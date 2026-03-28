@@ -20,6 +20,10 @@ from .serializers import (
 from .models import User, EmailOTP
 from .utils import send_otp_email
 import random
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 # REGISTER 
@@ -32,9 +36,18 @@ class RegisterView(APIView):
         user = serializer.save()
 
         otp_code = str(random.randint(100000, 999999))
-        EmailOTP.objects.create(user=user, otp=otp_code)
+        otp_record = EmailOTP.objects.create(user=user, otp=otp_code)
 
-        send_otp_email(user.email, otp_code)
+        try:
+            send_otp_email(user.email, otp_code)
+        except Exception:
+            logger.exception("Failed to send signup OTP email for %s", user.email)
+            otp_record.delete()
+            user.delete()
+            return Response(
+                {"message": "We could not send the OTP email right now. Please try again later."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
 
         return Response({
             "message": "User registered successfully. OTP sent to email."
@@ -92,7 +105,14 @@ class ForgotPasswordView(APIView):
             otp = str(random.randint(100000, 999999))
 
             EmailOTP.objects.create(user=user, otp=otp)
-            send_otp_email(user.email, otp)
+            try:
+                send_otp_email(user.email, otp)
+            except Exception:
+                logger.exception("Failed to send forgot-password OTP email for %s", user.email)
+                return Response(
+                    {"message": "We could not send the OTP email right now. Please try again later."},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
 
             return Response({"message": "OTP sent to email"})
 
@@ -109,7 +129,14 @@ class SendLoginOTPView(APIView):
 
         otp = str(random.randint(100000, 999999))
         EmailOTP.objects.create(user=serializer.user, otp=otp)
-        send_otp_email(serializer.user.email, otp)
+        try:
+            send_otp_email(serializer.user.email, otp)
+        except Exception:
+            logger.exception("Failed to send login OTP email for %s", serializer.user.email)
+            return Response(
+                {"message": "We could not send the OTP email right now. Please try again later."},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
 
         return Response({"message": "Login OTP sent to email"})
 
