@@ -1,0 +1,12 @@
+job_portal/.env
+frontend/.env
+job_portal/venv/
+job_portal/db.sqlite3
+job_portal/media/
+job_portal/staticfiles/
+frontend/node_modules/
+frontend/dist/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
