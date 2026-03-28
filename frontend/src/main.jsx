@@ -6,9 +6,7 @@ import {GoogleOAuthProvider} from '@react-oauth/google'
 import axios from 'axios'
 
 axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000'
-const googleClientId =
-  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-  '613086116653-v1e3ajri9st764pudl04ffo4f066s50s.apps.googleusercontent.com'
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim()
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <React.StrictMode>
