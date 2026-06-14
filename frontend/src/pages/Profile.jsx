@@ -156,7 +156,7 @@ const Profile = () => {
     <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-24 pb-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         <div className="mb-6 rounded-[2rem] border border-blue-100 bg-[linear-gradient(135deg,_#0f172a,_#1d4ed8,_#06b6d4)] p-6 text-white shadow-[0_24px_60px_rgba(37,99,235,0.16)] sm:p-8">
-          <p className="text-xs uppercase tracking-wide text-blue-100">Profile Studio</p>
+          <p className="text-xs text-blue-100">Profile</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mt-1">
             {isEmployer ? "Employer Profile Settings" : "Seeker Profile Settings"}
           </h2>

@@ -65,10 +65,6 @@ const Assesstment = () => {
         <section className="overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-12 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
           <div className="grid gap-8 lg:grid-cols-[1fr_0.85fr] lg:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-blue-100">
-                <Sparkles size={14} />
-                Assessments
-              </div>
               <h1 className="display-font mt-6 text-4xl font-bold leading-tight sm:text-6xl">Show your skills with job-ready assessments.</h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-100">
                 Complete assessments to highlight your strengths and add more value to your profile.
@@ -127,7 +123,7 @@ const Assesstment = () => {
                   <div className="rounded-2xl bg-blue-50 p-3 text-blue-600 transition-colors group-hover:bg-blue-600 group-hover:text-white">
                     <test.icon size={24} />
                   </div>
-                  <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${
+                  <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
                     test.level === 'Beginner' ? 'bg-cyan-100 text-cyan-700' :
                     test.level === 'Intermediate' ? 'bg-yellow-100 text-yellow-700' :
                     'bg-red-100 text-red-700'

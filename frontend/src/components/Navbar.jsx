@@ -249,7 +249,6 @@ const Navbar = () => {
             </div>
             <div>
               <span className="block text-xl font-bold tracking-tight text-slate-900 transition-colors group-hover:text-blue-700">Skilloria</span>
-              <span className="hidden text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400 sm:block">Career studio</span>
             </div>
           </Link>
 
@@ -350,7 +349,7 @@ const Navbar = () => {
                     className="h-8 w-8 rounded-full border border-blue-100 object-cover"
                   />
                   <div className="hidden text-left sm:block">
-                    <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">Signed in</p>
+                    <p className="text-xs text-slate-500">Signed in</p>
                     <p className="max-w-[120px] truncate text-sm font-bold text-slate-800">{displayName}</p>
                   </div>
                   <ChevronDown size={14} className={`text-slate-500 transition-transform ${isProfileMenuOpen ? 'rotate-180' : ''}`} />

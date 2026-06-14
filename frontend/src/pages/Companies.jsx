@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Search, MapPin, Briefcase, Star, Building2, Globe2 } from 'lucide-react'
+import { Search, MapPin, Briefcase, Star, Globe2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import axios from 'axios'
 import { resolveMediaUrl } from '../utils/media'
@@ -61,10 +61,6 @@ const Companies = () => {
         <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/60 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-10 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
           <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-blue-100">
-                <Building2 size={14} />
-                Company directory
-              </div>
               <h1 className="display-font mt-6 text-4xl font-bold leading-tight sm:text-6xl">Find companies that are hiring now.</h1>
               <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-100">
                 Browse company profiles, check locations, and view active job openings before you apply.
@@ -84,8 +80,7 @@ const Companies = () => {
       <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
         <div className="mb-10 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-700">Discover brands</p>
-            <h2 className="display-font mt-3 text-3xl font-bold text-slate-900 sm:text-5xl">Top companies hiring now</h2>
+            <h2 className="display-font text-3xl font-bold text-slate-900 sm:text-5xl">Top companies hiring now</h2>
             <p className="mt-2 text-base text-slate-600">Company logos, details, and active openings in one easy view.</p>
           </div>
           <div className="relative max-w-2xl">

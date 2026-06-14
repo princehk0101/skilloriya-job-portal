@@ -121,7 +121,7 @@ const CompanyProfile = () => {
               </div>
               
               <div className="mt-8 border-t border-slate-100 pt-6">
-                <h3 className="text-sm font-semibold text-slate-900 mb-3 uppercase tracking-wider">About Company</h3>
+                <h3 className="text-sm font-semibold text-slate-900 mb-3">About Company</h3>
                 <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
                   {company.description || 'No description provided for this company yet.'}
                 </p>
@@ -162,7 +162,7 @@ const CompanyProfile = () => {
                   >
                     <div className="flex justify-between items-start mb-3 gap-4">
                       <h3 className="font-bold text-slate-900 leading-tight group-hover:text-blue-600 transition-colors">{job.title}</h3>
-                      <div className="shrink-0 bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider">
+                      <div className="shrink-0 bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 rounded text-[10px] font-semibold">
                         {job.job_type}
                       </div>
                     </div>

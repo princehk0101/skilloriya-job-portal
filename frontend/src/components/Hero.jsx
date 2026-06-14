@@ -3,7 +3,6 @@ import { motion } from 'framer-motion'
 import {
   Search,
   MapPin,
-  Star,
   TrendingUp,
   ShieldCheck,
   Building2,
@@ -16,9 +15,9 @@ import { Link } from 'react-router-dom'
 const partnerLogos = ['Infosys', 'TCS', 'Wipro', 'Adobe', 'Accenture']
 
 const highlightStats = [
-  { value: '2k+', label: 'Jobs listed' },
-  { value: '600+', label: 'Hiring companies' },
-  { value: '24/7', label: 'Access to openings' },
+  { value: '2k+', label: 'Jobs' },
+  { value: '600+', label: 'Companies' },
+  { value: '24/7', label: 'Open' },
 ]
 
 const Hero = () => {
@@ -33,18 +32,13 @@ const Hero = () => {
           transition={{ duration: 0.5 }}
           className="z-10"
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/72 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-blue-700 shadow-sm backdrop-blur">
-            <Star size={14} fill="currentColor" className="text-blue-600" />
-            Trusted job portal
-          </div>
-
           <h1 className="display-font mt-8 max-w-3xl text-5xl font-bold leading-[0.95] tracking-tight text-slate-900 lg:text-7xl">
-            Find the right job
-            <span className="block text-blue-700">for your next career move.</span>
+            Find jobs that
+            <span className="block text-blue-700">match your skills.</span>
           </h1>
 
           <p className="mt-6 max-w-2xl text-lg font-medium leading-relaxed text-slate-600">
-            Search openings by role, location, and company. Explore opportunities across technology, design, marketing, operations, and more.
+            Search by title, skill, or company. Apply in minutes.
           </p>
 
           <div className="glass-panel mt-10 rounded-[1.75rem] p-3">
@@ -53,7 +47,7 @@ const Hero = () => {
                 <Search className="text-slate-400" size={18} />
                 <input
                   type="text"
-                  placeholder="Search roles, skills, companies"
+                  placeholder="Job title, skill, company"
                   className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-500"
                 />
               </div>
@@ -61,7 +55,7 @@ const Hero = () => {
                 <MapPin className="text-slate-400" size={18} />
                 <input
                   type="text"
-                  placeholder="Remote, Delhi, Bangalore"
+                  placeholder="Location or Remote"
                   className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-500"
                 />
               </div>
@@ -75,9 +69,8 @@ const Hero = () => {
             </div>
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
-            <span>Popular:</span>
-            {['Frontend Developer', 'UI/UX Designer', 'Digital Marketing', 'Remote Jobs'].map((item) => (
+          <div className="mt-8 flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-500">
+            {['Frontend Developer', 'UI/UX Designer', 'Remote'].map((item) => (
               <span key={item} className="cursor-pointer rounded-full border border-slate-200 bg-white/88 px-3 py-1.5 text-slate-600 shadow-sm transition-colors hover:border-blue-300 hover:text-blue-600">
                 {item}
               </span>
@@ -88,7 +81,7 @@ const Hero = () => {
             {highlightStats.map((item) => (
               <div key={item.label} className="soft-card rounded-[1.5rem] p-5">
                 <p className="text-2xl font-extrabold text-slate-900">{item.value}</p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-[0.22em] text-slate-500">{item.label}</p>
+                <p className="mt-1 text-xs font-medium text-slate-500">{item.label}</p>
               </div>
             ))}
           </div>
@@ -108,7 +101,7 @@ const Hero = () => {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">Verified employers</p>
-                  <p className="text-xs font-medium text-slate-500">Verified company profiles</p>
+                  <p className="text-xs font-medium text-slate-500">Trusted listings</p>
                 </div>
               </div>
             </div>
@@ -120,7 +113,7 @@ const Hero = () => {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">Application updates</p>
-                  <p className="text-xs font-medium text-slate-500">Track job activity easily</p>
+                  <p className="text-xs font-medium text-slate-500">Track status</p>
                 </div>
               </div>
             </div>
@@ -136,16 +129,16 @@ const Hero = () => {
             <div className="absolute -bottom-8 left-6 right-6 rounded-[1.6rem] border border-slate-800/70 bg-slate-950/95 p-5 text-white shadow-[0_24px_56px_rgba(16,32,58,0.35)]">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-400">Job search made simple</p>
-                  <h3 className="mt-1 text-xl font-bold">Browse jobs, companies, and categories in one place</h3>
+                  <p className="text-xs font-semibold text-blue-400">All in one</p>
+                  <h3 className="mt-1 text-xl font-bold">Jobs, companies, categories</h3>
                 </div>
                 <div className="rounded-lg border border-slate-700 bg-slate-800 p-2">
                   <Building2 size={18} />
                 </div>
               </div>
               <div className="mt-4 grid grid-cols-2 gap-3 text-xs font-medium text-slate-300">
-                <div className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2">Full-time, internship, and remote roles</div>
-                <div className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2">Quick access to company details</div>
+                <div className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2">Full-time and internships</div>
+                <div className="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2">Verified company info</div>
               </div>
             </div>
           </div>
@@ -154,7 +147,6 @@ const Hero = () => {
 
       <div className="relative mx-auto mt-20 max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="section-frame rounded-[2rem] px-6 py-8">
-          <p className="text-center text-xs font-semibold uppercase tracking-[0.25em] text-slate-500">Featured employers</p>
           <div className="mt-6 flex flex-wrap justify-center gap-4 lg:gap-8">
             {partnerLogos.map((item) => (
               <div key={item} className="cursor-default rounded-xl border border-white/70 bg-white px-6 py-3 text-center text-sm font-extrabold tracking-tight text-slate-400 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:text-blue-700">
@@ -165,11 +157,11 @@ const Hero = () => {
           <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-slate-500">
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm">
               <BadgeCheck size={16} className="text-blue-700" />
-              Full-time and internship jobs
+              Full-time and internships
             </span>
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm">
               <Sparkles size={16} className="text-amber-600" />
-              Remote and on-site opportunities
+              Remote and on-site
             </span>
           </div>
         </div>

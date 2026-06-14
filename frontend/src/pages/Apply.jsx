@@ -174,8 +174,7 @@ const Apply = () => {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="rounded-[2rem] border border-blue-100 bg-white/92 p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur sm:p-8">
             <div className="mb-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-blue-700">Job application</p>
-              <h1 className="mt-2 text-3xl font-black text-slate-900">Submit your application for this job.</h1>
+              <h1 className="text-3xl font-black text-slate-900">Submit your application for this job.</h1>
             </div>
 
             {existingApplication ? (
@@ -330,11 +329,8 @@ const Apply = () => {
             </div>
 
             <div className="rounded-[2rem] border border-blue-100 bg-[linear-gradient(135deg,_#0f172a,_#1d4ed8,_#06b6d4)] p-6 text-white shadow-[0_18px_45px_rgba(37,99,235,0.12)]">
-              <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.24em] text-blue-100">
-                <ShieldCheck size={14} />
-                Application tips
-              </div>
-              <ul className="mt-5 space-y-3 text-sm leading-7 text-blue-100">
+              <h3 className="text-sm font-semibold text-blue-100">Application tips</h3>
+              <ul className="mt-4 space-y-3 text-sm leading-7 text-blue-100">
                 <li>Upload an updated PDF resume.</li>
                 <li>Keep your cover letter relevant to the job role.</li>
                 <li>Make sure your contact details are correct before submitting.</li>

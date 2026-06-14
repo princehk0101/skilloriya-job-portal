@@ -381,8 +381,8 @@ const EmployerDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1 space-y-8">
             <div className="rounded-3xl border border-blue-100 bg-[linear-gradient(135deg,_#0f172a,_#1d4ed8,_#0ea5e9)] p-6 text-white shadow-[0_18px_45px_rgba(37,99,235,0.12)]">
-              <div className="mb-4 inline-flex rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.26em] text-blue-100">
-                Hiring Action
+              <div className="mb-4 text-sm font-semibold text-blue-100">
+                Hiring
               </div>
               <h2 className="text-2xl font-bold">Publish a new opening</h2>
               <p className="mt-2 text-sm leading-6 text-blue-100">
@@ -541,7 +541,7 @@ const EmployerDashboard = () => {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className={`${statusBadgeClass(app.status)} px-3 py-1 rounded-full text-xs font-bold uppercase`}>
+                        <span className={`${statusBadgeClass(app.status)} px-3 py-1 rounded-full text-xs font-semibold`}>
                           {app.status}
                         </span>
                         <select

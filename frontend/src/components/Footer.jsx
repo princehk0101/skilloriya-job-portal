@@ -13,15 +13,11 @@ const Footer = () => {
         <div className="section-frame rounded-[2rem] px-6 py-8 sm:px-8">
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-blue-700">
-                <Sparkles size={14} />
-                Job portal
-              </div>
-              <h2 className="display-font mt-5 text-4xl font-bold leading-tight text-slate-900 sm:text-5xl">
-                Take the next step in your career.
+              <h2 className="display-font text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">
+                Find jobs. Hire faster.
               </h2>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                Search jobs, explore hiring companies, and apply to opportunities that match your goals.
+              <p className="mt-3 max-w-2xl text-sm text-slate-600">
+                Clean search. Verified listings.
               </p>
             </div>
 
@@ -29,7 +25,7 @@ const Footer = () => {
               <div className="rounded-[1.5rem] border border-white/70 bg-white/88 p-5 shadow-[0_18px_40px_rgba(16,32,58,0.07)]">
                 <Compass className="text-blue-700" size={20} />
                 <p className="mt-4 text-2xl font-extrabold text-slate-900">2000+</p>
-                <p className="mt-1 text-sm text-slate-500">Live opportunities</p>
+                <p className="mt-1 text-sm text-slate-500">Open roles</p>
               </div>
               <div className="rounded-[1.5rem] border border-white/70 bg-white/88 p-5 shadow-[0_18px_40px_rgba(16,32,58,0.07)]">
                 <Building2 className="text-cyan-700" size={20} />
@@ -39,7 +35,7 @@ const Footer = () => {
               <div className="rounded-[1.5rem] border border-white/70 bg-white/88 p-5 shadow-[0_18px_40px_rgba(16,32,58,0.07)]">
                 <Sparkles className="text-amber-600" size={20} />
                 <p className="mt-4 text-2xl font-extrabold text-slate-900">Fresh</p>
-                <p className="mt-1 text-sm text-slate-500">Career support</p>
+                <p className="mt-1 text-sm text-slate-500">Support</p>
               </div>
             </div>
           </div>
@@ -53,13 +49,12 @@ const Footer = () => {
               </div>
               <div>
                 <span className="block text-xl font-bold tracking-tight">Skilloria</span>
-                <span className="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-400">Job portal</span>
               </div>
             </Link>
             <p className="text-sm leading-7 text-slate-600">
-              Skilloria helps job seekers discover opportunities and helps employers connect with qualified candidates.
+              Search jobs, compare companies, and apply with confidence.
             </p>
-            <div className="flex flex-wrap gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+            <div className="flex flex-wrap gap-3 text-xs font-medium text-slate-500">
               <span className="rounded-full border border-slate-200 bg-white px-3 py-2">Remote jobs</span>
               <span className="rounded-full border border-slate-200 bg-white px-3 py-2">Internships</span>
               <span className="rounded-full border border-slate-200 bg-white px-3 py-2">Full-time roles</span>
@@ -67,7 +62,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="mb-6 text-sm font-bold uppercase tracking-[0.25em] text-slate-400">Explore</h3>
+            <h3 className="mb-4 text-sm font-semibold text-slate-600">Explore</h3>
             <ul className="space-y-3 text-sm">
               <li><Link to="/" className="text-slate-600 transition-colors hover:text-blue-700">Browse Jobs</Link></li>
               <li><Link to="/categories" className="text-slate-600 transition-colors hover:text-blue-700">Career Paths</Link></li>
@@ -77,7 +72,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="mb-6 text-sm font-bold uppercase tracking-[0.25em] text-slate-400">Resources</h3>
+            <h3 className="mb-4 text-sm font-semibold text-slate-600">Resources</h3>
             <ul className="space-y-3 text-sm">
               <li><Link to="/blog" className="text-slate-600 transition-colors hover:text-blue-700">Career Blog</Link></li>
               <li><Link to="/help" className="text-slate-600 transition-colors hover:text-blue-700">Help Center</Link></li>
@@ -87,8 +82,8 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="mb-6 text-sm font-bold uppercase tracking-[0.25em] text-slate-400">Newsletter</h3>
-            <p className="mb-4 text-sm leading-7 text-slate-600">Get job alerts, company updates, and career tips in your inbox.</p>
+            <h3 className="mb-4 text-sm font-semibold text-slate-600">Alerts</h3>
+            <p className="mb-4 text-sm leading-7 text-slate-600">Get weekly job updates.</p>
             <div className="flex gap-2">
               <input
                 type="email"

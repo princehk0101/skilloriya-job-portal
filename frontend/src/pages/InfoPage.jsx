@@ -114,8 +114,7 @@ const InfoPage = ({ pageKey }) => {
         </Link>
 
         <section className="mt-6 rounded-[2rem] border border-white/60 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-8 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
-          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-blue-100">
-            <Icon size={14} />
+          <div className="text-sm font-semibold text-blue-100">
             {content.eyebrow}
           </div>
           <h1 className="display-font mt-5 text-4xl font-bold leading-tight sm:text-5xl">{content.title}</h1>

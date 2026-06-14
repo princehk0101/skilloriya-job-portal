@@ -182,7 +182,7 @@ const Login = () => {
         </button>
       </form>
 
-      <div className="my-6 flex items-center gap-3 text-xs uppercase tracking-[0.25em] text-slate-400">
+      <div className="my-6 flex items-center gap-3 text-xs text-slate-400">
         <span className="h-px flex-1 bg-slate-200" />
         Or continue with
         <span className="h-px flex-1 bg-slate-200" />

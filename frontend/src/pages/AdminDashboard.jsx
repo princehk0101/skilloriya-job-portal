@@ -146,17 +146,13 @@ const AdminDashboard = () => {
         <section className="overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-10 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-blue-100">
-                <Shield size={14} />
-                Admin dashboard
-              </div>
               <h1 className="display-font mt-5 text-4xl font-bold sm:text-5xl">Platform control panel</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-blue-100">
                 Manage users, jobs, companies, and applications from one place.
               </p>
             </div>
             <div className="rounded-[1.5rem] border border-white/15 bg-white/10 px-5 py-4">
-              <p className="text-xs uppercase tracking-[0.22em] text-blue-100/80">Signed in as</p>
+              <p className="text-xs text-blue-100/80">Signed in as</p>
               <p className="mt-2 text-lg font-bold">{profile?.email}</p>
               <button
                 onClick={() => fetchAll({ silent: true })}

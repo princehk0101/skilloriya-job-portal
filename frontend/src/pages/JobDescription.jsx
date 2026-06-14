@@ -114,10 +114,6 @@ const JobDescription = () => {
                   />
                 </div>
                 <div>
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.25em] text-blue-100">
-                    <Sparkles size={14} />
-                    Live opening
-                  </div>
                   <h1 className="display-font mt-4 text-4xl font-bold leading-tight sm:text-5xl">{job.title}</h1>
                   <div className="mt-4 flex flex-wrap gap-4 text-sm text-blue-100">
                     <span className="inline-flex items-center gap-2 font-semibold text-white">
@@ -257,7 +253,7 @@ const JobDescription = () => {
                   className="h-44 w-full object-cover"
                 />
                 <div className="p-5">
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-blue-700">Why apply here</p>
+                  <p className="text-sm font-semibold text-blue-700">Why apply here</p>
                   <p className="mt-3 text-sm leading-7 text-slate-600">
                     Review the role details, company information, and requirements before you apply.
                   </p>

@@ -84,11 +84,10 @@ const CategoryCard = () => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-700">Career paths</p>
-            <h2 className="display-font mb-3 mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl">
-              Browse work by <span className="bg-gradient-to-r from-blue-700 to-cyan-600 bg-clip-text text-transparent">interest and craft</span>
+            <h2 className="display-font mb-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-5xl">
+              Top categories
             </h2>
-            <p className="text-lg font-medium text-slate-600">Jump into the areas people usually explore first when they want a fast overview.</p>
+            <p className="text-base font-medium text-slate-600">Browse roles by domain.</p>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -103,7 +102,7 @@ const CategoryCard = () => {
 
         {categoryCards.length === 0 ? (
           <div className="section-frame rounded-[2rem] px-6 py-12 text-center text-sm font-medium text-slate-500">
-            Please wait while categories are loading...
+            Loading categories...
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-8">

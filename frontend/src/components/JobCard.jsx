@@ -103,11 +103,10 @@ const JobCard = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 flex items-end justify-between">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-700">Live opportunities</p>
-            <h2 className="display-font mb-2 mt-3 text-3xl font-bold text-gray-900 sm:text-5xl">
-              Featured <span className="text-blue-700">job openings</span>
+            <h2 className="display-font mb-2 text-3xl font-bold text-gray-900 sm:text-5xl">
+              Latest <span className="text-blue-700">job openings</span>
             </h2>
-            <p className="text-gray-600">Filter jobs by category and explore current openings.</p>
+            <p className="text-gray-600">Filter by category.</p>
           </div>
           <Link to="/categories" className="hidden items-center gap-2 rounded-full border border-white/70 bg-white/70 px-5 py-3 text-gray-700 transition-colors hover:border-blue-600 hover:text-blue-600 md:flex">
             Explore All <ArrowRight size={18} />

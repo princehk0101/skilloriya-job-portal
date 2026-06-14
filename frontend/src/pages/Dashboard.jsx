@@ -224,7 +224,7 @@ const Dashboard = () => {
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className={`${getStatusColor(app.status)} px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider`}>
+                        <span className={`${getStatusColor(app.status)} px-4 py-1.5 rounded-full text-xs font-semibold`}>
                           {app.status}
                         </span>
                         {app.jobId ? (

@@ -122,17 +122,10 @@ const PostJob = () => {
             <ArrowLeft size={16} />
             Back to Employer Panel
           </Link>
-          <div className="rounded-full bg-blue-100 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-blue-700">
-            Hiring Console
-          </div>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
           <section className="rounded-[2rem] border border-blue-100 bg-[linear-gradient(140deg,_#0f172a,_#1d4ed8,_#06b6d4)] p-8 text-white shadow-[0_24px_60px_rgba(37,99,235,0.16)]">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] text-blue-100">
-              <Sparkles size={14} />
-              Post faster
-            </div>
             <h1 className="mt-6 text-4xl font-bold leading-tight">Create a job post that candidates actually respond to.</h1>
             <p className="mt-4 max-w-lg text-sm leading-7 text-blue-100">
               Fill in the essentials, choose a category if available, and publish a role that looks clear, confident, and easy to understand.
@@ -152,8 +145,7 @@ const PostJob = () => {
 
           <section className="rounded-[2rem] border border-blue-100 bg-white/90 p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur sm:p-8">
             <div className="mb-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-slate-500">Job details</p>
-              <h2 className="mt-2 text-3xl font-bold text-slate-900">Publish a new opening</h2>
+              <h2 className="text-3xl font-bold text-slate-900">Publish a new opening</h2>
             </div>
 
             <form className="space-y-5" onSubmit={handleSubmit}>

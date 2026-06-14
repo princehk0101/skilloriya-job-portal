@@ -9,7 +9,7 @@ const NotFound = () => {
         <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
           <Compass size={28} />
         </div>
-        <p className="mt-6 text-xs font-semibold uppercase tracking-[0.28em] text-blue-700">404</p>
+        <p className="mt-6 text-xs font-semibold text-blue-700">404</p>
         <h1 className="mt-3 text-4xl font-bold text-slate-900">Page not found</h1>
         <p className="mt-4 text-sm leading-7 text-slate-600">
           The page you are looking for is currently unavailable or has been moved. Let's return to the active portal.

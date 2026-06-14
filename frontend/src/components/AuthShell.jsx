@@ -1,9 +1,8 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
-import { ArrowRight, CheckCircle2, Sparkles } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
 
 const AuthShell = ({
-  badge = 'Secure access',
   title,
   description,
   sideTitle,
@@ -68,11 +67,6 @@ const AuthShell = ({
         >
           <div className="grid gap-0 lg:grid-cols-[0.95fr_1.05fr]">
             <div className="px-7 py-10 sm:px-12 sm:py-14">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-blue-100">
-                <Sparkles className="h-3.5 w-3.5" />
-                {badge}
-              </div>
-
               <h1
                 className="display-font mt-8 max-w-xl text-4xl font-bold leading-tight tracking-tight sm:text-5xl"
               >
@@ -95,11 +89,6 @@ const AuthShell = ({
                 ))}
               </div>
 
-              <div className="mt-10 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.24em] text-blue-100/70">
-                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1.5">Calm layout</span>
-                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1.5">Faster access</span>
-                <ArrowRight className="h-4 w-4 text-blue-100/50" />
-              </div>
             </div>
 
             <div className="relative min-h-[320px]">
@@ -110,8 +99,7 @@ const AuthShell = ({
               />
               <div className="absolute inset-0 bg-[linear-gradient(180deg,_rgba(16,32,58,0.12),_rgba(16,32,58,0.58))]" />
               <div className="absolute bottom-6 left-6 right-6 rounded-[1.5rem] border border-white/10 bg-slate-950/55 p-5 backdrop-blur">
-                <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-100/80">{sideTitle}</p>
-                <p className="mt-2 text-sm leading-7 text-white/85">{sideDescription}</p>
+                <p className="text-sm leading-7 text-white/85">{sideDescription}</p>
               </div>
             </div>
           </div>
@@ -122,10 +110,7 @@ const AuthShell = ({
           className="glass-panel relative overflow-hidden rounded-[2rem] p-7 xl:p-10"
         >
           <div className="mb-8">
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-blue-700">
-              {sideTitle}
-            </p>
-            <p className="mt-2 text-sm font-medium leading-relaxed text-slate-600">{sideDescription}</p>
+            <p className="text-sm font-medium leading-relaxed text-slate-600">{sideDescription}</p>
           </div>
 
           {children}
