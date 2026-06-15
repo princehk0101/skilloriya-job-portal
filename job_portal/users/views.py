@@ -187,6 +187,10 @@ class GoogleLoginView(APIView):
 
     def post(self, request):
         token = request.data.get("token")
+        # Optional role parameter to allow creating employer accounts via Google
+        requested_role = request.data.get("role", "seeker")
+        if requested_role not in ("seeker", "employer"):
+            requested_role = "seeker"
 
         try:
             idinfo = id_token.verify_oauth2_token(
@@ -200,7 +204,7 @@ class GoogleLoginView(APIView):
             user, created = User.objects.get_or_create(
                 email=email,
                 defaults={
-                    "role": "seeker",
+                    "role": requested_role,
                     "is_verified": True
                 }
             )

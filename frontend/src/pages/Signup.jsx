@@ -78,6 +78,7 @@ const Signup = () => {
     try {
       const response = await axios.post('/api/users/google-login/', {
         token: credentialResponse.credential,
+        role: formData.role,
       })
 
       localStorage.setItem('access_token', response.data.access)
