@@ -230,6 +230,64 @@ class ProfileView(APIView):
         serializer = ProfileSerializer(request.user, context={"request": request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
+# --- Work endpoints (user-posted work / portfolio) ---
+from rest_framework.generics import (
+    CreateAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+    UpdateAPIView,
+    DestroyAPIView,
+)
+
+from .serializers import WorkSerializer
+from .models import Work
+
+
+class WorkCreateView(CreateAPIView):
+    serializer_class = WorkSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+class PublicWorkListView(ListAPIView):
+    queryset = Work.objects.filter(is_public=True).order_by('-created_at')
+    serializer_class = WorkSerializer
+    permission_classes = [AllowAny]
+
+
+class UserWorkListView(ListAPIView):
+    serializer_class = WorkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Work.objects.filter(owner=self.request.user).order_by('-created_at')
+
+
+class WorkDetailView(RetrieveAPIView):
+    queryset = Work.objects.all()
+    serializer_class = WorkSerializer
+    permission_classes = [AllowAny]
+
+
+class WorkUpdateView(UpdateAPIView):
+    serializer_class = WorkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Work.objects.filter(owner=self.request.user)
+
+
+class WorkDeleteView(DestroyAPIView):
+    serializer_class = WorkSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Work.objects.filter(owner=self.request.user)
+
     def patch(self, request):
         serializer = ProfileSerializer(
             request.user,

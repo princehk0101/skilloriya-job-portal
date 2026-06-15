@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .models import User, EmailOTP
+from .models import Work
 
 
 @admin.register(User)
@@ -45,3 +46,12 @@ class EmailOTPAdmin(admin.ModelAdmin):
     search_fields = ("user__email", "otp")
     readonly_fields = ("created_at",)
     list_select_related = ("user",)
+
+
+@admin.register(Work)
+class WorkAdmin(admin.ModelAdmin):
+    list_display = ("title", "owner", "is_public", "created_at")
+    list_filter = ("is_public", "created_at")
+    search_fields = ("title", "owner__email", "description")
+    readonly_fields = ("created_at", "updated_at")
+    autocomplete_fields = ("owner",)

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Company
+from .models import Company, Microtask
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -39,3 +39,22 @@ class CompanySerializer(serializers.ModelSerializer):
         if request:
             return request.build_absolute_uri(obj.logo.url)
         return obj.logo.url
+
+
+class MicrotaskSerializer(serializers.ModelSerializer):
+    company_name = serializers.ReadOnlyField(source='company.name')
+
+    class Meta:
+        model = Microtask
+        fields = [
+            'id',
+            'company',
+            'company_name',
+            'title',
+            'description',
+            'reward',
+            'deadline',
+            'is_active',
+            'created_at',
+        ]
+        read_only_fields = ['company', 'company_name', 'created_at']

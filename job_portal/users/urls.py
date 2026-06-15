@@ -10,6 +10,14 @@ from .views import (
     GoogleLoginView,
     ProfileView,
 )
+from .views import (
+    WorkCreateView,
+    PublicWorkListView,
+    UserWorkListView,
+    WorkDetailView,
+    WorkUpdateView,
+    WorkDeleteView,
+)
 
 urlpatterns = [
     path('register/', RegisterView.as_view()),
@@ -21,4 +29,11 @@ urlpatterns = [
     path('reset-password/', ResetPasswordView.as_view()),
     path('google-login/', GoogleLoginView.as_view()),
     path('profile/', ProfileView.as_view()),
+    # User works (portfolio)
+    path('works/', PublicWorkListView.as_view()),
+    path('works/my/', UserWorkListView.as_view()),
+    path('works/create/', WorkCreateView.as_view()),
+    path('works/<int:pk>/', WorkDetailView.as_view()),
+    path('works/<int:pk>/update/', WorkUpdateView.as_view()),
+    path('works/<int:pk>/delete/', WorkDeleteView.as_view()),
 ]

@@ -57,3 +57,58 @@ class CompanyDeleteView(DestroyAPIView):
 
     def get_queryset(self):
         return Company.objects.filter(owner=self.request.user)
+
+
+# --- Microtask endpoints ---
+from rest_framework.generics import (
+    CreateAPIView,
+    ListAPIView,
+    RetrieveAPIView,
+    UpdateAPIView,
+    DestroyAPIView,
+)
+from .serializers import MicrotaskSerializer
+from .models import Microtask
+from rest_framework.permissions import AllowAny
+from rest_framework import serializers as drf_serializers
+
+
+class MicrotaskCreateView(CreateAPIView):
+    serializer_class = MicrotaskSerializer
+    permission_classes = [IsAuthenticated, IsEmployer]
+
+    def perform_create(self, serializer):
+        try:
+            company = Company.objects.get(owner=self.request.user)
+        except Company.DoesNotExist:
+            raise drf_serializers.ValidationError("Create a company profile before posting microtasks.")
+
+        serializer.save(company=company)
+
+
+class MicrotaskListView(ListAPIView):
+    queryset = Microtask.objects.filter(is_active=True).order_by('-created_at')
+    serializer_class = MicrotaskSerializer
+    permission_classes = [AllowAny]
+
+
+class MicrotaskDetailView(RetrieveAPIView):
+    queryset = Microtask.objects.all()
+    serializer_class = MicrotaskSerializer
+    permission_classes = [AllowAny]
+
+
+class MicrotaskUpdateView(UpdateAPIView):
+    serializer_class = MicrotaskSerializer
+    permission_classes = [IsAuthenticated, IsEmployer]
+
+    def get_queryset(self):
+        return Microtask.objects.filter(company__owner=self.request.user)
+
+
+class MicrotaskDeleteView(DestroyAPIView):
+    serializer_class = MicrotaskSerializer
+    permission_classes = [IsAuthenticated, IsEmployer]
+
+    def get_queryset(self):
+        return Microtask.objects.filter(company__owner=self.request.user)

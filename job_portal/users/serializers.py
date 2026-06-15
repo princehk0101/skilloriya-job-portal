@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User
+from .models import User, Work
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -133,3 +133,33 @@ class ProfileSerializer(serializers.ModelSerializer):
         if value and value.size > 3 * 1024 * 1024:
             raise serializers.ValidationError("Profile image too large (max 3MB).")
         return value
+
+
+class WorkSerializer(serializers.ModelSerializer):
+    owner_email = serializers.ReadOnlyField(source='owner.email')
+    attachment_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Work
+        fields = [
+            'id',
+            'owner',
+            'owner_email',
+            'title',
+            'description',
+            'link',
+            'attachment',
+            'attachment_url',
+            'is_public',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['owner', 'owner_email', 'created_at', 'updated_at']
+
+    def get_attachment_url(self, obj):
+        if not obj.attachment:
+            return None
+        request = self.context.get('request')
+        if request:
+            return request.build_absolute_uri(obj.attachment.url)
+        return obj.attachment.url
