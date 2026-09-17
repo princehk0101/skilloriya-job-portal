@@ -84,12 +84,13 @@ const Signup = () => {
       localStorage.setItem('access_token', response.data.access)
       localStorage.setItem('refresh_token', response.data.refresh)
 
-      const role = response.data?.user?.role || 'seeker'
+      const role = response.data?.user?.role || formData.role || 'seeker'
       localStorage.setItem('user_role', role)
       navigate(role === 'employer' ? '/employer' : '/dashboard')
     } catch (error) {
       console.error('Google Login Backend Error:', error.response?.data || error.message)
-      setErrorMessage('Google signup could not be completed. Please try again.')
+      const backendMessage = error.response?.data?.error || 'Google signup could not be completed. Please try again.'
+      setErrorMessage(backendMessage)
     } finally {
       setLoading(false)
     }

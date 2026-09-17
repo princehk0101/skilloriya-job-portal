@@ -1,1 +1,1 @@
-web: gunicorn core.wsgi:application --chdir job_portal
+web: gunicorn --chdir backend core.wsgi:application

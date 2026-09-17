@@ -1,6 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowRight, MapPin, Clock, IndianRupee, BadgeCheck } from 'lucide-react'
+import {
+  ArrowRight,
+  MapPin,
+  Clock,
+  IndianRupee,
+  BadgeCheck,
+  Bookmark,
+  BookmarkCheck,
+  Sparkles,
+  Zap,
+  CheckCircle2,
+} from 'lucide-react'
 import axios from 'axios'
 import { Link, useSearchParams } from 'react-router-dom'
 import { resolveMediaUrl } from '../utils/media'
@@ -22,32 +33,83 @@ const JobCard = () => {
   const [jobs, setJobs] = useState([])
   const [categories, setCategories] = useState([])
   const [appliedJobsMap, setAppliedJobsMap] = useState({})
+  const [savedJobIds, setSavedJobIds] = useState(new Set())
   const [loading, setLoading] = useState(true)
 
   const selectedCategory = searchParams.get('category') || 'all'
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [jobsRes, categoriesRes, applications] = await Promise.all([
-          axios.get('/api/jobs/'),
-          axios.get('/api/jobs/categories/'),
-          fetchMyApplications(),
-        ])
-        setJobs(normalizeList(jobsRes.data))
-        setCategories(normalizeList(categoriesRes.data))
-        setAppliedJobsMap(createAppliedJobsMap(applications))
-      } catch (error) {
-        console.error('Error fetching jobs:', error.response?.data || error.message)
-        setJobs([])
-        setCategories([])
-        setAppliedJobsMap({})
-      } finally {
-        setLoading(false)
+  const getAuthConfig = () => {
+    const token = localStorage.getItem('access_token')
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : null
+  }
+
+  const fetchData = async () => {
+    try {
+      const auth = getAuthConfig()
+      const requests = [
+        axios.get('/api/jobs/', auth || {}),
+        axios.get('/api/jobs/categories/'),
+        fetchMyApplications(),
+      ]
+
+      if (auth) {
+        requests.push(axios.get('/api/jobs/saved/', auth))
       }
+
+      const results = await Promise.allSettled(requests)
+      const jobsData = results[0].status === 'fulfilled' ? results[0].value.data : []
+      const catData = results[1].status === 'fulfilled' ? results[1].value.data : []
+      const appData = results[2].status === 'fulfilled' ? results[2].value : []
+      const savedData = results[3]?.status === 'fulfilled' ? results[3].value.data : []
+
+      const fetchedJobs = normalizeList(jobsData)
+      setJobs(fetchedJobs)
+      setCategories(normalizeList(catData))
+      setAppliedJobsMap(createAppliedJobsMap(appData))
+
+      const savedIds = new Set()
+      normalizeList(savedData).forEach((item) => {
+        if (item.job) savedIds.add(item.job)
+      })
+      fetchedJobs.forEach((j) => {
+        if (j.is_saved) savedIds.add(j.id)
+      })
+      setSavedJobIds(savedIds)
+    } catch (error) {
+      console.error('Error fetching jobs:', error)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchData()
   }, [])
+
+  const handleToggleSave = async (e, jobId) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const auth = getAuthConfig()
+    if (!auth) {
+      alert('Please login to bookmark jobs.')
+      return
+    }
+
+    try {
+      await axios.post(`/api/jobs/${jobId}/save/`, {}, auth)
+      setSavedJobIds((prev) => {
+        const next = new Set(prev)
+        if (next.has(jobId)) {
+          next.delete(jobId)
+        } else {
+          next.add(jobId)
+        }
+        return next
+      })
+    } catch (err) {
+      console.error('Failed to toggle save job:', err)
+    }
+  }
 
   const filterOptions = useMemo(() => {
     const counts = jobs.reduce((acc, job) => {
@@ -103,25 +165,32 @@ const JobCard = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 flex items-end justify-between">
           <div>
-            <h2 className="display-font mb-2 text-3xl font-bold text-gray-900 sm:text-5xl">
-              Latest <span className="text-blue-700">job openings</span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1 text-xs font-bold text-blue-700 shadow-sm">
+              <Sparkles size={13} />
+              Curated Openings
+            </span>
+            <h2 className="display-font mt-2 text-3xl font-extrabold text-slate-900 sm:text-5xl">
+              Latest <span className="text-blue-700">Job Openings</span>
             </h2>
-            <p className="text-gray-600">Filter by category.</p>
+            <p className="mt-1 text-sm text-slate-600">Discover verified roles with transparent pay & instant apply.</p>
           </div>
-          <Link to="/categories" className="hidden items-center gap-2 rounded-full border border-white/70 bg-white/70 px-5 py-3 text-gray-700 transition-colors hover:border-blue-600 hover:text-blue-600 md:flex">
-            Explore All <ArrowRight size={18} />
+          <Link
+            to="/categories"
+            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-600 hover:text-blue-600 md:flex"
+          >
+            Explore Categories <ArrowRight size={16} />
           </Link>
         </div>
 
-        <div className="mb-8 flex flex-wrap gap-3">
+        <div className="mb-8 flex flex-wrap gap-2.5">
           {filterOptions.map((option) => (
             <button
               key={option.id}
               onClick={() => handleCategoryFilter(option.id)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+              className={`rounded-full px-4 py-2 text-xs font-bold transition ${
                 selectedCategory === option.id
                   ? 'bg-slate-900 text-white shadow-md'
-                  : 'border border-white/80 bg-white/78 text-slate-700 hover:border-blue-300 hover:text-blue-700'
+                  : 'border border-slate-200 bg-white/80 text-slate-700 hover:border-blue-300 hover:text-blue-700'
               }`}
             >
               {option.label} ({option.count})
@@ -130,76 +199,121 @@ const JobCard = () => {
         </div>
 
         {loading ? (
-          <p className="text-center text-gray-500">Loading jobs...</p>
+          <div className="flex h-40 items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+          </div>
         ) : filteredJobs.length === 0 ? (
-          <div className="section-frame rounded-[2rem] px-6 py-8 text-center text-slate-600">
+          <div className="rounded-[2rem] border border-blue-100 bg-white p-12 text-center text-slate-500 shadow-sm">
             There are currently no jobs available in this category.
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredJobs.map((job, idx) => (
-              <motion.article
-                key={job.id || idx}
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.08 }}
-                className="section-frame flex h-full flex-col rounded-[1.75rem] p-6 transition-all hover:-translate-y-1 hover:border-blue-200"
-              >
-                {appliedJobsMap[String(job.id)] ? (
-                  <div className="mb-4 flex items-center justify-between gap-3">
-                    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${getApplicationStatusClass(appliedJobsMap[String(job.id)].status)}`}>
-                      <BadgeCheck size={13} />
-                      {getApplicationStatusLabel(appliedJobsMap[String(job.id)].status)}
-                    </span>
-                    <span className="text-xs text-slate-500">
-                      Applied {new Date(appliedJobsMap[String(job.id)].applied_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                ) : null}
+            {filteredJobs.map((job, idx) => {
+              const isSaved = savedJobIds.has(job.id)
 
-                <div className="mb-6 flex items-start gap-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-100 bg-white p-2 shadow-sm">
-                    <img
-                      src={resolveMediaUrl(job.employer_image_url) || 'https://via.placeholder.com/50'}
-                      alt={job.employer_name || job.employer_email}
-                      className="h-full w-full rounded-md object-cover"
-                    />
+              return (
+                <motion.article
+                  key={job.id || idx}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  className={`group relative flex h-full flex-col justify-between rounded-[2rem] border p-6 transition-all duration-300 hover:-translate-y-1 ${
+                    job.is_featured
+                      ? 'border-blue-300 bg-gradient-to-br from-blue-50/80 via-white to-cyan-50/50 shadow-[0_16px_40px_rgba(37,99,235,0.12)]'
+                      : 'border-slate-200/80 bg-white/95 shadow-sm hover:border-blue-200 hover:shadow-md'
+                  }`}
+                >
+                  {/* Top Badges */}
+                  <div className="mb-4 flex items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {job.is_featured ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-blue-600 to-cyan-600 px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm">
+                          <Zap size={10} />
+                          Featured
+                        </span>
+                      ) : null}
+
+                      {job.company_verified ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 border border-emerald-200">
+                          <CheckCircle2 size={11} className="text-emerald-600" />
+                          Verified
+                        </span>
+                      ) : null}
+
+                      {appliedJobsMap[String(job.id)] ? (
+                        <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${getApplicationStatusClass(appliedJobsMap[String(job.id)].status)}`}>
+                          <BadgeCheck size={12} />
+                          {getApplicationStatusLabel(appliedJobsMap[String(job.id)].status)}
+                        </span>
+                      ) : null}
+                    </div>
+
+                    {/* Bookmark Button */}
+                    <button
+                      onClick={(e) => handleToggleSave(e, job.id)}
+                      className={`rounded-full p-2 transition ${
+                        isSaved
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-slate-100 text-slate-400 hover:bg-blue-50 hover:text-blue-600'
+                      }`}
+                      title={isSaved ? 'Remove from Saved Jobs' : 'Save Job'}
+                    >
+                      {isSaved ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
+                    </button>
                   </div>
+
+                  {/* Company & Title Header */}
                   <div>
-                    <h3 className="line-clamp-1 font-bold text-gray-900">{job.title}</h3>
-                    <p className="text-sm text-gray-500">{job.employer_name || job.employer_email}</p>
-                    <p className="mt-1 text-xs font-semibold text-blue-600">{job.category_name || 'Uncategorized'}</p>
-                  </div>
-                </div>
+                    <div className="mb-4 flex items-start gap-3.5">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-slate-100 bg-white p-1.5 shadow-sm">
+                        <img
+                          src={resolveMediaUrl(job.employer_image_url) || 'https://via.placeholder.com/48'}
+                          alt={job.employer_name || job.employer_email}
+                          className="h-full w-full rounded-xl object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="truncate text-base font-bold text-slate-900 group-hover:text-blue-700 transition-colors">
+                          {job.title}
+                        </h3>
+                        <p className="truncate text-xs text-slate-500">{job.employer_name || job.employer_email}</p>
+                        <p className="mt-0.5 text-[11px] font-semibold text-blue-600">{job.category_name || 'General'}</p>
+                      </div>
+                    </div>
 
-                <div className="mb-6 flex flex-wrap gap-x-4 gap-y-2 text-sm text-gray-600">
-                  <div className="flex items-center gap-1.5">
-                    <MapPin size={16} className="text-gray-400" />
-                    <span>{job.location || 'Remote'}</span>
+                    {/* Tags */}
+                    <div className="mb-6 flex flex-wrap gap-x-3 gap-y-2 text-xs text-slate-600">
+                      <div className="flex items-center gap-1">
+                        <MapPin size={13} className="text-slate-400" />
+                        <span>{job.location || 'Remote'}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock size={13} className="text-slate-400" />
+                        <span className="capitalize">{job.job_type_display || job.job_type || 'Full-time'}</span>
+                      </div>
+                      <div className="flex items-center gap-1 font-semibold text-slate-800">
+                        <IndianRupee size={13} className="text-emerald-600" />
+                        <span>{job.salary ? `${Number(job.salary).toLocaleString()}/mo` : 'Negotiable'}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5">
-                    <Clock size={16} className="text-gray-400" />
-                    <span>{job.job_type_display || job.job_type || 'Full Time'}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <IndianRupee size={16} className="text-gray-400" />
-                    <span>{job.salary || 'Not disclosed'}</span>
-                  </div>
-                </div>
 
-                <div className="mt-auto flex items-center justify-between border-t border-gray-100 pt-4">
-                  <p className="text-xs text-gray-400">{job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Recently'}</p>
-                  <div className="flex items-center gap-3">
-                    {appliedJobsMap[String(job.id)] ? (
-                      <span className="text-xs font-semibold text-blue-700">Application submitted</span>
-                    ) : null}
-                    <Link to={`/jobs/${job.id}`} className="rounded-full bg-gray-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600">
+                  {/* Footer Action */}
+                  <div className="mt-auto flex items-center justify-between border-t border-slate-100 pt-3.5">
+                    <span className="text-[11px] text-slate-400">
+                      {job.created_at ? new Date(job.created_at).toLocaleDateString() : 'Just now'}
+                    </span>
+                    <Link
+                      to={`/jobs/${job.id}`}
+                      className="inline-flex items-center gap-1 rounded-full bg-slate-900 px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-600 shadow-sm"
+                    >
                       View Details
+                      <ArrowRight size={13} />
                     </Link>
                   </div>
-                </div>
-              </motion.article>
-            ))}
+                </motion.article>
+              )
+            })}
           </div>
         )}
       </div>

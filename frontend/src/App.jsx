@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ChatDrawer from './components/ChatDrawer';
 import Home from './pages/Home';
 import Categories from './pages/Categories';
 import Login from './pages/Login';
@@ -23,6 +24,8 @@ import Apply from './pages/Apply';
 import Settings from './pages/Settings';
 import CompanyProfile from './pages/CompanyProfile';
 import PostJob from './pages/PostJob';
+import Pricing from './pages/Pricing';
+import VideoInterview from './pages/VideoInterview';
 import InfoPage from './pages/InfoPage';
 import NotFound from './pages/NotFound';
 
@@ -45,6 +48,8 @@ function App() {
             <Route path="/employer" element={<EmployerDashboard />} />
             <Route path="/admin-dashboard" element={<AdminDashboard />} />
             <Route path="/post-job" element={<PostJob />} />
+            <Route path="/pricing" element={<Pricing />} />
+            <Route path="/interview/:roomId" element={<VideoInterview />} />
             <Route path="/forget-password" element={<ForgetPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/verify-reset-otp" element={<VerifyResetOTP />} />
@@ -64,6 +69,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+        <ChatDrawer />
         <Footer />
       </div>
     </Router>

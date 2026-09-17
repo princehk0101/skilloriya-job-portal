@@ -253,27 +253,32 @@ const Apply = () => {
                     ))}
                   </div>
                 ) : null}
-                <textarea
-                  name="cover_letter"
-                  value={formData.cover_letter}
-                  onChange={handleChange}
-                  placeholder="Write a short cover letter for this job."
-                  rows={6}
-                  required
-                  className="w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                />
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-slate-700">
+                      Cover Letter <span className="text-slate-400 font-normal">(Optional)</span>
+                    </label>
+                  </div>
+                  <textarea
+                    name="cover_letter"
+                    value={formData.cover_letter}
+                    onChange={handleChange}
+                    placeholder="Write a short note or cover letter for this job (Optional - why you're interested in this role)."
+                    rows={5}
+                    className="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  />
+                </div>
 
-                <label className="block rounded-[1.5rem] border border-dashed border-blue-200 bg-blue-50/60 px-5 py-6 text-center">
+                <label className="block rounded-[1.5rem] border border-dashed border-blue-200 bg-blue-50/60 px-5 py-6 text-center cursor-pointer hover:bg-blue-50 transition">
                   <UploadCloud className="mx-auto text-blue-700" size={26} />
                   <p className="mt-3 text-sm font-semibold text-slate-900">
-                    {formData.resume ? formData.resume.name : 'Upload resume PDF'}
+                    {formData.resume ? formData.resume.name : 'Upload resume (PDF, DOC, DOCX)'}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">Only PDF resumes are accepted for this application.</p>
+                  <p className="mt-1 text-xs text-slate-500">Attach your latest resume to submit with this application.</p>
                   <input
                     type="file"
-                    accept="application/pdf"
+                    accept=".pdf,.doc,.docx"
                     onChange={(e) => setFormData((prev) => ({ ...prev, resume: e.target.files?.[0] || null }))}
-                    required
                     className="mt-4 block w-full text-sm text-slate-600 file:mr-4 file:rounded-xl file:border-0 file:bg-blue-700 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-800"
                   />
                 </label>

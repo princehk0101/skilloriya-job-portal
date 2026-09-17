@@ -31,6 +31,8 @@ export const createAppliedJobsMap = (applications) => {
 
 export const getApplicationStatusClass = (status) => {
   switch (status) {
+    case 'applied':
+      return 'bg-sky-100 text-sky-700'
     case 'accepted':
       return 'bg-emerald-100 text-emerald-700'
     case 'rejected':
@@ -44,6 +46,8 @@ export const getApplicationStatusClass = (status) => {
 
 export const getApplicationStatusLabel = (status) => {
   switch (status) {
+    case 'applied':
+      return 'Applied'
     case 'accepted':
       return 'Accepted'
     case 'rejected':

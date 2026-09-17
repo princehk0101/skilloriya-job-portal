@@ -12,6 +12,9 @@ import {
   LogOut,
   Plus,
   Sparkles,
+  MessageSquare,
+  CreditCard,
+  Award,
 } from 'lucide-react'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -165,7 +168,9 @@ const Navbar = () => {
           const apps = normalizeList(res.data)
           built = apps.map((app) => ({
             id: `seek-${app.id}`,
-            title: app.status === 'waitlist' ? 'Application received' : `Status updated: ${app.status}`,
+            title: ['applied', 'waitlist'].includes(app.status)
+              ? 'Application received'
+              : `Status updated: ${app.status}`,
             body: app.job_title || 'Job application',
             timestamp: app.applied_at,
             href: '/dashboard',
@@ -203,6 +208,10 @@ const Navbar = () => {
     })
   }
 
+  const handleOpenChat = () => {
+    window.dispatchEvent(new CustomEvent('open-chat'))
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
@@ -219,17 +228,21 @@ const Navbar = () => {
         { to: '/admin-dashboard', label: 'Admin Panel' },
         { to: '/', label: 'Job Feed' },
         { to: '/companies', label: 'Companies' },
+        { to: '/pricing', label: 'Pricing' },
       ]
     : isEmployer
     ? [
         { to: '/employer', label: 'Employer Panel' },
         { to: '/', label: 'Job Feed' },
         { to: '/companies', label: 'Companies' },
+        { to: '/pricing', label: 'Pricing' },
       ]
     : [
         { to: '/', label: 'Find Jobs' },
         { to: '/categories', label: 'Categories' },
         { to: '/companies', label: 'Companies' },
+        { to: '/assessments', label: 'Skill Tests' },
+        { to: '/pricing', label: 'Pricing' },
       ]
 
   const displayName = profile?.first_name || profile?.email || 'My Account'
@@ -277,6 +290,16 @@ const Navbar = () => {
                 <Plus size={16} />
                 Post Job
               </Link>
+            ) : null}
+
+            {isLoggedIn ? (
+              <button
+                onClick={handleOpenChat}
+                className="relative rounded-full border border-slate-200/80 bg-white/90 p-2.5 text-slate-500 shadow-sm transition-all hover:border-blue-200 hover:bg-blue-50/70 hover:text-blue-700"
+                title="Messages & Live Chat"
+              >
+                <MessageSquare size={18} strokeWidth={2.4} />
+              </button>
             ) : null}
 
             {isLoggedIn ? (
@@ -372,6 +395,14 @@ const Navbar = () => {
                         <User size={16} />
                         Profile
                       </Link>
+                      <Link to="/pricing" className="inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                        <CreditCard size={16} />
+                        Plans & Pricing
+                      </Link>
+                      <button onClick={handleOpenChat} className="inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                        <MessageSquare size={16} />
+                        Messages & Chat
+                      </button>
                       <Link to="/settings" className="inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
                         <Settings size={16} />
                         Settings
