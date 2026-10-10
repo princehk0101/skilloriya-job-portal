@@ -226,19 +226,19 @@ const Navbar = () => {
   const navLinks = isAdmin
     ? [
         { to: '/admin-dashboard', label: 'Admin Panel' },
-        { to: '/', label: 'Job Feed' },
+        { to: '/jobs', label: 'Job Feed' },
         { to: '/companies', label: 'Companies' },
         { to: '/pricing', label: 'Pricing' },
       ]
     : isEmployer
     ? [
         { to: '/employer', label: 'Employer Panel' },
-        { to: '/', label: 'Job Feed' },
+        { to: '/jobs', label: 'Job Feed' },
         { to: '/companies', label: 'Companies' },
         { to: '/pricing', label: 'Pricing' },
       ]
     : [
-        { to: '/', label: 'Find Jobs' },
+        { to: '/jobs', label: 'Find Jobs' },
         { to: '/categories', label: 'Categories' },
         { to: '/companies', label: 'Companies' },
         { to: '/assessments', label: 'Skill Tests' },

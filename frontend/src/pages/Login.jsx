@@ -12,42 +12,22 @@ const Login = () => {
   const [errorMessage, setErrorMessage] = useState('')
   const navigate = useNavigate()
 
-  const redirectByProfile = (profileData, role) => {
-    if (profileData?.is_staff || profileData?.is_superuser) {
-      navigate('/admin-dashboard')
-      return
-    }
-    if (role === 'employer') {
-      navigate('/employer')
-      return
-    }
-    navigate('/dashboard')
-  }
-
   const saveSessionAndRole = async (data) => {
     localStorage.setItem('access_token', data.access)
     localStorage.setItem('refresh_token', data.refresh)
+    const role = data?.user?.role
+    if (role) localStorage.setItem('user_role', role)
 
-    let role = data?.user?.role
-    if (data?.access) {
-      try {
-        const profileRes = await axios.get('/api/users/profile/', {
-          headers: { Authorization: `Bearer ${data.access}` },
-        })
-        role = profileRes.data?.role || role
-        localStorage.setItem('user_profile', JSON.stringify(profileRes.data))
-        redirectByProfile(profileRes.data, role)
-        return
-      } catch {
-        role = role || null
-      }
+    try {
+      const profileRes = await axios.get('/api/users/profile/', {
+        headers: { Authorization: `Bearer ${data.access}` },
+      })
+      localStorage.setItem('user_profile', JSON.stringify(profileRes.data))
+      if (profileRes.data?.is_staff || profileRes.data?.is_superuser) navigate('/admin-dashboard')
+      else navigate(profileRes.data?.role === 'employer' ? '/employer' : '/dashboard')
+    } catch {
+      navigate(role === 'employer' ? '/employer' : '/dashboard')
     }
-
-    if (role) {
-      localStorage.setItem('user_role', role)
-    }
-
-    redirectByProfile(null, role)
   }
 
   const extractErrorMessage = (error) => {

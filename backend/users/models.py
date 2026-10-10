@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 import random
+from datetime import timedelta
+from django.utils import timezone
 
 
 class CustomUserManager(BaseUserManager):
@@ -40,6 +42,7 @@ class User(AbstractUser):
     bio = models.TextField(blank=True)
     skills = models.TextField(blank=True, help_text='Comma-separated skills')
     experience_years = models.PositiveIntegerField(default=0)
+    job_email_alerts = models.BooleanField(default=True)
     education = models.CharField(max_length=255, blank=True)
     company_name = models.CharField(max_length=255, blank=True)
     designation = models.CharField(max_length=255, blank=True)
@@ -56,12 +59,23 @@ class User(AbstractUser):
         return self.email
 
 class EmailOTP(models.Model):
+    PURPOSE_CHOICES = [
+        ('verification', 'Email verification'),
+        ('login', 'Login'),
+        ('password_reset', 'Password reset'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     otp = models.CharField(max_length=6)
+    purpose = models.CharField(max_length=20, choices=PURPOSE_CHOICES, default='login')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def generate_otp(self):
         return str(random.randint(100000, 999999))
+
+    @property
+    def is_expired(self):
+        return timezone.now() >= self.created_at + timedelta(minutes=10)
 
     def __str__(self):
         return f"{self.user.email} - {self.otp}"
@@ -141,4 +155,21 @@ class UserSubscription(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.plan} ({'Active' if self.is_active else 'Expired'})"
+
+
+class ResumeVersion(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='resume_versions',
+    )
+    name = models.CharField(max_length=120)
+    file = models.FileField(upload_to='resumes/versions/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.name} ({self.user.email})"
 

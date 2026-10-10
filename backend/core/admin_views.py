@@ -4,8 +4,9 @@ from rest_framework.generics import DestroyAPIView, ListAPIView, UpdateAPIView
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db import transaction
 
-from applications.models import Application
+from applications.models import Application, ApplicationStatusEvent
 from applications.serializers import ApplicationSerializer, ApplicationStatusSerializer
 from companies.models import Company
 from companies.serializers import CompanySerializer
@@ -309,4 +310,16 @@ class AdminApplicationUpdateView(UpdateAPIView):
 
     def get_queryset(self):
         return Application.objects.all()
+
+    @transaction.atomic
+    def perform_update(self, serializer):
+        previous_status = serializer.instance.status
+        application = serializer.save()
+        if previous_status != application.status:
+            ApplicationStatusEvent.objects.create(
+                application=application,
+                from_status=previous_status,
+                to_status=application.status,
+                changed_by=self.request.user,
+            )
 

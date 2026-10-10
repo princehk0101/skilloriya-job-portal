@@ -8,6 +8,7 @@ const VerifyOTP = () => {
   const [otp, setOtp] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [notice, setNotice] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const email = location.state?.email || ''
@@ -23,6 +24,20 @@ const VerifyOTP = () => {
     } catch (error) {
       console.error('Verify OTP failed:', error.response?.data || error.message)
       setErrorMessage(error.response?.data?.detail || error.response?.data?.message || 'Invalid OTP. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResend = async () => {
+    setLoading(true)
+    setErrorMessage('')
+    setNotice('')
+    try {
+      await axios.post('/api/users/resend-verification-otp/', { email })
+      setNotice('A new verification code has been sent. Check your inbox and spam folder.')
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'Could not resend the code. Check the email and try again.')
     } finally {
       setLoading(false)
     }
@@ -78,12 +93,17 @@ const VerifyOTP = () => {
           </div>
         ) : null}
 
+        {notice ? <p role="status" className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{notice}</p> : null}
+
         <button
           type="submit"
           disabled={loading || !email}
           className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? 'Verifying...' : 'Verify OTP'}
+        </button>
+        <button type="button" onClick={handleResend} disabled={loading || !email} className="w-full text-sm font-semibold text-blue-700 hover:text-cyan-700 disabled:opacity-50">
+          {loading ? 'Sending…' : 'Resend verification OTP'}
         </button>
       </form>
     </AuthShell>

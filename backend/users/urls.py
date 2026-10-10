@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (
     RegisterView,
     VerifyOTPView,
+    ResendVerificationOTPView,
     LoginView,
     ForgotPasswordView,
     SendLoginOTPView,
@@ -9,7 +10,10 @@ from .views import (
     ResetPasswordView,
     GoogleLoginView,
     ProfileView,
+    ResumeVersionListCreateView,
+    ResumeVersionDeleteView,
 )
+from .ai_views import ResumeParseView
 from .views import (
     WorkCreateView,
     PublicWorkListView,
@@ -24,6 +28,7 @@ from .views import (
 urlpatterns = [
     path('register/', RegisterView.as_view()),
     path('verify-otp/', VerifyOTPView.as_view()),
+    path('resend-verification-otp/', ResendVerificationOTPView.as_view()),
     path('login/', LoginView.as_view()),
     path('login-otp/request/', SendLoginOTPView.as_view()),
     path('login-otp/verify/', LoginWithOTPView.as_view()),
@@ -31,6 +36,9 @@ urlpatterns = [
     path('reset-password/', ResetPasswordView.as_view()),
     path('google-login/', GoogleLoginView.as_view()),
     path('profile/', ProfileView.as_view()),
+    path('resume-parse/', ResumeParseView.as_view()),
+    path('resume-versions/', ResumeVersionListCreateView.as_view()),
+    path('resume-versions/<int:pk>/', ResumeVersionDeleteView.as_view()),
     # User works (portfolio)
     path('works/', PublicWorkListView.as_view()),
     path('works/my/', UserWorkListView.as_view()),

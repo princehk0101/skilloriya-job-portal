@@ -26,6 +26,7 @@ const Signup = () => {
   const [formData, setFormData] = useState({ email: '', password: '', role: 'seeker' })
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
+  const [showLoginLink, setShowLoginLink] = useState(false)
   const navigate = useNavigate()
 
   const handleChange = (e) => {
@@ -54,6 +55,7 @@ const Signup = () => {
     e.preventDefault()
     setLoading(true)
     setErrorMessage('')
+    setShowLoginLink(false)
 
     try {
       const payload = {
@@ -61,11 +63,20 @@ const Signup = () => {
         password: formData.password,
         email: formData.email,
       }
-      await axios.post('/api/users/register/', payload)
-      navigate('/VerifyOTP', { state: { email: formData.email } })
+      const response = await axios.post('/api/users/register/', payload)
+      if (response.data.verification_email_sent === false) {
+        setErrorMessage(response.data.message)
+        setShowLoginLink(true)
+      } else {
+        navigate('/VerifyOTP', { state: { email: formData.email } })
+      }
     } catch (error) {
       console.error('Signup failed:', error.response?.data || error.message)
-      setErrorMessage(extractErrorMessage(error))
+      const message = extractErrorMessage(error)
+      setErrorMessage(message)
+      setShowLoginLink(
+        message.toLowerCase().includes('already exists') || error.response?.status === 429,
+      )
     } finally {
       setLoading(false)
     }
@@ -80,10 +91,8 @@ const Signup = () => {
         token: credentialResponse.credential,
         role: formData.role,
       })
-
       localStorage.setItem('access_token', response.data.access)
       localStorage.setItem('refresh_token', response.data.refresh)
-
       const role = response.data?.user?.role || formData.role || 'seeker'
       localStorage.setItem('user_role', role)
       navigate(role === 'employer' ? '/employer' : '/dashboard')
@@ -179,8 +188,15 @@ const Signup = () => {
         </div>
 
         {errorMessage ? (
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-            {errorMessage}
+          <div className="space-y-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <p>{errorMessage}</p>
+            {showLoginLink ? (
+              <Link to="/login" className="inline-block font-bold text-blue-700 underline">
+                {errorMessage.toLowerCase().includes('already exists')
+                  ? 'This email already has an account. Sign in instead.'
+                  : 'Already have an account? Try signing in.'}
+              </Link>
+            ) : null}
           </div>
         ) : null}
 

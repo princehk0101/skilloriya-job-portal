@@ -136,6 +136,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+EMAIL_TIMEOUT = 10
 
 # ================= PASSWORD VALIDATION =================
 AUTH_PASSWORD_VALIDATORS = [
@@ -196,6 +197,13 @@ REST_FRAMEWORK = {
     "rest_framework.pagination.PageNumberPagination",
 
     "PAGE_SIZE": 10,
+    "DEFAULT_THROTTLE_RATES": {
+        "auth_register": "20/hour",
+        "auth_login": "10/minute",
+        "auth_otp_request": "3/minute",
+        "auth_otp_verify": "10/minute",
+        "auth_password_reset": "5/hour",
+    },
 }
 
 # ================= JWT SETTINGS =================

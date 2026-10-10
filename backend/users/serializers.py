@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User, Work
+from .models import User, Work, ResumeVersion
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -24,19 +24,16 @@ class LoginSerializer(serializers.Serializer):
         if not user:
             raise serializers.ValidationError("Invalid email or password")
 
-        if not user.is_verified and not (user.is_staff or user.is_superuser):
-            raise serializers.ValidationError("Email not verified")
-
+        self.user = user
         refresh = RefreshToken.for_user(user)
-
         return {
             "user": {
                 "id": user.id,
                 "email": user.email,
-                "role": user.role
+                "role": user.role,
             },
             "access": str(refresh.access_token),
-            "refresh": str(refresh)
+            "refresh": str(refresh),
         }
 
 
@@ -48,9 +45,6 @@ class OTPRequestSerializer(serializers.Serializer):
             user = User.objects.get(email=value)
         except User.DoesNotExist:
             raise serializers.ValidationError("User not found")
-
-        if not user.is_verified and not (user.is_staff or user.is_superuser):
-            raise serializers.ValidationError("Email not verified")
 
         self.user = user
         return value
@@ -69,8 +63,10 @@ class OTPLoginVerifySerializer(serializers.Serializer):
         if not user.is_verified and not (user.is_staff or user.is_superuser):
             raise serializers.ValidationError("Email not verified")
 
-        otp_obj = user.emailotp_set.filter(otp=data["otp"]).last()
-        if not otp_obj:
+        otp_obj = user.emailotp_set.filter(otp=data["otp"], purpose='login').last()
+        if not otp_obj or otp_obj.is_expired:
+            if otp_obj:
+                otp_obj.delete()
             raise serializers.ValidationError("Invalid OTP")
 
         self.user = user
@@ -82,6 +78,7 @@ class OTPLoginVerifySerializer(serializers.Serializer):
                 "id": user.id,
                 "email": user.email,
                 "role": user.role,
+                "job_email_alerts": user.job_email_alerts,
             },
             "access": str(refresh.access_token),
             "refresh": str(refresh),
@@ -115,6 +112,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "bio",
             "skills",
             "experience_years",
+            "job_email_alerts",
             "education",
             "company_name",
             "designation",
@@ -198,3 +196,26 @@ class WorkSerializer(serializers.ModelSerializer):
         if request:
             return request.build_absolute_uri(obj.attachment.url)
         return obj.attachment.url
+
+
+class ResumeVersionSerializer(serializers.ModelSerializer):
+    file_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ResumeVersion
+        fields = ['id', 'name', 'file', 'file_url', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+    def validate_file(self, value):
+        if value.size > 10 * 1024 * 1024:
+            raise serializers.ValidationError('Resume file too large (maximum 10 MB).')
+        extension = value.name.lower().rsplit('.', 1)[-1]
+        if extension not in ['pdf', 'doc', 'docx']:
+            raise serializers.ValidationError('Only PDF, DOC, or DOCX files are supported.')
+        return value
+
+    def get_file_url(self, obj):
+        if not obj.file:
+            return None
+        request = self.context.get('request')
+        return request.build_absolute_uri(obj.file.url) if request else obj.file.url

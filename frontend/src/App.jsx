@@ -15,6 +15,7 @@ import ResetPassword from './pages/ResetPassword';
 import VerifyResetOTP from './pages/VerifyResetOTP';
 import VerifyLoginOTP from './pages/VerifyLoginOTP';
 import JobDescription from './pages/JobDescription';
+import Jobs from './pages/Jobs';
 import Companies from './pages/Companies';
 import Assesstment from './pages/Assesstment';
 import Profile from './pages/Profile';
@@ -39,6 +40,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/categories" element={<Categories />} />
+            <Route path="/jobs" element={<Jobs />} />
             <Route path="/login" element={<Login />} />
             <Route path="/login-otp" element={<LoginWithOTP />} />
             <Route path="/login-otp/verify" element={<VerifyLoginOTP />} />

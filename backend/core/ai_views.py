@@ -1,5 +1,7 @@
 import re
 import io
+import zipfile
+import xml.etree.ElementTree as ET
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -7,7 +9,8 @@ from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework import status
 from jobs.models import Job
 from jobs.serializers import JobSerializer
-from users.models import User
+from users.models import User, ResumeVersion
+from django.shortcuts import get_object_or_404
 
 COMMON_SKILLS = [
     "Python", "JavaScript", "TypeScript", "React", "Next.js", "Node.js", "Django", "FastAPI",
@@ -34,6 +37,15 @@ def extract_text_from_file(uploaded_file):
         try:
             return content.decode('utf-8', errors='ignore')
         except:
+            return ""
+
+    if name.endswith('.docx'):
+        try:
+            with zipfile.ZipFile(io.BytesIO(content)) as document:
+                xml_content = document.read('word/document.xml')
+            root = ET.fromstring(xml_content)
+            return ' '.join(node.text or '' for node in root.iter() if node.tag.endswith('}t'))
+        except Exception:
             return ""
 
     if name.endswith('.pdf'):
@@ -237,12 +249,12 @@ class AIResumeParserView(APIView):
         })
 
 
-def calculate_job_match(user, job):
-    user_skills_str = user.skills or ""
+def calculate_job_match(user, job, candidate_skills=None, experience_years=None):
+    user_skills_str = candidate_skills if candidate_skills is not None else (user.skills or "")
     user_skills = set([s.strip().lower() for s in re.split(r'[,|/\n]', user_skills_str) if s.strip()])
     
     # Extract skills from job title and description
-    job_text = f"{job.title} {job.description}".lower()
+    job_text = f"{job.title} {job.description} {' '.join(job.required_skills or [])}".lower()
     required_skills = set()
     for skill in COMMON_SKILLS:
         pattern = r'(?i)(?:\b|(?<=[^a-zA-Z0-9]))' + re.escape(skill) + r'(?:\b|(?=[^a-zA-Z0-9]))'
@@ -259,7 +271,7 @@ def calculate_job_match(user, job):
     skill_score = (len(matched) / len(required_skills)) * 70 if required_skills else 50
     
     # Experience factor (up to 20%)
-    user_exp = getattr(user, 'experience_years', 0) or 0
+    user_exp = experience_years if experience_years is not None else (getattr(user, 'experience_years', 0) or 0)
     job_exp = job.experience_required or 0
     if user_exp >= job_exp:
         exp_score = 20
@@ -269,7 +281,10 @@ def calculate_job_match(user, job):
     # Location / Job Type factor (up to 10%)
     loc_score = 10 if (job.job_type == 'remote' or (user.location and user.location.lower() in job.location.lower())) else 5
 
-    total_score = min(100, max(20, int(skill_score + exp_score + loc_score)))
+    skill_points = int(skill_score)
+    raw_score = skill_points + exp_score + loc_score
+    floor_adjustment = max(0, 20 - raw_score)
+    total_score = min(100, max(20, raw_score))
 
     is_top_applicant = total_score >= 65 or len(matched) >= 2
     level = "Top Applicant (High Match)" if total_score >= 75 else "Good Match" if total_score >= 50 else "Moderate Match"
@@ -280,6 +295,12 @@ def calculate_job_match(user, job):
     
     return {
         "match_score": total_score,
+        "score_breakdown": {
+            "skills": {"score": skill_points, "out_of": 70},
+            "experience": {"score": exp_score, "out_of": 20},
+            "location": {"score": loc_score, "out_of": 10},
+            "minimum score adjustment": {"score": floor_adjustment, "out_of": 20},
+        },
         "matched_skills": matched_titles,
         "missing_skills": [s.title() for s in missing],
         "recommendation_level": level,
@@ -312,11 +333,34 @@ class AIRecommendedJobsView(APIView):
 
     def get(self, request):
         user = request.user
+        resume_id = request.query_params.get('resume_id')
+        resume_skills = None
+        resume_experience = None
+        if resume_id:
+            resume = get_object_or_404(ResumeVersion, id=resume_id, user=user)
+            resume.file.open('rb')
+            try:
+                resume_text = extract_text_from_file(resume.file)
+            finally:
+                resume.file.close()
+            parsed_resume = parse_resume_text(resume_text)
+            if parsed_resume['skills']:
+                resume_skills = ', '.join(parsed_resume['skills'])
+                resume_experience = parsed_resume['experience_years']
+
         jobs = Job.objects.filter(is_active=True).select_related('employer', 'category')
         
         scored_jobs = []
         for job in jobs:
-            match_data = calculate_job_match(user, job)
+            match_data = calculate_job_match(
+                user,
+                job,
+                candidate_skills=resume_skills,
+                experience_years=resume_experience,
+            )
+            match_data['matching_basis'] = 'resume' if resume_skills is not None else 'profile'
+            if resume_skills is not None:
+                match_data['resume_skills'] = parsed_resume['skills']
             serializer = JobSerializer(job, context={'request': request})
             job_dict = serializer.data
             job_dict['ai_match'] = match_data

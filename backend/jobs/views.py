@@ -17,6 +17,7 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from .models import Job, JobCategory, SavedJob, JobAlert
 from .serializers import JobSerializer, JobCategorySerializer, SavedJobSerializer, JobAlertSerializer
 from .permissions import IsEmployer, IsSeeker
+from .alerts import alert_matches_job, notify_matching_job_alerts
 
 
 # Job List (Search + Filter + Ordering)
@@ -74,7 +75,8 @@ class JobCreateView(CreateAPIView):
     permission_classes = [IsAuthenticated, IsEmployer]
 
     def perform_create(self, serializer):
-        serializer.save(employer=self.request.user)
+        job = serializer.save(employer=self.request.user)
+        notify_matching_job_alerts(job)
 
 
 
@@ -181,4 +183,4 @@ class JobAlertMatchesView(ListAPIView):
             queryset = queryset.filter(salary__lte=alert.max_salary)
         if alert.experience_required is not None:
             queryset = queryset.filter(experience_required__lte=alert.experience_required)
-        return queryset.order_by('-created_at')
+        return [job for job in queryset.select_related('employer', 'category').order_by('-created_at') if alert_matches_job(alert, job)]

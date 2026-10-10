@@ -30,6 +30,8 @@ class JobSerializer(serializers.ModelSerializer):
             "employer_image_url",
             "title",
             "description",
+            "required_skills",
+            "practical_challenge",
             "location",
             "salary",
             "job_type",
@@ -93,7 +95,7 @@ class JobAlertSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobAlert
         fields = [
-            'id', 'name', 'keyword', 'location', 'job_type',
+            'id', 'name', 'keyword', 'skills', 'location', 'job_type',
             'min_salary', 'max_salary', 'experience_required',
             'is_active', 'created_at',
         ]

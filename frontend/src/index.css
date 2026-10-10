@@ -94,3 +94,32 @@ body::after {
   background: rgba(35, 85, 217, 0.15);
   color: var(--theme-ink);
 }
+
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  #skill-fit-passport,
+  #skill-fit-passport * {
+    visibility: visible !important;
+  }
+
+  #skill-fit-passport {
+    position: fixed;
+    inset: 0;
+    overflow: visible;
+    width: 100%;
+    padding: 0;
+    background: #fff;
+    color: #0f172a;
+  }
+
+  #skill-fit-passport .print-hidden {
+    display: none !important;
+  }
+}

@@ -75,13 +75,21 @@ const EmployerDashboard = () => {
     waitlist: 0,
     shortlisted: 0,
     accepted: 0,
+    applied: 0,
+    screening: 0,
+    interview: 0,
+    offer: 0,
+    rejected: 0,
+    applications_per_job: [],
   })
   const [selectedJobId, setSelectedJobId] = useState(null)
   const [applicants, setApplicants] = useState([])
+  const [interviews, setInterviews] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSavingCompany, setIsSavingCompany] = useState(false)
   const [error, setError] = useState('')
   const [successMsg, setSuccessMsg] = useState('')
+  const [scheduledRoom, setScheduledRoom] = useState('')
   const [company, setCompany] = useState(null)
   const [viewMode, setViewMode] = useState('kanban') // 'kanban' | 'list'
 
@@ -118,11 +126,12 @@ const EmployerDashboard = () => {
 
   const loadEmployerData = async () => {
     try {
-      const [profileRes, jobsRes, dashboardRes, companiesRes] = await Promise.all([
+      const [profileRes, jobsRes, dashboardRes, companiesRes, interviewsRes] = await Promise.all([
         axios.get('/api/users/profile/', getAuthConfig()),
         axios.get('/api/jobs/my-jobs/', getAuthConfig()),
         axios.get('/api/applications/employer/dashboard/', getAuthConfig()),
         axios.get('/api/companies/'),
+        axios.get('/api/applications/interviews/my/', getAuthConfig()),
       ])
 
       if (profileRes.data?.is_staff || profileRes.data?.is_superuser) {
@@ -141,12 +150,19 @@ const EmployerDashboard = () => {
 
       const myJobs = normalizeList(jobsRes.data)
       setJobs(myJobs)
+      setInterviews(normalizeList(interviewsRes.data))
 
       setStats({
         total_applications: dashboardRes.data?.total_applications || 0,
         waitlist: dashboardRes.data?.waitlist || 0,
         shortlisted: dashboardRes.data?.shortlisted || 0,
         accepted: dashboardRes.data?.accepted || 0,
+        applied: dashboardRes.data?.applied || 0,
+        screening: dashboardRes.data?.screening || 0,
+        interview: dashboardRes.data?.interview || 0,
+        offer: dashboardRes.data?.offer || 0,
+        rejected: dashboardRes.data?.rejected || 0,
+        applications_per_job: dashboardRes.data?.applications_per_job || [],
       })
 
       const allCompanies = normalizeList(companiesRes.data)
@@ -278,6 +294,22 @@ const EmployerDashboard = () => {
     }
   }
 
+  const reviewSkillProof = async (applicationId, status) => {
+    const review_note = window.prompt(status === 'verified' ? 'Optional note for the candidate:' : 'What should the candidate improve?') || ''
+    try {
+      const response = await axios.patch(
+        `/api/applications/applications/${applicationId}/skill-proof/review/`,
+        { status, review_note },
+        getAuthConfig()
+      )
+      setApplicants((prev) => prev.map((app) => app.id === applicationId ? response.data : app))
+      await loadEmployerData()
+    } catch (err) {
+      console.error('Proof review failed:', err.response?.data || err.message)
+      setError('Unable to save the skill proof review.')
+    }
+  }
+
   const handleScheduleInterview = async (e) => {
     e.preventDefault()
     if (!scheduleApp || !interviewDate) return
@@ -296,6 +328,7 @@ const EmployerDashboard = () => {
         getAuthConfig()
       )
       setSuccessMsg(`Video interview scheduled! Room ID: ${res.data.room_id}`)
+      setScheduledRoom(res.data.room_id)
       setScheduleApp(null)
       setInterviewDate('')
       setInterviewNotes('')
@@ -383,6 +416,12 @@ const EmployerDashboard = () => {
           </div>
         ) : null}
 
+        {scheduledRoom && successMsg ? (
+          <div className="mb-6 -mt-5 text-right text-xs font-bold text-emerald-700">
+            <Link to={`/interview/${scheduledRoom}`} className="underline">Open interview room</Link>
+          </div>
+        ) : null}
+
         {/* Stats Row */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm">
@@ -414,6 +453,66 @@ const EmployerDashboard = () => {
             <p className="text-2xl font-black text-slate-900">{stats.accepted}</p>
           </div>
         </div>
+
+        {/* Hiring Analytics */}
+        <section className="mb-8 grid gap-4 lg:grid-cols-2" aria-label="Hiring analytics">
+          <div className="rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm">
+            <h2 className="text-sm font-bold text-slate-900">Hiring pipeline</h2>
+            <p className="mt-1 text-xs text-slate-500">Applications by current status</p>
+            <div className="mt-4 space-y-3">
+              {[
+                ['Applied', stats.applied], ['Screening', stats.screening], ['Waitlist', stats.waitlist], ['Shortlisted', stats.shortlisted],
+                ['Interview', stats.interview], ['Offer', stats.offer], ['Hired', stats.accepted], ['Rejected', stats.rejected],
+              ].map(([label, count]) => (
+                <div key={label} className="grid grid-cols-[5.5rem_1fr_2rem] items-center gap-3">
+                  <span className="text-xs text-slate-600">{label}</span>
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div className="h-full rounded-full bg-blue-600" style={{ width: `${stats.total_applications ? Math.max(2, (count / stats.total_applications) * 100) : 0}%` }} />
+                  </div>
+                  <span className="text-right text-xs font-bold text-slate-800">{count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm">
+            <h2 className="text-sm font-bold text-slate-900">Applications by job</h2>
+            <p className="mt-1 text-xs text-slate-500">Compare applicant volume across your listings</p>
+            <div className="mt-4 space-y-3">
+              {stats.applications_per_job.length ? stats.applications_per_job.map((item) => (
+                <div key={item.job_id} className="grid grid-cols-[minmax(0,1fr)_2fr_2rem] items-center gap-3">
+                  <span className="truncate text-xs text-slate-600" title={item.job__title}>{item.job__title}</span>
+                  <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div className="h-full rounded-full bg-cyan-600" style={{ width: `${Math.max(3, (item.total_applications / Math.max(...stats.applications_per_job.map((job) => job.total_applications), 1)) * 100)}%` }} />
+                  </div>
+                  <span className="text-right text-xs font-bold text-slate-800">{item.total_applications}</span>
+                </div>
+              )) : <p className="py-5 text-center text-xs text-slate-500">Post a job and receive applications to see analytics.</p>}
+            </div>
+          </div>
+        </section>
+
+        <section className="mb-8 rounded-2xl border border-blue-100 bg-white/90 p-5 shadow-sm" aria-label="Scheduled interviews">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h2 className="text-sm font-bold text-slate-900">Scheduled interviews</h2>
+              <p className="mt-1 text-xs text-slate-500">Open a room to take notes and submit candidate feedback.</p>
+            </div>
+            <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">{interviews.length}</span>
+          </div>
+          {interviews.length ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {interviews.map((interview) => (
+                <div key={interview.id} className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-bold text-slate-800">{interview.candidate_name || interview.candidate_email}</p>
+                    <p className="truncate text-xs text-slate-500">{interview.job_title} · {new Date(interview.scheduled_at).toLocaleString()}</p>
+                  </div>
+                  <Link to={`/interview/${interview.room_id}`} className="shrink-0 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white hover:bg-blue-700">Open room</Link>
+                </div>
+              ))}
+            </div>
+          ) : <p className="py-3 text-xs text-slate-500">No interviews scheduled yet.</p>}
+        </section>
 
         {/* Dashboard Main Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -727,6 +826,22 @@ const EmployerDashboard = () => {
                           </button>
                         </div>
                       </div>
+
+                        {app.skill_proof ? (
+                          <div className="rounded-xl border border-cyan-100 bg-cyan-50/70 p-3 text-xs text-slate-700">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <p className="font-bold text-slate-900">Proof-of-Skill · {app.skill_proof.skills_demonstrated}</p>
+                              <span className="rounded-full bg-white px-2.5 py-1 font-semibold capitalize text-cyan-800">{app.skill_proof.status.replace('_', ' ')}</span>
+                            </div>
+                            <p className="mt-1 whitespace-pre-line">{app.skill_proof.explanation}</p>
+                            {app.skill_proof.artifact_url ? <a href={app.skill_proof.artifact_url} target="_blank" rel="noreferrer" className="mt-2 inline-flex items-center gap-1 font-bold text-blue-700 hover:underline">Open work sample <ExternalLink size={12} /></a> : null}
+                            {app.skill_proof.review_note ? <p className="mt-2 border-t border-cyan-100 pt-2"><strong>Review note:</strong> {app.skill_proof.review_note}</p> : null}
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <button type="button" onClick={() => reviewSkillProof(app.id, 'verified')} className="rounded-lg bg-emerald-600 px-3 py-1.5 font-bold text-white hover:bg-emerald-700">Verify proof</button>
+                              <button type="button" onClick={() => reviewSkillProof(app.id, 'needs_work')} className="rounded-lg border border-amber-200 bg-white px-3 py-1.5 font-bold text-amber-800 hover:bg-amber-50">Needs improvement</button>
+                            </div>
+                          </div>
+                        ) : null}
 
                       <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-xs">
                         {app.resume_url || app.resume ? (

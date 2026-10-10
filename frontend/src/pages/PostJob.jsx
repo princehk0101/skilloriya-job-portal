@@ -19,6 +19,8 @@ const PostJob = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    required_skills: '',
+    practical_challenge: '',
     location: '',
     salary: '',
     job_type: 'remote',
@@ -79,6 +81,8 @@ const PostJob = () => {
       const payload = {
         title: formData.title.trim(),
         description: formData.description.trim(),
+        required_skills: formData.required_skills.split(',').map((skill) => skill.trim()).filter(Boolean),
+        practical_challenge: formData.practical_challenge.trim(),
         location: formData.location.trim(),
         salary: Number(formData.salary),
         job_type: formData.job_type,
@@ -91,6 +95,8 @@ const PostJob = () => {
       setFormData({
         title: '',
         description: '',
+        required_skills: '',
+        practical_challenge: '',
         location: '',
         salary: '',
         job_type: 'remote',
@@ -151,6 +157,31 @@ const PostJob = () => {
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="grid gap-5 md:grid-cols-2">
                 <label className="block md:col-span-2">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Required skills <span className="font-normal text-slate-400">(comma separated)</span></span>
+                  <input
+                    type="text"
+                    name="required_skills"
+                    value={formData.required_skills}
+                    onChange={handleChange}
+                    placeholder="React, JavaScript, REST APIs"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  />
+                </label>
+
+                <label className="block md:col-span-2">
+                  <span className="mb-2 block text-sm font-medium text-slate-700">Optional practical challenge</span>
+                  <textarea
+                    name="practical_challenge"
+                    value={formData.practical_challenge}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="Example: Share a small project or code sample that shows how you handle API errors."
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                  />
+                  <span className="mt-1 block text-xs text-slate-500">Candidates can attach a work sample and explain their approach with their application.</span>
+                </label>
+
+                <label className="block md:col-span-2">
                   <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
                     <Briefcase size={16} className="text-blue-600" />
                     Job title
@@ -185,7 +216,7 @@ const PostJob = () => {
                 <label className="block">
                   <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
                     <Wallet size={16} className="text-blue-600" />
-                    Salary
+                    Annual salary (INR)
                   </span>
                   <input
                     type="number"
@@ -193,7 +224,7 @@ const PostJob = () => {
                     min="0"
                     value={formData.salary}
                     onChange={handleChange}
-                    placeholder="25000"
+                    placeholder="600000 (annual)"
                     className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
                     required
                   />

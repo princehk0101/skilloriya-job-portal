@@ -211,7 +211,7 @@ const JobDescription = () => {
                     </span>
                     <span className="inline-flex items-center gap-1.5"><MapPin size={15} /> {job.location || 'Remote'}</span>
                     <span className="inline-flex items-center gap-1.5"><Clock size={15} /> {job.job_type_display || job.job_type}</span>
-                    <span className="inline-flex items-center gap-1.5"><IndianRupee size={15} /> {job.salary ? `₹${Number(job.salary).toLocaleString()}/mo` : 'Disclosed on interview'}</span>
+                    <span className="inline-flex items-center gap-1.5"><IndianRupee size={15} /> {job.salary ? `₹${Number(job.salary).toLocaleString('en-IN')} / year` : 'Pay not listed'}</span>
                   </div>
                 </div>
               </div>
@@ -266,6 +266,17 @@ const JobDescription = () => {
               <section className="rounded-[2rem] border border-slate-100 bg-slate-50/60 p-7">
                 <h2 className="text-xl font-extrabold text-slate-900">About the Role</h2>
                 <p className="mt-4 whitespace-pre-line text-sm leading-8 text-slate-700">{job.description}</p>
+                {job.required_skills?.length ? (
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    {job.required_skills.map((skill) => <span key={skill} className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-800">{skill}</span>)}
+                  </div>
+                ) : null}
+                {job.practical_challenge ? (
+                  <div className="mt-5 rounded-2xl border border-cyan-100 bg-cyan-50 p-4">
+                    <h3 className="text-sm font-bold text-cyan-950">Optional Proof-of-Skill challenge</h3>
+                    <p className="mt-2 whitespace-pre-line text-sm leading-6 text-cyan-900">{job.practical_challenge}</p>
+                  </div>
+                ) : null}
               </section>
 
               {/* Suggested Related Jobs */}
@@ -283,7 +294,7 @@ const JobDescription = () => {
                       >
                         <p className="font-bold text-slate-900 text-sm">{item.title}</p>
                         <p className="mt-1 text-xs text-slate-500">{item.location} • {item.job_type}</p>
-                        <p className="mt-2 text-xs font-semibold text-blue-600">₹{Number(item.salary || 0).toLocaleString()}/mo</p>
+                        <p className="mt-2 text-xs font-semibold text-blue-600">₹{Number(item.salary || 0).toLocaleString('en-IN')} / year</p>
                       </Link>
                     ))}
                   </div>

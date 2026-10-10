@@ -16,8 +16,12 @@ const LoginWithOTP = () => {
     setErrorMessage('')
 
     try {
-      await axios.post('/api/users/login-otp/request/', { email })
-      navigate('/login-otp/verify', { state: { email } })
+      const response = await axios.post('/api/users/login-otp/request/', { email })
+      if (response.data.verification_required) {
+        navigate('/VerifyOTP', { state: { email: response.data.email || email } })
+      } else {
+        navigate('/login-otp/verify', { state: { email: response.data.email || email } })
+      }
     } catch (error) {
       console.error('Login OTP request failed:', error.response?.data || error.message)
       const data = error.response?.data

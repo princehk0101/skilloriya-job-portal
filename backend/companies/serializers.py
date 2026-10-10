@@ -77,7 +77,7 @@ class CompanySerializer(serializers.ModelSerializer):
 
     def get_average_rating(self, obj):
         avg = obj.reviews.aggregate(Avg('rating'))['rating__avg']
-        return round(avg, 1) if avg is not None else 5.0
+        return round(avg, 1) if avg is not None else None
 
     def get_reviews_count(self, obj):
         return obj.reviews.count()

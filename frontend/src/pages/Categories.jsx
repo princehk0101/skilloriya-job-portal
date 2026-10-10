@@ -16,6 +16,12 @@ const normalizeList = (data) => {
   return []
 }
 
+const doesJobMatchSearch = (job, jobSearch, locationSearch) => {
+  const searchableText = `${job.title || ''} ${job.description || ''} ${job.employer_name || ''} ${job.category_name || ''}`.toLowerCase()
+  return (!jobSearch || searchableText.includes(jobSearch))
+    && (!locationSearch || String(job.location || '').toLowerCase().includes(locationSearch))
+}
+
 const fetchAllPages = async (url) => {
   let nextUrl = url
   let pages = 0
@@ -114,21 +120,31 @@ const Categories = () => {
     return displayCategories.filter((cat) => cat.name?.toLowerCase().includes(q))
   }, [displayCategories, search])
 
+  const jobSearch = (searchParams.get('q') || '').trim().toLowerCase()
+  const locationSearch = (searchParams.get('location') || '').trim().toLowerCase()
+
   const categoryFilteredList = useMemo(() => {
     const queryCategory = searchParams.get('category')?.toLowerCase()
-    if (!queryCategory) return filteredCategories
-
     return filteredCategories.filter((cat) => {
-      const slug = String(cat.slug || '').toLowerCase()
-      const id = String(cat.id || '').toLowerCase()
-      const name = String(cat.name || '').toLowerCase()
-      return slug === queryCategory || id === queryCategory || name === queryCategory
+      if (queryCategory) {
+        const slug = String(cat.slug || '').toLowerCase()
+        const id = String(cat.id || '').toLowerCase()
+        const name = String(cat.name || '').toLowerCase()
+        if (slug !== queryCategory && id !== queryCategory && name !== queryCategory) return false
+      }
+      if (jobSearch || locationSearch) {
+        const matchingJobs = (jobsByCategory[String(cat.id)] || []).some((job) => doesJobMatchSearch(job, jobSearch, locationSearch))
+        if (!matchingJobs) return false
+      }
+      return true
     })
-  }, [filteredCategories, searchParams])
+  }, [filteredCategories, searchParams, jobsByCategory, jobSearch, locationSearch])
 
   const clearCategoryFilter = () => {
     const nextParams = new URLSearchParams(searchParams)
     nextParams.delete('category')
+    nextParams.delete('q')
+    nextParams.delete('location')
     setSearchParams(nextParams)
   }
 
@@ -161,12 +177,12 @@ const Categories = () => {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          {searchParams.get('category') ? (
+          {searchParams.get('category') || jobSearch || locationSearch ? (
             <button
               onClick={clearCategoryFilter}
               className="mt-4 inline-flex rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
             >
-              Clear category filter
+              Clear job filters
             </button>
           ) : null}
         </div>
@@ -174,18 +190,18 @@ const Categories = () => {
 
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {isLoading ? (
-          <p className="text-center text-gray-500">Loading categories and jobs...</p>
+            <p className="text-center text-gray-500">Loading categories and jobs...</p>
         ) : categoryFilteredList.length === 0 ? (
           <div className="rounded-3xl border border-blue-100 bg-white p-8 text-center shadow-sm">
-            <h2 className="text-2xl font-bold text-gray-900">No categories available</h2>
+            <h2 className="text-2xl font-bold text-gray-900">{jobSearch || locationSearch ? 'No matching jobs found' : 'No categories available'}</h2>
             <p className="mt-2 text-gray-600">
-              Categories and related openings will appear here as soon as they are added.
+              {jobSearch || locationSearch ? 'Try a different title, skill, or location.' : 'Categories and related openings will appear here as soon as they are added.'}
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
             {categoryFilteredList.map((cat, idx) => {
-              const categoryJobs = jobsByCategory[String(cat.id)] || []
+              const categoryJobs = (jobsByCategory[String(cat.id)] || []).filter((job) => doesJobMatchSearch(job, jobSearch, locationSearch))
               return (
                 <motion.div
                   key={cat.id}

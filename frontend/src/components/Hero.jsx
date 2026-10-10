@@ -1,4 +1,5 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 import { motion } from 'framer-motion'
 import {
   Search,
@@ -10,17 +11,37 @@ import {
   Sparkles,
   BadgeCheck,
 } from 'lucide-react'
-import { Link } from 'react-router-dom'
-
-const partnerLogos = ['Infosys', 'TCS', 'Wipro', 'Adobe', 'Accenture']
-
-const highlightStats = [
-  { value: '2k+', label: 'Jobs' },
-  { value: '600+', label: 'Companies' },
-  { value: '24/7', label: 'Open' },
-]
+import { useNavigate } from 'react-router-dom'
 
 const Hero = () => {
+  const navigate = useNavigate()
+  const [query, setQuery] = useState('')
+  const [location, setLocation] = useState('')
+  const [counts, setCounts] = useState({ jobs: null, companies: null, assessments: null })
+
+  useEffect(() => {
+    let active = true
+    Promise.allSettled([
+      axios.get('/api/jobs/'),
+      axios.get('/api/companies/'),
+      axios.get('/api/skills/assessments/'),
+    ]).then(([jobsResult, companiesResult, assessmentsResult]) => {
+      if (!active) return
+      const countOf = (result) => result.status !== 'fulfilled'
+        ? 0
+        : (result.value.data?.count ?? (Array.isArray(result.value.data) ? result.value.data.length : result.value.data?.results?.length ?? 0))
+      setCounts({ jobs: countOf(jobsResult), companies: countOf(companiesResult), assessments: countOf(assessmentsResult) })
+    })
+    return () => { active = false }
+  }, [])
+
+  const searchJobs = (searchTerm = query, searchLocation = location) => {
+    const params = new URLSearchParams()
+    if (searchTerm.trim()) params.set('q', searchTerm.trim())
+    if (searchLocation.trim()) params.set('location', searchLocation.trim())
+    navigate(`/jobs${params.toString() ? `?${params.toString()}` : ''}`)
+  }
+
   return (
     <section className="relative overflow-hidden pb-24 pt-32 lg:pb-28 lg:pt-40">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(circle_at_top_left,_rgba(35,85,217,0.18),_transparent_40%),radial-gradient(circle_at_80%_20%,_rgba(243,180,79,0.18),_transparent_24%)]" />
@@ -41,12 +62,14 @@ const Hero = () => {
             Search by title, skill, or company. Apply in minutes.
           </p>
 
-          <div className="glass-panel mt-10 rounded-[1.75rem] p-3">
+          <form onSubmit={(event) => { event.preventDefault(); searchJobs() }} className="glass-panel mt-10 rounded-[1.75rem] p-3">
             <div className="flex flex-col gap-2 lg:flex-row">
               <div className="flex flex-1 items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3.5 transition-all focus-within:border-blue-300 focus-within:ring-2 focus-within:ring-blue-100">
                 <Search className="text-slate-400" size={18} />
                 <input
                   type="text"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
                   placeholder="Job title, skill, company"
                   className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-500"
                 />
@@ -55,32 +78,38 @@ const Hero = () => {
                 <MapPin className="text-slate-400" size={18} />
                 <input
                   type="text"
+                  value={location}
+                  onChange={(event) => setLocation(event.target.value)}
                   placeholder="Location or Remote"
                   className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-500"
                 />
               </div>
-              <Link
-                to="/categories"
+              <button
+                type="submit"
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-8 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
               >
-                Explore Jobs
+                Search Jobs
                 <ArrowRight size={16} />
-              </Link>
+              </button>
             </div>
-          </div>
+          </form>
 
           <div className="mt-8 flex flex-wrap items-center gap-3 text-xs font-semibold text-slate-500">
             {['Frontend Developer', 'UI/UX Designer', 'Remote'].map((item) => (
-              <span key={item} className="cursor-pointer rounded-full border border-slate-200 bg-white/88 px-3 py-1.5 text-slate-600 shadow-sm transition-colors hover:border-blue-300 hover:text-blue-600">
+              <button type="button" key={item} onClick={() => searchJobs(item === 'Remote' ? '' : item, item === 'Remote' ? item : '')} className="rounded-full border border-slate-200 bg-white/88 px-3 py-1.5 text-slate-600 shadow-sm transition-colors hover:border-blue-300 hover:text-blue-600">
                 {item}
-              </span>
+              </button>
             ))}
           </div>
 
           <div className="mt-12 grid gap-4 sm:grid-cols-3">
-            {highlightStats.map((item) => (
+            {[
+              { value: counts.jobs, label: 'Active jobs' },
+              { value: counts.companies, label: 'Company profiles' },
+              { value: counts.assessments, label: 'Skill assessments' },
+            ].map((item) => (
               <div key={item.label} className="soft-card rounded-[1.5rem] p-5">
-                <p className="text-2xl font-extrabold text-slate-900">{item.value}</p>
+                <p className="text-2xl font-extrabold text-slate-900">{item.value === null ? '—' : item.value.toLocaleString()}</p>
                 <p className="mt-1 text-xs font-medium text-slate-500">{item.label}</p>
               </div>
             ))}
@@ -147,21 +176,18 @@ const Hero = () => {
 
       <div className="relative mx-auto mt-20 max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="section-frame rounded-[2rem] px-6 py-8">
-          <div className="mt-6 flex flex-wrap justify-center gap-4 lg:gap-8">
-            {partnerLogos.map((item) => (
-              <div key={item} className="cursor-default rounded-xl border border-white/70 bg-white px-6 py-3 text-center text-sm font-extrabold tracking-tight text-slate-400 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-200 hover:text-blue-700">
-                {item}
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm text-slate-500">
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-slate-600">
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm">
               <BadgeCheck size={16} className="text-blue-700" />
-              Full-time and internships
+              Application status timeline
             </span>
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm">
               <Sparkles size={16} className="text-amber-600" />
-              Remote and on-site
+              Explainable skill matches
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm">
+              <TrendingUp size={16} className="text-teal-700" />
+              Verified skill passport
             </span>
           </div>
         </div>

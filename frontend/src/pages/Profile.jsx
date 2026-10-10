@@ -146,7 +146,7 @@ const Profile = () => {
       const payload = new FormData()
       payload.append("resume", file)
 
-      const res = await axios.post("/api/ai/resume-parser/", payload, {
+      const res = await axios.post("/api/users/resume-parse/", payload, {
         headers: { Authorization: `Bearer ${token}` }
       })
 
@@ -571,88 +571,85 @@ const Profile = () => {
                   }}
                 />
 
-                {/* AI Feature Callout Card */}
-                <div className="mt-4 rounded-2xl border border-blue-200/80 bg-[linear-gradient(135deg,_#eff6ff,_#f0fdf4)] p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-xl bg-blue-600 text-white p-2.5 shadow-sm">
-                      <Zap size={18} />
+                {/* Smart AI Resume Parser Card (Unified) */}
+                <div className="mt-4 overflow-hidden rounded-2xl border-2 border-dashed border-blue-200 bg-[linear-gradient(135deg,_#eff6ff,_#f0fdf4)] p-6 transition-all hover:bg-blue-50/70 relative">
+                  {isParsingAI && (
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex flex-col items-center justify-center z-10">
+                      <div className="flex flex-col items-center">
+                        <div className="relative">
+                          <Loader2 size={32} className="animate-spin text-blue-600" />
+                          <Sparkles size={14} className="absolute -top-1 -right-1 text-amber-500 animate-pulse" />
+                        </div>
+                        <p className="mt-3 font-bold text-sm text-blue-900">AI is extracting your details...</p>
+                        <p className="text-[11px] font-medium text-slate-500 mt-1">Skills, Experience, Education</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                        <Sparkles size={13} className="text-amber-500" /> Smart AI Resume Parser
-                      </p>
-                      <p className="text-[11px] text-slate-500 mt-0.5">
-                        Upload your resume to automatically extract and populate your key skills, education, experience, and bio in seconds!
-                      </p>
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => aiFileInputRef.current?.click()}
-                    disabled={isParsingAI}
-                    className="shrink-0 rounded-xl bg-white border border-blue-200 px-3.5 py-1.5 text-xs font-bold text-blue-700 shadow-sm hover:bg-blue-50 transition-all"
-                  >
-                    {isParsingAI ? "Extracting..." : "Select Resume for AI Auto-Fill"}
-                  </button>
-                </div>
+                  )}
 
-                {/* Resume Upload Card */}
-                <div className="mt-4 rounded-2xl border-2 border-dashed border-blue-200 bg-blue-50/50 p-5 transition-all hover:bg-blue-50">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="flex items-start gap-3.5">
-                      <div className="rounded-xl bg-blue-600 p-3 text-white shadow-md">
-                        <FileText size={24} />
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="flex items-start gap-4">
+                      <div className="shrink-0 rounded-2xl bg-blue-600 p-3.5 text-white shadow-lg relative">
+                        <Zap size={24} />
+                        <div className="absolute -bottom-1 -right-1 rounded-full bg-amber-500 p-1 border-2 border-white">
+                          <Sparkles size={10} className="text-white" />
+                        </div>
                       </div>
                       <div>
-                        <h4 className="text-sm font-bold text-slate-900">Your Resume / CV</h4>
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          Upload PDF, DOC, or DOCX (up to 10MB). Used for instant 1-click job applications and AI scoring.
+                        <h4 className="text-base font-black text-slate-900 flex items-center gap-2">
+                          Smart AI Resume Parser <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 uppercase tracking-wider border border-emerald-200">Recommended</span>
+                        </h4>
+                        <p className="text-xs text-slate-600 mt-1 max-w-md leading-relaxed">
+                          Upload your resume to automatically extract and populate your key skills, education, experience, and bio in seconds!
                         </p>
-
+                        
                         {/* Current Resume Status */}
-                        {formData.resume_url && !formData.resume && (
-                          <div className="mt-2 flex flex-wrap items-center gap-2">
-                            <span className="inline-flex items-center gap-1 rounded-md bg-emerald-100 px-2 py-1 text-xs font-semibold text-emerald-800">
-                              <FileCheck size={13} /> Active Resume Saved
-                            </span>
-                            <a
-                              href={resolveMediaUrl(formData.resume_url)}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:underline"
-                            >
-                              View / Download Current Resume <ExternalLink size={12} />
-                            </a>
-                          </div>
-                        )}
-
-                        {/* Newly Selected Resume */}
-                        {formData.resume instanceof File && (
-                          <div className="mt-2 flex items-center gap-2">
-                            <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">
-                              <FileText size={13} /> {formData.resume.name} ({(formData.resume.size / 1024 / 1024).toFixed(2)} MB)
-                            </span>
-                            <button
-                              type="button"
-                              onClick={removeSelectedResume}
-                              className="text-xs text-rose-600 hover:text-rose-800 flex items-center gap-0.5"
-                              title="Cancel new file selection"
-                            >
-                              <Trash2 size={13} /> Remove
-                            </button>
+                        {(formData.resume_url || formData.resume) && (
+                          <div className="mt-3 pt-3 border-t border-blue-100/50 flex flex-wrap items-center gap-3">
+                            {formData.resume_url && !formData.resume && (
+                              <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 border border-emerald-100 px-2.5 py-1 text-[11px] font-bold text-emerald-700">
+                                  <FileCheck size={14} /> AI Parsed & Saved
+                                </span>
+                                <a
+                                  href={resolveMediaUrl(formData.resume_url)}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center gap-1 text-[11px] font-bold text-blue-600 hover:text-blue-800 hover:underline"
+                                >
+                                  View Current <ExternalLink size={12} />
+                                </a>
+                              </div>
+                            )}
+                            {formData.resume instanceof File && (
+                              <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center gap-1.5 rounded-lg bg-blue-100 border border-blue-200 px-2.5 py-1 text-[11px] font-bold text-blue-800">
+                                  <FileText size={14} /> {formData.resume.name} ({(formData.resume.size / 1024 / 1024).toFixed(2)} MB)
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={removeSelectedResume}
+                                  className="text-[11px] font-bold text-rose-600 hover:text-rose-800 flex items-center gap-1"
+                                >
+                                  <Trash2 size={12} /> Remove
+                                </button>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
                     </div>
 
-                    <label className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-xs font-bold text-blue-700 shadow-sm border border-blue-200 hover:bg-blue-50 cursor-pointer transition-all self-start sm:self-center">
-                      <Upload size={14} />
-                      {formData.resume_url || formData.resume ? "Upload / Replace Resume" : "Upload Resume"}
+                    <label className={`shrink-0 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-black text-blue-700 shadow-sm border-2 border-blue-200 cursor-pointer transition-all hover:bg-blue-50 hover:border-blue-400 hover:shadow-md ${isParsingAI ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <Upload size={16} />
+                      {formData.resume_url || formData.resume ? "Replace & Parse Again" : "Select Resume"}
                       <input
                         type="file"
                         accept=".pdf,.doc,.docx"
                         className="hidden"
-                        onChange={handleResumeChange}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0]
+                          if (f) handleAIResumeParse(f)
+                        }}
                       />
                     </label>
                   </div>
@@ -798,7 +795,7 @@ const Profile = () => {
                                   {isTop ? '🏆 Top Applicant' : 'Matched Candidate'} ({match.match_score || 75}%)
                                 </span>
                                 <span className="text-[11px] font-bold text-emerald-700">
-                                  ₹{Number(job.salary || 0).toLocaleString()}/mo
+                                  ₹{Number(job.salary || 0).toLocaleString('en-IN')} / year
                                 </span>
                               </div>
 

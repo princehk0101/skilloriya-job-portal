@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { Check, Sparkles, Zap, Shield, Crown, Building2, User, Loader2, ArrowRight } from 'lucide-react'
+import { Check, Sparkles, Zap, Shield, Crown, Loader2, ArrowRight } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 
 const Pricing = () => {
   const navigate = useNavigate()
   const [plans, setPlans] = useState([])
   const [currentPlan, setCurrentPlan] = useState('free')
-  const [billingCycle, setBillingCycle] = useState('monthly') // 'monthly' | 'annual'
   const [loading, setLoading] = useState(true)
   const [activatingId, setActivatingId] = useState(null)
   const [successMsg, setSuccessMsg] = useState('')
@@ -24,68 +23,7 @@ const Pricing = () => {
       setPlans(res.data.plans || [])
       setCurrentPlan(res.data.current_plan || 'free')
     } catch {
-      // Fallback local plans if offline
-      setPlans([
-        {
-          id: 'free',
-          name: 'Free Starter',
-          price: 0,
-          billing: 'Forever free',
-          role_target: 'both',
-          popular: false,
-          features: [
-            'Search and apply to unlimited standard jobs',
-            'Basic profile with portfolio & resume upload',
-            'Take skill assessments and earn badges',
-            'Basic job alerts and notification bell'
-          ]
-        },
-        {
-          id: 'pro_seeker',
-          name: 'Pro Seeker',
-          price: 499,
-          billing: 'per month',
-          role_target: 'seeker',
-          popular: true,
-          features: [
-            'AI Resume Parser & Auto Profile Enhancer',
-            'Real-time AI Match Score on every job',
-            'Highlighted Gold Candidate badge on applications',
-            'Direct in-app messaging with recruiters',
-            'Priority applicant ranking in recruiter lists'
-          ]
-        },
-        {
-          id: 'recruiter_pro',
-          name: 'Recruiter Pro',
-          price: 1999,
-          billing: 'per month',
-          role_target: 'employer',
-          popular: true,
-          features: [
-            'Post unlimited active job listings',
-            '3 Featured / Boosted job listings included',
-            'Interactive Kanban applicant pipeline',
-            'Built-in WebRTC Video Interview Scheduler',
-            'Direct chat with candidates'
-          ]
-        },
-        {
-          id: 'enterprise',
-          name: 'Enterprise Unlimited',
-          price: 4999,
-          billing: 'per month',
-          role_target: 'employer',
-          popular: false,
-          features: [
-            'All Recruiter Pro features included',
-            'Verified Employer Blue Badge',
-            'Unlimited Boosted job listings',
-            'Top search visibility across categories',
-            'Dedicated hiring manager support'
-          ]
-        }
-      ])
+      setErrorMsg('Unable to load plan details. Please try again when the API is available.')
     } finally {
       setLoading(false)
     }
@@ -150,38 +88,14 @@ const Pricing = () => {
         <div className="text-center max-w-3xl mx-auto">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
             <Sparkles size={14} />
-            Skilloria Membership & Monetization
+            Skilloriya plan preview
           </span>
           <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
-            Supercharge your career & hiring with <span className="bg-gradient-to-r from-blue-600 via-cyan-500 to-teal-500 bg-clip-text text-transparent">Skilloria Pro</span>
+            Compare candidate and recruiter plans
           </h1>
           <p className="mt-4 text-base text-slate-600 sm:text-lg">
-            Choose the plan that fits your growth. Unlock AI parsing, real-time match recommendations, video interviews, and priority hiring.
+            These prices are a product preview. Paid checkout and tier-based feature limits are not enabled yet.
           </p>
-
-          {/* Billing Switcher */}
-          <div className="mt-8 inline-flex items-center gap-3 rounded-full border border-slate-200 bg-white p-1.5 shadow-sm">
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              className={`rounded-full px-5 py-2 text-xs font-bold transition ${
-                billingCycle === 'monthly'
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Monthly Billing
-            </button>
-            <button
-              onClick={() => setBillingCycle('annual')}
-              className={`rounded-full px-5 py-2 text-xs font-bold transition ${
-                billingCycle === 'annual'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
-              }`}
-            >
-              Annual Billing <span className="ml-1 text-[10px] text-cyan-200 uppercase font-black tracking-wider">Save 20%</span>
-            </button>
-          </div>
         </div>
 
         {/* Alerts */}
@@ -200,10 +114,7 @@ const Pricing = () => {
         <div className="mt-14 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4 items-stretch">
           {plans.map((plan) => {
             const isCurrent = currentPlan === plan.id
-            const price =
-              billingCycle === 'annual' && plan.price > 0
-                ? Math.round(plan.price * 0.8)
-                : plan.price
+            const price = plan.price
 
             return (
               <div
@@ -240,7 +151,7 @@ const Pricing = () => {
                       ₹{price.toLocaleString()}
                     </span>
                     <span className={`text-xs ${plan.popular ? 'text-blue-100' : 'text-slate-500'}`}>
-                      {plan.price === 0 ? 'forever' : `/${billingCycle === 'annual' ? 'mo (billed yearly)' : 'month'}`}
+                      {plan.price === 0 ? 'forever' : '/month · preview'}
                     </span>
                   </div>
 
@@ -271,6 +182,10 @@ const Pricing = () => {
                     >
                       Current Plan
                     </button>
+                  ) : plan.price > 0 ? (
+                    <button disabled className="w-full cursor-not-allowed rounded-2xl border border-slate-200 bg-slate-100 py-3.5 text-center text-sm font-bold text-slate-500">
+                      Checkout not configured
+                    </button>
                   ) : (
                     <button
                       onClick={() => handleActivate(plan.id)}
@@ -297,29 +212,29 @@ const Pricing = () => {
           })}
         </div>
 
-        {/* Trust & FAQ Section */}
+        {/* Plan status */}
         <div className="mt-20 rounded-[2.5rem] border border-blue-100 bg-white/90 p-8 sm:p-12 shadow-sm">
           <div className="grid gap-8 md:grid-cols-3 text-center">
             <div className="p-4">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-600">
                 <Shield size={24} />
               </div>
-              <h4 className="mt-4 font-bold text-slate-900">Secure & Instant</h4>
-              <p className="mt-1 text-sm text-slate-500">Upgrade anytime. Instant feature activation on your profile.</p>
+              <h4 className="mt-4 font-bold text-slate-900">Free plan works</h4>
+              <p className="mt-1 text-sm text-slate-500">Use the current candidate and recruiter tools without a payment setup.</p>
             </div>
             <div className="p-4">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-600">
                 <Zap size={24} />
               </div>
-              <h4 className="mt-4 font-bold text-slate-900">AI Powered Efficiency</h4>
-              <p className="mt-1 text-sm text-slate-500">Save 80% time parsing resumes & matching suitable roles.</p>
+              <h4 className="mt-4 font-bold text-slate-900">Transparent match scores</h4>
+              <p className="mt-1 text-sm text-slate-500">Review the skills, experience, and location factors behind job matches.</p>
             </div>
             <div className="p-4">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
                 <Sparkles size={24} />
               </div>
-              <h4 className="mt-4 font-bold text-slate-900">100% Satisfaction</h4>
-              <p className="mt-1 text-sm text-slate-500">Cancel or switch your tier anytime with single-click ease.</p>
+              <h4 className="mt-4 font-bold text-slate-900">Checkout status</h4>
+              <p className="mt-1 text-sm text-slate-500">Paid subscriptions stay disabled until a payment provider is connected.</p>
             </div>
           </div>
         </div>

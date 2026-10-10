@@ -19,12 +19,17 @@ const Apply = () => {
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [existingApplication, setExistingApplication] = useState(null)
+  const [resumeVersions, setResumeVersions] = useState([])
+  const [selectedResumeVersion, setSelectedResumeVersion] = useState('')
   const [formData, setFormData] = useState({
     full_name: '',
     college_name: '',
     phone_number: '',
     skills: '',
     cover_letter: '',
+    proof_skills: '',
+    proof_url: '',
+    proof_explanation: '',
     resume: null,
   })
 
@@ -48,10 +53,11 @@ const Apply = () => {
       }
 
       try {
-        const [jobRes, profileRes, applications] = await Promise.all([
+        const [jobRes, profileRes, applications, resumeRes] = await Promise.all([
           axios.get(`/api/jobs/${id}/`),
           axios.get('/api/users/profile/', { headers: { Authorization: `Bearer ${token}` } }),
           fetchMyApplications(),
+          axios.get('/api/users/resume-versions/', { headers: { Authorization: `Bearer ${token}` } }),
         ])
         const profile = profileRes.data || {}
         if (profile.is_staff || profile.is_superuser) {
@@ -68,6 +74,7 @@ const Apply = () => {
         }
         const appliedRecord = applications.find((application) => Number(application.job) === Number(id)) || null
         setJob(jobRes.data)
+        setResumeVersions(Array.isArray(resumeRes.data) ? resumeRes.data : resumeRes.data?.results || [])
         setExistingApplication(appliedRecord)
         setFormData((prev) => ({
           ...prev,
@@ -113,18 +120,26 @@ const Apply = () => {
       payload.append('phone_number', formData.phone_number)
       payload.append('skills', formData.skills)
       payload.append('cover_letter', formData.cover_letter)
+      if (formData.proof_skills.trim() || formData.proof_url.trim() || formData.proof_explanation.trim()) {
+        payload.append('proof_skills', formData.proof_skills)
+        payload.append('proof_url', formData.proof_url)
+        payload.append('proof_explanation', formData.proof_explanation)
+      }
       if (formData.resume) {
         payload.append('resume', formData.resume)
       }
+      if (selectedResumeVersion && !formData.resume) {
+        payload.append('resume_version_id', selectedResumeVersion)
+      }
 
-      await axios.post(`/api/applications/apply/${id}/`, payload, {
+      const response = await axios.post(`/api/applications/apply/${id}/`, payload, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
 
-      setMessage('Application submitted successfully.')
-      setTimeout(() => navigate('/dashboard'), 1000)
+      setMessage(response.data?.message || 'Application submitted successfully.')
+      setTimeout(() => navigate('/dashboard'), 2000)
     } catch (err) {
       const data = err.response?.data
       console.error('Apply failed:', data || err.message)
@@ -253,6 +268,19 @@ const Apply = () => {
                     ))}
                   </div>
                 ) : null}
+                {job?.practical_challenge ? (
+                  <div className="space-y-3 rounded-2xl border border-cyan-200 bg-cyan-50 p-4">
+                    <div>
+                      <p className="text-sm font-bold text-cyan-950">Optional Proof-of-Skill challenge</p>
+                      <p className="mt-1 whitespace-pre-line text-sm text-cyan-900">{job.practical_challenge}</p>
+                      {job.required_skills?.length ? <p className="mt-2 text-xs font-semibold text-cyan-800">Skills: {job.required_skills.join(', ')}</p> : null}
+                    </div>
+                    <input name="proof_skills" value={formData.proof_skills} onChange={handleChange} placeholder="Skills shown in your sample (e.g. React, API design)" className="w-full rounded-xl border border-cyan-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-cyan-500" />
+                    <input name="proof_url" type="url" value={formData.proof_url} onChange={handleChange} placeholder="Link to GitHub, portfolio, or demo (optional)" className="w-full rounded-xl border border-cyan-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-cyan-500" />
+                    <textarea name="proof_explanation" value={formData.proof_explanation} onChange={handleChange} rows={3} maxLength={5000} placeholder="Explain what you built and what your contribution was" className="w-full rounded-xl border border-cyan-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-cyan-500" />
+                    <p className="text-xs text-cyan-800">An employer can review this work sample and mark it verified or request improvement.</p>
+                  </div>
+                ) : null}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-xs font-semibold text-slate-700">
@@ -269,10 +297,27 @@ const Apply = () => {
                   />
                 </div>
 
+                {resumeVersions.length ? (
+                  <label className="block text-xs font-semibold text-slate-700">
+                    Choose a saved resume version
+                    <select
+                      value={selectedResumeVersion}
+                      onChange={(event) => {
+                        setSelectedResumeVersion(event.target.value)
+                        setFormData((current) => ({ ...current, resume: null }))
+                      }}
+                      className="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm"
+                    >
+                      <option value="">Use profile resume or upload below</option>
+                      {resumeVersions.map((resume) => <option key={resume.id} value={resume.id}>{resume.name}</option>)}
+                    </select>
+                  </label>
+                ) : null}
+
                 <label className="block rounded-[1.5rem] border border-dashed border-blue-200 bg-blue-50/60 px-5 py-6 text-center cursor-pointer hover:bg-blue-50 transition">
                   <UploadCloud className="mx-auto text-blue-700" size={26} />
                   <p className="mt-3 text-sm font-semibold text-slate-900">
-                    {formData.resume ? formData.resume.name : 'Upload resume (PDF, DOC, DOCX)'}
+                    {formData.resume ? formData.resume.name : selectedResumeVersion ? 'Upload another resume instead (optional)' : 'Upload resume (PDF, DOC, DOCX)'}
                   </p>
                   <p className="mt-1 text-xs text-slate-500">Attach your latest resume to submit with this application.</p>
                   <input
@@ -323,7 +368,7 @@ const Apply = () => {
                     <div className="space-y-2 text-sm text-slate-600">
                       <p className="inline-flex items-center gap-2"><Briefcase size={14} /> {job.job_type_display || job.job_type}</p>
                       <p>{job.location}</p>
-                      <p>Salary: {job.salary}</p>
+                      <p>Annual salary: ₹{Number(job.salary || 0).toLocaleString('en-IN')}</p>
                       <p>Category: {job.category_name || 'Uncategorized'}</p>
                     </div>
                   </>

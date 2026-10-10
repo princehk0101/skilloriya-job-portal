@@ -34,6 +34,21 @@ const normalizeList = (data) => {
   return []
 }
 
+const fetchAllPages = async (url) => {
+  const items = []
+  let nextUrl = url
+  let pageCount = 0
+
+  while (nextUrl && pageCount < 20) {
+    const response = await axios.get(nextUrl)
+    items.push(...normalizeList(response.data))
+    nextUrl = response.data?.next || null
+    pageCount += 1
+  }
+
+  return items
+}
+
 const CategoryCard = () => {
   const [categories, setCategories] = useState([])
   const [jobs, setJobs] = useState([])
@@ -41,12 +56,12 @@ const CategoryCard = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [categoriesRes, jobsRes] = await Promise.all([
-          axios.get('/api/jobs/categories/'),
-          axios.get('/api/jobs/'),
+        const [allCategories, allJobs] = await Promise.all([
+          fetchAllPages('/api/jobs/categories/'),
+          fetchAllPages('/api/jobs/'),
         ])
-        setCategories(normalizeList(categoriesRes.data))
-        setJobs(normalizeList(jobsRes.data))
+        setCategories(allCategories)
+        setJobs(allJobs)
       } catch (error) {
         console.error('Failed to load categories:', error.response?.data || error.message)
         setCategories([])
@@ -123,7 +138,7 @@ const CategoryCard = () => {
                     <div>
                       <h3 className="mb-2 text-lg font-extrabold text-slate-900 transition-colors group-hover:text-blue-700">{cat.name}</h3>
                       <p className="inline-flex items-center rounded-full bg-slate-100/80 px-4 py-1.5 text-xs font-bold tracking-wide text-slate-600 transition-colors group-hover:bg-blue-50 group-hover:text-blue-700">
-                        {cat.count} Jobs
+                        {cat.count} {cat.count === 1 ? 'Job' : 'Jobs'}
                       </p>
                     </div>
                   </motion.div>

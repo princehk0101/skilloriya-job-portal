@@ -26,6 +26,11 @@ const VideoInterview = () => {
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
   const [notes, setNotes] = useState('')
+  const [notesMessage, setNotesMessage] = useState('')
+  const [savingNotes, setSavingNotes] = useState(false)
+  const [feedbackDraft, setFeedbackDraft] = useState({ rating: 5, feedback: '' })
+  const [feedbackMessage, setFeedbackMessage] = useState('')
+  const [savingFeedback, setSavingFeedback] = useState(false)
   const [isNotesOpen, setIsNotesOpen] = useState(false)
   const [userProfile, setUserProfile] = useState(() => {
     try {
@@ -52,6 +57,9 @@ const VideoInterview = () => {
         const res = await axios.get(`/api/applications/interviews/${roomId}/`, getAuthConfig())
         setInterview(res.data)
         setNotes(res.data.notes || '')
+        if (res.data.feedback) {
+          setFeedbackDraft({ rating: res.data.feedback.rating, feedback: res.data.feedback.feedback })
+        }
       } catch (err) {
         console.error('Failed to load interview room:', err)
       } finally {
@@ -69,6 +77,52 @@ const VideoInterview = () => {
     navigator.clipboard.writeText(url)
     setCopied(true)
     setTimeout(() => setCopied(false), 2500)
+  }
+
+  const saveFeedback = async (event) => {
+    event.preventDefault()
+    setSavingFeedback(true)
+    setFeedbackMessage('')
+    try {
+      const response = await axios.post(
+        `/api/applications/interviews/${interview.id}/feedback/`,
+        feedbackDraft,
+        getAuthConfig()
+      )
+      setInterview((current) => ({ ...current, feedback: response.data }))
+      setFeedbackMessage('Feedback saved as a draft. Approve it when you are ready to share it with the candidate.')
+    } catch (err) {
+      setFeedbackMessage(err.response?.data?.detail || 'Unable to save interview feedback.')
+    } finally {
+      setSavingFeedback(false)
+    }
+  }
+
+  const saveInterviewNotes = async () => {
+    setSavingNotes(true)
+    setNotesMessage('')
+    try {
+      await axios.patch(`/api/applications/interviews/${roomId}/notes/`, { notes }, getAuthConfig())
+      setNotesMessage('Private interviewer notes saved.')
+    } catch (err) {
+      setNotesMessage(err.response?.data?.error || 'Unable to save notes.')
+    } finally {
+      setSavingNotes(false)
+    }
+  }
+
+  const approveFeedback = async () => {
+    try {
+      const response = await axios.patch(
+        `/api/applications/interviews/${interview.id}/feedback/`,
+        { approve: true },
+        getAuthConfig()
+      )
+      setInterview((current) => ({ ...current, feedback: response.data }))
+      setFeedbackMessage('Feedback approved and shared with the candidate.')
+    } catch (err) {
+      setFeedbackMessage(err.response?.data?.detail || 'Unable to approve feedback.')
+    }
   }
 
   const jitsiUrl = `https://meet.jit.si/${roomId}#config.startWithAudioMuted=false&config.startWithVideoMuted=false&config.prejoinPageEnabled=false`
@@ -182,6 +236,38 @@ const VideoInterview = () => {
               rows={10}
               className="mt-2 w-full rounded-2xl border border-white/15 bg-slate-950 p-3 text-xs text-slate-100 outline-none focus:border-blue-500"
             />
+            {userProfile?.role === 'employer' ? (
+              <div className="mt-2">
+                <button type="button" onClick={saveInterviewNotes} disabled={savingNotes} className="w-full rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-xs font-bold text-white hover:bg-white/15 disabled:opacity-60">{savingNotes ? 'Saving...' : 'Save private notes'}</button>
+                {notesMessage ? <p role="status" className="mt-2 text-xs text-cyan-200">{notesMessage}</p> : null}
+              </div>
+            ) : null}
+
+            <div className="mt-7 border-t border-white/10 pt-5">
+              <h4 className="text-sm font-bold text-slate-200">Interview Feedback</h4>
+              {userProfile?.role === 'employer' ? (
+                <form onSubmit={saveFeedback} className="mt-3 space-y-3">
+                  <label className="block text-xs text-slate-400">
+                    Candidate rating
+                    <select value={feedbackDraft.rating} onChange={(e) => setFeedbackDraft((current) => ({ ...current, rating: Number(e.target.value) }))} className="mt-1 w-full rounded-xl border border-white/15 bg-slate-950 px-3 py-2 text-sm text-white">
+                      {[5, 4, 3, 2, 1].map((rating) => <option key={rating} value={rating}>{rating} / 5</option>)}
+                    </select>
+                  </label>
+                  <textarea value={feedbackDraft.feedback} onChange={(e) => setFeedbackDraft((current) => ({ ...current, feedback: e.target.value }))} required minLength={10} maxLength={4000} rows={5} placeholder="Share concise, constructive interview feedback..." className="w-full rounded-xl border border-white/15 bg-slate-950 p-3 text-xs text-white placeholder:text-slate-500" />
+                  <button disabled={savingFeedback} className="w-full rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-60">{savingFeedback ? 'Saving...' : 'Save feedback draft'}</button>
+                  {interview?.feedback && !interview.feedback.is_approved ? <button type="button" onClick={approveFeedback} className="w-full rounded-xl border border-emerald-400/50 bg-emerald-500/10 px-3 py-2 text-xs font-bold text-emerald-300">Approve and share with candidate</button> : null}
+                  {interview?.feedback?.is_approved ? <p className="text-xs font-semibold text-emerald-300">Approved and visible to candidate</p> : null}
+                </form>
+              ) : interview?.feedback?.is_approved ? (
+                <div className="mt-3 rounded-xl border border-emerald-400/20 bg-emerald-500/10 p-3">
+                  <p className="text-xs font-bold text-emerald-300">Rating: {interview.feedback.rating}/5</p>
+                  <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-slate-200">{interview.feedback.feedback}</p>
+                </div>
+              ) : (
+                <p className="mt-2 text-xs text-slate-500">The interviewer has not shared feedback yet.</p>
+              )}
+              {feedbackMessage ? <p role="status" className="mt-2 text-xs text-cyan-200">{feedbackMessage}</p> : null}
+            </div>
           </aside>
         ) : null}
       </div>

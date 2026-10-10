@@ -33,10 +33,18 @@ export const getApplicationStatusClass = (status) => {
   switch (status) {
     case 'applied':
       return 'bg-sky-100 text-sky-700'
+    case 'screening':
+      return 'bg-amber-100 text-amber-700'
+    case 'interview':
+      return 'bg-violet-100 text-violet-700'
+    case 'offer':
+      return 'bg-emerald-100 text-emerald-700'
     case 'accepted':
       return 'bg-emerald-100 text-emerald-700'
     case 'rejected':
       return 'bg-rose-100 text-rose-700'
+    case 'waitlist':
+      return 'bg-orange-100 text-orange-700'
     case 'shortlisted':
       return 'bg-indigo-100 text-indigo-700'
     default:
@@ -48,6 +56,14 @@ export const getApplicationStatusLabel = (status) => {
   switch (status) {
     case 'applied':
       return 'Applied'
+    case 'waitlist':
+      return 'Waitlisted'
+    case 'screening':
+      return 'Screening'
+    case 'interview':
+      return 'Interview'
+    case 'offer':
+      return 'Offer'
     case 'accepted':
       return 'Accepted'
     case 'rejected':

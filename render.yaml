@@ -8,7 +8,7 @@ services:
       pip install -r requirements.txt
       python manage.py collectstatic --noinput
       python manage.py migrate
-    startCommand: gunicorn core.wsgi:application
+    startCommand: python manage.py seed_demo_jobs && python manage.py seed_demo_applications && gunicorn core.wsgi:application
     disk:
       name: media
       mountPath: /opt/render/project/src/backend/media
@@ -45,6 +45,8 @@ services:
       - key: EMAIL_HOST_PASSWORD
         sync: false
       - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: FRONTEND_URL
         sync: false
 
 databases:

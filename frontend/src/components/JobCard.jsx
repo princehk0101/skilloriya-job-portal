@@ -28,15 +28,47 @@ const normalizeList = (data) => {
   return []
 }
 
-const JobCard = () => {
+const fetchAllPages = async (url) => {
+  const items = []
+  let nextUrl = url
+  let pageCount = 0
+  while (nextUrl && pageCount < 20) {
+    const response = await axios.get(nextUrl)
+    items.push(...normalizeList(response.data))
+    nextUrl = response.data?.next || null
+    pageCount += 1
+  }
+  return items
+}
+
+const JobCard = ({ fullPage = false }) => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [jobs, setJobs] = useState([])
   const [categories, setCategories] = useState([])
   const [appliedJobsMap, setAppliedJobsMap] = useState({})
   const [savedJobIds, setSavedJobIds] = useState(new Set())
   const [loading, setLoading] = useState(true)
+  const [filters, setFilters] = useState({
+    q: searchParams.get('q') || '',
+    location: searchParams.get('location') || '',
+    job_type: searchParams.get('job_type') || '',
+    min_salary: searchParams.get('min_salary') || '',
+    max_salary: searchParams.get('max_salary') || '',
+    sort: searchParams.get('sort') || '',
+  })
 
   const selectedCategory = searchParams.get('category') || 'all'
+
+  useEffect(() => {
+    setFilters({
+      q: searchParams.get('q') || '',
+      location: searchParams.get('location') || '',
+      job_type: searchParams.get('job_type') || '',
+      min_salary: searchParams.get('min_salary') || '',
+      max_salary: searchParams.get('max_salary') || '',
+      sort: searchParams.get('sort') || '',
+    })
+  }, [searchParams])
 
   const getAuthConfig = () => {
     const token = localStorage.getItem('access_token')
@@ -47,8 +79,8 @@ const JobCard = () => {
     try {
       const auth = getAuthConfig()
       const requests = [
-        axios.get('/api/jobs/', auth || {}),
-        axios.get('/api/jobs/categories/'),
+        fetchAllPages('/api/jobs/'),
+        fetchAllPages('/api/jobs/categories/'),
         fetchMyApplications(),
       ]
 
@@ -57,14 +89,14 @@ const JobCard = () => {
       }
 
       const results = await Promise.allSettled(requests)
-      const jobsData = results[0].status === 'fulfilled' ? results[0].value.data : []
-      const catData = results[1].status === 'fulfilled' ? results[1].value.data : []
+      const jobsData = results[0].status === 'fulfilled' ? results[0].value : []
+      const catData = results[1].status === 'fulfilled' ? results[1].value : []
       const appData = results[2].status === 'fulfilled' ? results[2].value : []
       const savedData = results[3]?.status === 'fulfilled' ? results[3].value.data : []
 
-      const fetchedJobs = normalizeList(jobsData)
+      const fetchedJobs = jobsData
       setJobs(fetchedJobs)
-      setCategories(normalizeList(catData))
+      setCategories(catData)
       setAppliedJobsMap(createAppliedJobsMap(appData))
 
       const savedIds = new Set()
@@ -143,12 +175,49 @@ const JobCard = () => {
   }, [categories, jobs])
 
   const filteredJobs = useMemo(() => {
-    if (selectedCategory === 'all') return jobs
-    if (selectedCategory === 'uncategorized') {
-      return jobs.filter((job) => !job.category)
-    }
-    return jobs.filter((job) => String(job.category) === selectedCategory)
-  }, [jobs, selectedCategory])
+    const query = (searchParams.get('q') || '').trim().toLowerCase()
+    const location = (searchParams.get('location') || '').trim().toLowerCase()
+    const jobType = searchParams.get('job_type') || ''
+    const minSalary = Number(searchParams.get('min_salary') || 0)
+    const maxSalary = Number(searchParams.get('max_salary') || 0)
+    const sort = searchParams.get('sort') || ''
+    let results = jobs.filter((job) => {
+      const categoryMatch = selectedCategory === 'all'
+        || (selectedCategory === 'uncategorized' ? !job.category : String(job.category) === selectedCategory)
+      const searchable = `${job.title || ''} ${job.description || ''} ${job.employer_name || ''} ${job.category_name || ''}`.toLowerCase()
+      const salary = Number(job.salary || 0)
+      return categoryMatch
+        && (!query || searchable.includes(query))
+        && (!location || String(job.location || '').toLowerCase().includes(location))
+        && (!jobType || job.job_type === jobType)
+        && (!minSalary || salary >= minSalary)
+        && (!maxSalary || salary <= maxSalary)
+    })
+
+    if (sort === 'salary_high') results = [...results].sort((a, b) => Number(b.salary || 0) - Number(a.salary || 0))
+    if (sort === 'salary_low') results = [...results].sort((a, b) => Number(a.salary || 0) - Number(b.salary || 0))
+    if (sort === 'newest') results = [...results].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
+    return results
+  }, [jobs, selectedCategory, searchParams])
+
+  const visibleJobs = fullPage ? filteredJobs : filteredJobs.slice(0, 9)
+
+  const applyFilters = (event) => {
+    event.preventDefault()
+    const nextParams = new URLSearchParams(searchParams)
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) nextParams.set(key, value)
+      else nextParams.delete(key)
+    })
+    setSearchParams(nextParams)
+  }
+
+  const clearFilters = () => {
+    setFilters({ q: '', location: '', job_type: '', min_salary: '', max_salary: '', sort: '' })
+    const nextParams = new URLSearchParams(searchParams)
+    ;['q', 'location', 'job_type', 'min_salary', 'max_salary', 'sort', 'category'].forEach((key) => nextParams.delete(key))
+    setSearchParams(nextParams)
+  }
 
   const handleCategoryFilter = (categoryId) => {
     const nextParams = new URLSearchParams(searchParams)
@@ -170,9 +239,9 @@ const JobCard = () => {
               Curated Openings
             </span>
             <h2 className="display-font mt-2 text-3xl font-extrabold text-slate-900 sm:text-5xl">
-              Latest <span className="text-blue-700">Job Openings</span>
+              {fullPage ? <>Find your next <span className="text-blue-700">opportunity</span></> : <>Latest <span className="text-blue-700">Job Openings</span></>}
             </h2>
-            <p className="mt-1 text-sm text-slate-600">Discover verified roles with transparent pay & instant apply.</p>
+            <p className="mt-1 text-sm text-slate-600">Search all {jobs.length} active roles by title, location, work style, and annual pay.</p>
           </div>
           <Link
             to="/categories"
@@ -181,6 +250,27 @@ const JobCard = () => {
             Explore Categories <ArrowRight size={16} />
           </Link>
         </div>
+
+        <form onSubmit={applyFilters} className="mb-7 grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-2 xl:grid-cols-7">
+          <input aria-label="Job title, company, or skill" value={filters.q} onChange={(e) => setFilters({ ...filters, q: e.target.value })} placeholder="Job title, company, or skill" className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500 xl:col-span-2" />
+          <input aria-label="Location" value={filters.location} onChange={(e) => setFilters({ ...filters, location: e.target.value })} placeholder="City or remote" className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500" />
+          <select aria-label="Work style" value={filters.job_type} onChange={(e) => setFilters({ ...filters, job_type: e.target.value })} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500">
+            <option value="">Any work style</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">On-site</option>
+          </select>
+          <select aria-label="Minimum annual salary" value={filters.min_salary} onChange={(e) => setFilters({ ...filters, min_salary: e.target.value })} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500">
+            <option value="">Any minimum pay</option><option value="300000">₹3 lakh+</option><option value="500000">₹5 lakh+</option><option value="750000">₹7.5 lakh+</option><option value="1000000">₹10 lakh+</option>
+          </select>
+          <select aria-label="Maximum annual salary" value={filters.max_salary} onChange={(e) => setFilters({ ...filters, max_salary: e.target.value })} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500">
+            <option value="">Any maximum pay</option><option value="500000">Up to ₹5 lakh</option><option value="750000">Up to ₹7.5 lakh</option><option value="1000000">Up to ₹10 lakh</option><option value="1500000">Up to ₹15 lakh</option>
+          </select>
+          <select aria-label="Sort jobs" value={filters.sort} onChange={(e) => setFilters({ ...filters, sort: e.target.value })} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500">
+            <option value="">Relevance</option><option value="newest">Newest</option><option value="salary_high">Highest pay</option><option value="salary_low">Lowest pay</option>
+          </select>
+          <div className="flex gap-2 md:col-span-2 xl:col-span-6">
+            <button type="submit" className="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-800">Search jobs</button>
+            <button type="button" onClick={clearFilters} className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Clear filters</button>
+          </div>
+        </form>
 
         <div className="mb-8 flex flex-wrap gap-2.5">
           {filterOptions.map((option) => (
@@ -204,11 +294,11 @@ const JobCard = () => {
           </div>
         ) : filteredJobs.length === 0 ? (
           <div className="rounded-[2rem] border border-blue-100 bg-white p-12 text-center text-slate-500 shadow-sm">
-            There are currently no jobs available in this category.
+            No jobs match these filters. Try a different title, location, or salary range.
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredJobs.map((job, idx) => {
+            {visibleJobs.map((job, idx) => {
               const isSaved = savedJobIds.has(job.id)
 
               return (
@@ -293,7 +383,7 @@ const JobCard = () => {
                       </div>
                       <div className="flex items-center gap-1 font-semibold text-slate-800">
                         <IndianRupee size={13} className="text-emerald-600" />
-                        <span>{job.salary ? `${Number(job.salary).toLocaleString()}/mo` : 'Negotiable'}</span>
+                        <span>{job.salary ? `₹${Number(job.salary).toLocaleString('en-IN')} / year` : 'Pay not listed'}</span>
                       </div>
                     </div>
                   </div>
@@ -316,6 +406,13 @@ const JobCard = () => {
             })}
           </div>
         )}
+        {!fullPage && filteredJobs.length > visibleJobs.length ? (
+          <div className="mt-9 text-center">
+            <Link to={`/jobs${searchParams.toString() ? `?${searchParams.toString()}` : ''}`} className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-6 py-3 text-sm font-bold text-white transition hover:bg-blue-700">
+              View all {filteredJobs.length} matching jobs <ArrowRight size={16} />
+            </Link>
+          </div>
+        ) : null}
       </div>
     </section>
   )

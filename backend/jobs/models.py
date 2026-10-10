@@ -35,6 +35,8 @@ class Job(models.Model):
 
     title = models.CharField(max_length=255)
     description = models.TextField()
+    required_skills = models.JSONField(default=list, blank=True)
+    practical_challenge = models.TextField(blank=True)
     location = models.CharField(max_length=255)
 
     # Prevent negative salary
@@ -91,6 +93,7 @@ class JobAlert(models.Model):
     )
     name = models.CharField(max_length=120)
     keyword = models.CharField(max_length=255, blank=True)
+    skills = models.TextField(blank=True, help_text='Comma-separated skills; an alert matches any listed skill')
     location = models.CharField(max_length=255, blank=True)
     job_type = models.CharField(max_length=20, choices=Job.JOB_TYPE_CHOICES, blank=True)
     min_salary = models.PositiveIntegerField(null=True, blank=True)

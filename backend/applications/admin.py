@@ -1,21 +1,38 @@
 from django.contrib import admin
+from django.db import transaction
 
-from .models import Application
+from .models import Application, ApplicationStatusEvent
+
+
+def bulk_change_status(request, queryset, target_status):
+    with transaction.atomic():
+        for application in queryset.select_related('job', 'applicant').iterator():
+            previous_status = application.status
+            if previous_status == target_status:
+                continue
+            application.status = target_status
+            application.save(update_fields=['status'])
+            ApplicationStatusEvent.objects.create(
+                application=application,
+                from_status=previous_status,
+                to_status=target_status,
+                changed_by=request.user,
+            )
 
 
 @admin.action(description="Mark selected applications as shortlisted")
 def mark_shortlisted(modeladmin, request, queryset):
-    queryset.update(status=Application.Status.SHORTLISTED)
+    bulk_change_status(request, queryset, Application.Status.SHORTLISTED)
 
 
 @admin.action(description="Mark selected applications as accepted")
 def mark_accepted(modeladmin, request, queryset):
-    queryset.update(status=Application.Status.ACCEPTED)
+    bulk_change_status(request, queryset, Application.Status.ACCEPTED)
 
 
 @admin.action(description="Mark selected applications as rejected")
 def mark_rejected(modeladmin, request, queryset):
-    queryset.update(status=Application.Status.REJECTED)
+    bulk_change_status(request, queryset, Application.Status.REJECTED)
 
 
 @admin.register(Application)

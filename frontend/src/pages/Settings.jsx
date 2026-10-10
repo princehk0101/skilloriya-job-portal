@@ -1,51 +1,96 @@
-import React, { useState } from 'react'
-import { Shield, Bell, Moon, Globe, Save } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
+import { Bell, Loader2, Save, Shield } from 'lucide-react'
 
 const Settings = () => {
-  const [settings, setSettings] = useState({
-    email_notifications: true,
-    job_alerts: true,
-    profile_visibility: true,
-    dark_mode: false,
+  const [jobEmailAlerts, setJobEmailAlerts] = useState(true)
+  const [savedValue, setSavedValue] = useState(true)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState('')
+
+  const getAuthConfig = () => ({
+    headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
   })
 
-  const handleToggle = (key) => {
-    setSettings((prev) => ({ ...prev, [key]: !prev[key] }))
+  useEffect(() => {
+    const loadPreferences = async () => {
+      try {
+        const response = await axios.get('/api/users/profile/', getAuthConfig())
+        const enabled = response.data?.job_email_alerts !== false
+        setJobEmailAlerts(enabled)
+        setSavedValue(enabled)
+      } catch (error) {
+        setMessage('Sign in to load and manage your email alert preferences.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadPreferences()
+  }, [])
+
+  const handleSave = async () => {
+    setSaving(true)
+    setMessage('')
+    try {
+      await axios.patch('/api/users/profile/', { job_email_alerts: jobEmailAlerts }, getAuthConfig())
+      setSavedValue(jobEmailAlerts)
+      setMessage(jobEmailAlerts
+        ? 'Personalized vacancy emails are turned on.'
+        : 'Personalized vacancy emails are turned off.')
+    } catch (error) {
+      setMessage('Could not save this preference. Please sign in and try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-24 pb-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] px-4 pb-12 pt-24 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-4xl space-y-6">
         <div className="rounded-[2rem] border border-blue-100 bg-[linear-gradient(135deg,_#0f172a,_#1d4ed8,_#06b6d4)] p-8 text-white shadow-[0_24px_60px_rgba(37,99,235,0.16)]">
-          <h1 className="text-3xl font-extrabold">Settings</h1>
-          <p className="mt-2 text-blue-100">Control your account preferences and privacy.</p>
+          <h1 className="text-3xl font-extrabold">Email preferences</h1>
+          <p className="mt-2 text-blue-100">Choose whether Skilloriya should email you about new roles that fit your interests.</p>
         </div>
 
-        <div className="rounded-3xl border border-blue-100 bg-white/90 p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur">
-          <h2 className="text-xl font-bold text-slate-900 mb-4">Preferences</h2>
-          <div className="space-y-4">
-            <button onClick={() => handleToggle('email_notifications')} className="w-full flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3 text-left shadow-sm transition hover:border-blue-300 hover:bg-blue-50/50">
-              <span className="inline-flex items-center gap-2 text-slate-700"><Bell size={16} className="text-blue-600" /> Email Notifications</span>
-              <span className={`text-sm font-semibold ${settings.email_notifications ? 'text-cyan-600' : 'text-slate-400'}`}>{settings.email_notifications ? 'ON' : 'OFF'}</span>
-            </button>
-            <button onClick={() => handleToggle('job_alerts')} className="w-full flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3 text-left shadow-sm transition hover:border-blue-300 hover:bg-blue-50/50">
-              <span className="inline-flex items-center gap-2 text-slate-700"><Globe size={16} className="text-blue-600" /> Job Alerts</span>
-              <span className={`text-sm font-semibold ${settings.job_alerts ? 'text-cyan-600' : 'text-slate-400'}`}>{settings.job_alerts ? 'ON' : 'OFF'}</span>
-            </button>
-            <button onClick={() => handleToggle('profile_visibility')} className="w-full flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3 text-left shadow-sm transition hover:border-blue-300 hover:bg-blue-50/50">
-              <span className="inline-flex items-center gap-2 text-slate-700"><Shield size={16} className="text-blue-600" /> Profile Visibility</span>
-              <span className={`text-sm font-semibold ${settings.profile_visibility ? 'text-cyan-600' : 'text-slate-400'}`}>{settings.profile_visibility ? 'ON' : 'OFF'}</span>
-            </button>
-            <button onClick={() => handleToggle('dark_mode')} className="w-full flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3 text-left shadow-sm transition hover:border-blue-300 hover:bg-blue-50/50">
-              <span className="inline-flex items-center gap-2 text-slate-700"><Moon size={16} className="text-blue-600" /> Dark Mode</span>
-              <span className={`text-sm font-semibold ${settings.dark_mode ? 'text-cyan-600' : 'text-slate-400'}`}>{settings.dark_mode ? 'ON' : 'OFF'}</span>
-            </button>
-          </div>
+        <div className="rounded-3xl border border-blue-100 bg-white/90 p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">
+          <h2 className="mb-4 text-xl font-bold text-slate-900">Personalized job alerts</h2>
+          {loading ? (
+            <Loader2 className="h-6 w-6 animate-spin text-blue-700" />
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setJobEmailAlerts((current) => !current)}
+                className="flex w-full items-center justify-between gap-4 rounded-2xl border border-blue-100 bg-white px-4 py-4 text-left shadow-sm transition hover:border-blue-300 hover:bg-blue-50/50"
+                aria-pressed={jobEmailAlerts}
+              >
+                <span>
+                  <span className="flex items-center gap-2 font-semibold text-slate-800"><Bell size={17} className="text-blue-600" /> Email me matching vacancies</span>
+                  <span className="mt-1 block pl-6 text-xs leading-5 text-slate-500">We use skills from your profile and roles you have applied for. We email you when an employer posts a relevant opening.</span>
+                </span>
+                <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${jobEmailAlerts ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                  {jobEmailAlerts ? 'ON' : 'OFF'}
+                </span>
+              </button>
 
-          <button className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-white font-semibold hover:bg-blue-800">
-            <Save size={16} />
-            Save Preferences
-          </button>
+              <p className="mt-4 flex items-start gap-2 text-xs leading-5 text-slate-500">
+                <Shield size={14} className="mt-0.5 shrink-0 text-blue-600" />
+                This preference is saved to your account and stays the same when you sign in with an OTP.
+              </p>
+
+              {message ? <p role="status" className="mt-4 text-sm text-slate-600">{message}</p> : null}
+              <button
+                type="button"
+                onClick={handleSave}
+                disabled={saving || jobEmailAlerts === savedValue}
+                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                {saving ? 'Saving…' : 'Save preference'}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>

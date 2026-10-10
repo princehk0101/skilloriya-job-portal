@@ -11,6 +11,19 @@ const normalizeList = (data) => {
   return []
 }
 
+const fetchAllPages = async (url) => {
+  const items = []
+  let nextUrl = url
+  let pageCount = 0
+  while (nextUrl && pageCount < 20) {
+    const response = await axios.get(nextUrl)
+    items.push(...normalizeList(response.data))
+    nextUrl = response.data?.next || null
+    pageCount += 1
+  }
+  return items
+}
+
 const Companies = () => {
   const [companies, setCompanies] = useState([])
   const [jobCountByEmployer, setJobCountByEmployer] = useState({})
@@ -20,13 +33,11 @@ const Companies = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [companiesRes, jobsRes] = await Promise.all([
-          axios.get('/api/companies/'),
-          axios.get('/api/jobs/'),
+        const [companyList, jobs] = await Promise.all([
+          fetchAllPages('/api/companies/'),
+          fetchAllPages('/api/jobs/'),
         ])
 
-        const companyList = normalizeList(companiesRes.data)
-        const jobs = normalizeList(jobsRes.data)
         const counts = jobs.reduce((acc, job) => {
           const key = job.employer_email || ''
           acc[key] = (acc[key] || 0) + 1
@@ -123,9 +134,8 @@ const Companies = () => {
                         className="h-full w-full rounded-xl object-cover"
                       />
                     </div>
-                    <div className="mt-4 flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-700">
-                      <Star size={14} fill="currentColor" />
-                      <span>4.5</span>
+                    <div className={`mt-4 flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold ${company.reviews_count ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-500'}`}>
+                      {company.reviews_count ? <><Star size={13} fill="currentColor" /><span>{Number(company.average_rating).toFixed(1)} ({company.reviews_count})</span></> : <span>No reviews yet</span>}
                     </div>
                   </div>
 

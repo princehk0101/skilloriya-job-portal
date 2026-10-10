@@ -2,9 +2,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
+from rest_framework.generics import ListCreateAPIView, DestroyAPIView
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import authenticate
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -17,8 +21,9 @@ from .serializers import (
     OTPRequestSerializer,
     OTPLoginVerifySerializer,
     ProfileSerializer,
+    ResumeVersionSerializer,
 )
-from .models import User, EmailOTP
+from .models import User, EmailOTP, ResumeVersion
 from .utils import send_otp_email
 import random
 import logging
@@ -27,9 +32,30 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def issue_login_otp(user):
+    otp_code = str(random.randint(100000, 999999))
+    otp_record = EmailOTP.objects.create(user=user, otp=otp_code, purpose='login')
+    if not send_otp_email(user.email, otp_code):
+        otp_record.delete()
+        return False
+    return True
+
+
+def issue_verification_otp(user):
+    EmailOTP.objects.filter(user=user, purpose='verification').delete()
+    otp_code = str(random.randint(100000, 999999))
+    otp_record = EmailOTP.objects.create(user=user, otp=otp_code, purpose='verification')
+    if not send_otp_email(user.email, otp_code):
+        otp_record.delete()
+        return False
+    return True
+
+
 # REGISTER 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'auth_register'
 
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
@@ -37,18 +63,22 @@ class RegisterView(APIView):
         user = serializer.save()
 
         otp_code = str(random.randint(100000, 999999))
-        otp_record = EmailOTP.objects.create(user=user, otp=otp_code)
+        otp_record = EmailOTP.objects.create(user=user, otp=otp_code, purpose='verification')
 
         try:
-            send_otp_email(user.email, otp_code)
+            if not send_otp_email(user.email, otp_code):
+                otp_record.delete()
+                return Response({
+                    'message': 'Account created, but the verification email could not be sent. You can sign in with your password and verify later.',
+                    'verification_email_sent': False,
+                }, status=status.HTTP_201_CREATED)
         except Exception:
             logger.exception("Failed to send signup OTP email for %s", user.email)
             otp_record.delete()
-            user.delete()
-            return Response(
-                {"message": "We could not send the OTP email right now. Please try again later."},
-                status=status.HTTP_503_SERVICE_UNAVAILABLE,
-            )
+            return Response({
+                'message': 'Account created, but the verification email could not be sent. You can sign in with your password and verify later.',
+                'verification_email_sent': False,
+            }, status=status.HTTP_201_CREATED)
 
         return Response({
             "message": "User registered successfully. OTP sent to email."
@@ -58,6 +88,8 @@ class RegisterView(APIView):
 # VERIFY OTP 
 class VerifyOTPView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'auth_otp_verify'
 
     def post(self, request):
         email = request.data.get("email")
@@ -65,9 +97,11 @@ class VerifyOTPView(APIView):
 
         try:
             user = User.objects.get(email=email)
-            otp_obj = EmailOTP.objects.filter(user=user, otp=otp).last()
+            otp_obj = EmailOTP.objects.filter(user=user, otp=otp, purpose='verification').last()
 
-            if not otp_obj:
+            if not otp_obj or otp_obj.is_expired:
+                if otp_obj:
+                    otp_obj.delete()
                 return Response({"error": "Invalid OTP"}, status=400)
 
             user.is_verified = True
@@ -80,23 +114,59 @@ class VerifyOTPView(APIView):
             return Response({"error": "User not found"}, status=400)
 
 
+class ResendVerificationOTPView(APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'auth_otp_request'
+
+    def post(self, request):
+        email = str(request.data.get('email', '')).strip().lower()
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response({'message': 'No account needs verification for this email. Check the address or create an account.'}, status=status.HTTP_404_NOT_FOUND)
+
+        if user.is_verified or user.is_staff or user.is_superuser:
+            return Response({'message': 'This email is already verified. Please log in.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        EmailOTP.objects.filter(user=user, purpose='verification').delete()
+        if not issue_verification_otp(user):
+            return Response({'message': 'We could not send the verification email. Please try again later.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        return Response({'message': 'Verification OTP sent. Check your inbox and spam folder.', 'email': user.email})
+
+
 # LOGIN 
 class LoginView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'auth_login'
 
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
+        user = serializer.user
+        if not user.is_verified and not (user.is_staff or user.is_superuser):
+            if not issue_verification_otp(user):
+                return Response(
+                    {'message': 'This account needs email verification, but we could not send the verification email. Please try again later.'},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
+            return Response({
+                'message': 'We sent a one-time verification code. Enter it once to activate your account.',
+                'email': user.email,
+                'verification_required': True,
+            }, status=status.HTTP_200_OK)
         return Response({
             "message": "Login successful",
-            **serializer.validated_data
+            **serializer.validated_data,
         }, status=status.HTTP_200_OK)
 
 
 # FORGOT PASSWORD 
 class ForgotPasswordView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'auth_password_reset'
 
     def post(self, request):
         email = request.data.get("email")
@@ -105,9 +175,10 @@ class ForgotPasswordView(APIView):
             user = User.objects.get(email=email)
             otp = str(random.randint(100000, 999999))
 
-            EmailOTP.objects.create(user=user, otp=otp)
+            EmailOTP.objects.create(user=user, otp=otp, purpose='password_reset')
             try:
-                send_otp_email(user.email, otp)
+                if not send_otp_email(user.email, otp):
+                    raise RuntimeError('Password reset OTP email could not be sent.')
             except Exception:
                 logger.exception("Failed to send forgot-password OTP email for %s", user.email)
                 return Response(
@@ -123,27 +194,35 @@ class ForgotPasswordView(APIView):
 
 class SendLoginOTPView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'auth_otp_request'
 
     def post(self, request):
         serializer = OTPRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        otp = str(random.randint(100000, 999999))
-        EmailOTP.objects.create(user=serializer.user, otp=otp)
-        try:
-            send_otp_email(serializer.user.email, otp)
-        except Exception:
-            logger.exception("Failed to send login OTP email for %s", serializer.user.email)
+        if not serializer.user.is_verified and not (serializer.user.is_staff or serializer.user.is_superuser):
+            if not issue_verification_otp(serializer.user):
+                return Response({'message': 'We could not send the verification email. Please try again later.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+            return Response({
+                'message': 'This account needs email verification first. We sent a verification OTP.',
+                'email': serializer.user.email,
+                'verification_required': True,
+            }, status=status.HTTP_200_OK)
+
+        if not issue_login_otp(serializer.user):
             return Response(
                 {"message": "We could not send the OTP email right now. Please try again later."},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE,
             )
 
-        return Response({"message": "Login OTP sent to email"})
+        return Response({"message": "Login OTP sent to email", "email": serializer.user.email, "otp_required": True})
 
 
 class LoginWithOTPView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'auth_otp_verify'
 
     def post(self, request):
         serializer = OTPLoginVerifySerializer(data=request.data)
@@ -159,6 +238,8 @@ class LoginWithOTPView(APIView):
 #  RESET PASSWORD 
 class ResetPasswordView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'auth_password_reset'
 
     def post(self, request):
         email = request.data.get("email")
@@ -167,10 +248,20 @@ class ResetPasswordView(APIView):
 
         try:
             user = User.objects.get(email=email)
-            otp_obj = EmailOTP.objects.filter(user=user, otp=otp).last()
+            otp_obj = EmailOTP.objects.filter(user=user, otp=otp, purpose='password_reset').last()
 
-            if not otp_obj:
+            if not otp_obj or otp_obj.is_expired:
+                if otp_obj:
+                    otp_obj.delete()
                 return Response({"error": "Invalid OTP"}, status=400)
+
+            if not new_password:
+                return Response({"error": "A new password is required."}, status=400)
+
+            try:
+                validate_password(new_password, user=user)
+            except DjangoValidationError as error:
+                return Response({"error": error.messages}, status=400)
 
             user.password = make_password(new_password)
             user.save()
@@ -185,6 +276,8 @@ class ResetPasswordView(APIView):
 # = GOOGLE LOGIN 
 class GoogleLoginView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = 'auth_login'
 
     def post(self, request):
         token = request.data.get("token")
@@ -207,8 +300,8 @@ class GoogleLoginView(APIView):
             )
 
             email = idinfo.get("email")
-            if not email:
-                return Response({"error": "Email not found in Google token."}, status=status.HTTP_400_BAD_REQUEST)
+            if not email or not idinfo.get('email_verified'):
+                return Response({"error": "A Google-verified email is required."}, status=status.HTTP_400_BAD_REQUEST)
 
             first_name = idinfo.get("given_name", "")
             last_name = idinfo.get("family_name", "")
@@ -237,23 +330,18 @@ class GoogleLoginView(APIView):
                 user.last_name = last_name
 
             user.save(update_fields=["role", "is_verified", "first_name", "last_name"])
-
-            refresh = RefreshToken.for_user(user)
-
-            return Response({
-                "message": "Google login successful",
-                "user": {
-                    "id": user.id,
-                    "email": user.email,
-                    "role": user.role
-                },
-                "access": str(refresh.access_token),
-                "refresh": str(refresh)
-            })
-
         except Exception as e:
             logger.exception("Google login verification failed: %s", str(e))
-            return Response({"error": f"Invalid Google token: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Google sign-in token is invalid or expired."}, status=status.HTTP_400_BAD_REQUEST)
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "message": "Google login successful",
+            "user": {"id": user.id, "email": user.email, "role": user.role},
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "is_new_user": created,
+        }, status=status.HTTP_200_OK)
 
 
 class ProfileView(APIView):
@@ -277,6 +365,26 @@ class ProfileView(APIView):
 
     def put(self, request):
         return self.patch(request)
+
+
+class ResumeVersionListCreateView(ListCreateAPIView):
+    serializer_class = ResumeVersionSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_queryset(self):
+        return ResumeVersion.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class ResumeVersionDeleteView(DestroyAPIView):
+    serializer_class = ResumeVersionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return ResumeVersion.objects.filter(user=self.request.user)
 
 
 # --- Work endpoints (user-posted work / portfolio) ---
@@ -338,10 +446,6 @@ class WorkDeleteView(DestroyAPIView):
 
 
 from .models import UserSubscription
-from datetime import timedelta
-from django.utils import timezone
-
-
 PLANS_CATALOG = [
     {
         "id": "free",
@@ -365,11 +469,10 @@ PLANS_CATALOG = [
         "role_target": "seeker",
         "popular": True,
         "features": [
-            "AI Resume Parser & Auto Profile Enhancer",
-            "Real-time AI Match Score on every job",
-            "Highlighted Gold Candidate badge on applications",
-            "Direct in-app messaging with recruiters",
-            "Priority applicant ranking in recruiter lists"
+            "Planned: enhanced resume parsing",
+            "Planned: premium candidate profile badge",
+            "Planned: recruiter messaging tools",
+            "Planned: premium applicant insights"
         ]
     },
     {
@@ -380,11 +483,11 @@ PLANS_CATALOG = [
         "role_target": "employer",
         "popular": True,
         "features": [
-            "Post unlimited active job listings",
-            "3 Featured / Boosted job listings included",
-            "Interactive Kanban applicant pipeline",
-            "Built-in WebRTC Video Interview Scheduler",
-            "Direct chat with candidates"
+            "Planned: expanded job posting limits",
+            "Planned: featured job listings",
+            "Planned: advanced applicant pipeline",
+            "Planned: interview scheduling tools",
+            "Planned: candidate messaging tools"
         ]
     },
     {
@@ -395,11 +498,11 @@ PLANS_CATALOG = [
         "role_target": "employer",
         "popular": False,
         "features": [
-            "All Recruiter Pro features included",
-            "Verified Employer Blue Badge",
-            "Unlimited Boosted job listings",
-            "Top search visibility across categories",
-            "Dedicated hiring manager support"
+            "Planned: all Recruiter Pro features",
+            "Planned: verified employer profile",
+            "Planned: expanded featured listings",
+            "Planned: enhanced company visibility",
+            "Planned: team hiring tools"
         ]
     }
 ]
@@ -429,8 +532,13 @@ class ActivateSubscriptionView(APIView):
         if plan_id not in valid_plans:
             return Response({'error': 'Invalid plan selected.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Simulate checkout / activation
-        expires = timezone.now() + timedelta(days=30) if plan_id != 'free' else None
+        if plan_id != 'free':
+            return Response(
+                {'error': 'Paid checkout is not configured yet. No payment or upgrade was made.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        expires = None
         
         sub, created = UserSubscription.objects.update_or_create(
             user=request.user,
