@@ -20,6 +20,7 @@ import {
   FileCheck,
 } from 'lucide-react'
 import { resolveMediaUrl } from '../utils/media'
+import SidebarLayout from '../components/SidebarLayout'
 
 const cardConfig = [
   { key: 'total_users', label: 'Users', icon: Users, color: 'text-blue-600', bg: 'bg-blue-100' },
@@ -319,8 +320,9 @@ const AdminDashboard = () => {
   const showApplications = activeTab === 'all' || activeTab === 'applications'
 
   return (
-    <div className="min-h-screen px-4 pb-12 pt-24 sm:px-6 lg:px-8 bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)]">
-      <div className="mx-auto max-w-7xl">
+    <SidebarLayout title="Admin Panel" role="admin" profile={profile}>
+      <div className="min-h-screen px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
         <section className="overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-10 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
@@ -499,9 +501,14 @@ const AdminDashboard = () => {
                           <td className="px-6 py-4">
                             <div className="flex flex-wrap gap-2">
                               <span className={`rounded-full px-3 py-1 text-xs font-semibold ${user.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                                {user.is_verified ? 'Verified' : 'Pending'}
+                                {user.is_verified ? 'Verified' : 'Unverified'}
                               </span>
-                              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${user.is_active ? 'bg-blue-100 text-blue-700' : 'bg-slate-200 text-slate-700'}`}>
+                              {user.role === 'employer' && (
+                                <span className={`rounded-full px-3 py-1 text-xs font-semibold ${user.is_approved_by_admin ? 'bg-blue-100 text-blue-700' : 'bg-red-100 text-red-700'}`}>
+                                  {user.is_approved_by_admin ? 'Approved Recruiter' : 'Pending Approval'}
+                                </span>
+                              )}
+                              <span className={`rounded-full px-3 py-1 text-xs font-semibold ${user.is_active ? 'bg-slate-100 text-slate-700' : 'bg-slate-300 text-slate-800'}`}>
                                 {user.is_active ? 'Active' : 'Disabled'}
                               </span>
                             </div>
@@ -514,6 +521,16 @@ const AdminDashboard = () => {
                               >
                                 {user.is_verified ? 'Unverify' : 'Verify'}
                               </button>
+                              {user.role === 'employer' && (
+                                <button
+                                  onClick={() => updateUser(user.id, { is_approved_by_admin: !user.is_approved_by_admin })}
+                                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                                    user.is_approved_by_admin ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-blue-600 text-white hover:bg-blue-700'
+                                  }`}
+                                >
+                                  {user.is_approved_by_admin ? 'Revoke Approval' : 'Approve Recruiter'}
+                                </button>
+                              )}
                               <button
                                 onClick={() => updateUser(user.id, { is_active: !user.is_active })}
                                 className="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-300 transition"
@@ -1193,6 +1210,7 @@ const AdminDashboard = () => {
         )}
       </div>
     </div>
+  </SidebarLayout>
   )
 }
 

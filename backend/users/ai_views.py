@@ -1,16 +1,20 @@
 import os
 import json
-import PyPDF2
+try:
+    import PyPDF2
+except ImportError:
+    PyPDF2 = None
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
-import google.generativeai as genai
-
-# Configure Gemini
-if hasattr(settings, 'GEMINI_API_KEY') and settings.GEMINI_API_KEY:
-    genai.configure(api_key=settings.GEMINI_API_KEY)
+try:
+    import google.generativeai as genai
+    if hasattr(settings, 'GEMINI_API_KEY') and settings.GEMINI_API_KEY:
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+except ImportError:
+    genai = None
 
 class ResumeParseView(APIView):
     permission_classes = [IsAuthenticated]

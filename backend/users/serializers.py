@@ -7,7 +7,7 @@ from .models import User, Work, ResumeVersion
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email', 'password', 'role']
+        fields = ['email', 'password', 'role', 'company_name']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -100,6 +100,7 @@ class ProfileSerializer(serializers.ModelSerializer):
             "is_active",
             "is_staff",
             "is_superuser",
+            "is_approved_by_admin",
             "first_name",
             "last_name",
             "profile_image",

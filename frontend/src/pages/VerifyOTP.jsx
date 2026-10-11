@@ -20,7 +20,7 @@ const VerifyOTP = () => {
 
     try {
       await axios.post('/api/users/verify-otp/', { email, otp })
-      navigate('/login')
+      navigate('/')
     } catch (error) {
       console.error('Verify OTP failed:', error.response?.data || error.message)
       setErrorMessage(error.response?.data?.detail || error.response?.data?.message || 'Invalid OTP. Please try again.')

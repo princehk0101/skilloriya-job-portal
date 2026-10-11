@@ -1,8 +1,22 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Briefcase, ArrowRight, Compass, Sparkles, Building2 } from 'lucide-react'
 
 const Footer = () => {
+  const location = useLocation()
+  const hideFooterRoutes = [
+    '/admin-dashboard',
+    '/employer',
+    '/portfolio',
+    '/ai',
+    '/ai-copilot',
+    '/dsa-sheets',
+    '/task-board',
+  ]
+  if (hideFooterRoutes.some((route) => location.pathname === route || location.pathname.startsWith(`${route}/`))) {
+    return null
+  }
+
   return (
     <footer className="relative overflow-hidden border-t border-slate-200/80 bg-[linear-gradient(180deg,_rgba(255,255,255,0.22),_rgba(234,241,250,0.88))] pt-20 text-slate-700">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-300/70 to-transparent" />

@@ -41,6 +41,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
             "location",
             "company_name",
             "date_joined",
+            "is_approved_by_admin",
         ]
 
     def get_full_name(self, obj):
@@ -51,7 +52,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
 class AdminUserManageSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["role", "is_verified", "is_active", "is_staff"]
+        fields = ["role", "is_verified", "is_active", "is_staff", "is_approved_by_admin"]
 
 
 class AdminJobManageSerializer(serializers.ModelSerializer):

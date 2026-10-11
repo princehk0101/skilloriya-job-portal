@@ -55,7 +55,7 @@ const AuthShell = ({
   return (
     <section
       ref={shellRef}
-      className="relative min-h-screen overflow-hidden px-4 py-10 text-slate-900 sm:px-6 lg:px-8"
+      className="relative min-h-screen overflow-hidden px-4 pt-28 pb-10 text-slate-900 sm:px-6 lg:px-8"
     >
       <div className="pointer-events-none absolute left-0 top-0 h-80 w-80 rounded-full bg-blue-300/18 blur-[120px]" />
       <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-amber-200/18 blur-[120px]" />

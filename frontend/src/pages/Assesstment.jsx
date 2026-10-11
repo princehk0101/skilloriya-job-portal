@@ -84,7 +84,7 @@ const Assesstment = () => {
     return () => clearInterval(timer)
   }, [activeTest, testResult, timeLeft])
 
-  const startAssessment = async (testId) => {
+  const startAssessment = async (testId, forceDynamic = false) => {
     const auth = getAuthConfig()
     if (!auth) {
       alert('Please login to take skill assessments.')
@@ -93,7 +93,10 @@ const Assesstment = () => {
 
     try {
       setLoading(true)
-      const res = await axios.get(`/api/skills/assessments/${testId}/`, auth)
+      const url = forceDynamic
+        ? `/api/skills/assessments/${testId}/?dynamic=true&t=${Date.now()}`
+        : `/api/skills/assessments/${testId}/`
+      const res = await axios.get(url, auth)
       setActiveTest(res.data.assessment)
       setQuestions(res.data.questions || [])
       setCurrentQIndex(0)
@@ -411,35 +414,83 @@ const Assesstment = () => {
                     </div>
                   ) : null}
 
-                  {/* Question Feedback List */}
-                  <div className="mt-6 max-h-56 overflow-y-auto space-y-2 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-left text-xs">
-                    {testResult.feedback?.map((fb, idx) => (
-                      <div key={idx} className="border-b border-slate-200 pb-2">
-                        <p className="font-bold text-slate-800">Q{idx + 1}: {fb.question_text}</p>
-                        <p className={`mt-0.5 font-semibold ${fb.is_correct ? 'text-emerald-700' : 'text-rose-600'}`}>
-                          {fb.is_correct ? '✓ Correct' : `✗ Your choice: ${fb.user_answer || 'None'} (Correct: ${fb.correct_answer})`}
-                        </p>
-                        {fb.explanation ? <p className="text-slate-500 mt-0.5 italic">{fb.explanation}</p> : null}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6 flex justify-center gap-3">
+                  {/* Action buttons */}
+                  <div className="mt-5 flex flex-wrap justify-center gap-3">
                     <button
                       onClick={closeTestModal}
-                      className="rounded-2xl bg-slate-900 px-6 py-3 text-xs font-bold text-white transition hover:bg-blue-600"
+                      className="rounded-2xl bg-slate-900 px-6 py-2.5 text-xs font-bold text-white transition hover:bg-blue-600 shadow-sm"
                     >
                       Done & Return
                     </button>
-                    {!testResult.passed ? (
-                      <button
-                        onClick={() => startAssessment(activeTest.id)}
-                        className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-300 bg-white px-5 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50"
-                      >
-                        <RotateCcw size={14} />
-                        Try Again
-                      </button>
-                    ) : null}
+                    <button
+                      onClick={() => startAssessment(activeTest.id, true)}
+                      className="inline-flex items-center gap-1.5 rounded-2xl bg-emerald-600 px-6 py-2.5 text-xs font-bold text-white transition hover:bg-emerald-700 shadow-sm"
+                    >
+                      <RotateCcw size={14} />
+                      <span>Retake with Fresh Dynamic AI Questions</span>
+                    </button>
+                  </div>
+
+                  {/* Detailed Solutions & Explanations Section */}
+                  <div className="mt-6 border-t border-slate-100 pt-5 text-left">
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+                        Full Solutions & Deep Explanations
+                      </h4>
+                      <span className="text-[11px] font-bold text-slate-500">
+                        {testResult.correct_answers} of {testResult.total_questions} Solved Correctly
+                      </span>
+                    </div>
+
+                    <div className="max-h-72 overflow-y-auto space-y-3 pr-1">
+                      {testResult.feedback?.map((fb, idx) => (
+                        <div
+                          key={idx}
+                          className={`rounded-2xl border p-4 text-xs transition ${
+                            fb.is_correct
+                              ? 'bg-emerald-50/60 border-emerald-200 text-emerald-950'
+                              : 'bg-rose-50/60 border-rose-200 text-rose-950'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="font-bold text-slate-900">
+                              Q{idx + 1}: {fb.question_text}
+                            </p>
+                            <span
+                              className={`rounded-md px-2 py-0.5 text-[10px] font-bold shrink-0 ${
+                                fb.is_correct
+                                  ? 'bg-emerald-200 text-emerald-900'
+                                  : 'bg-rose-200 text-rose-900'
+                              }`}
+                            >
+                              {fb.is_correct ? '✓ Correct' : '✗ Incorrect'}
+                            </span>
+                          </div>
+
+                          <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-600">
+                            <div className="rounded-lg bg-white/80 p-2 border border-slate-200">
+                              <span className="text-slate-400 font-bold block">Your Answer:</span>
+                              <span className={fb.is_correct ? 'font-bold text-emerald-700' : 'font-bold text-rose-600'}>
+                                Option {fb.user_answer || 'Skipped'}
+                              </span>
+                            </div>
+                            <div className="rounded-lg bg-white/80 p-2 border border-slate-200">
+                              <span className="text-slate-400 font-bold block">Correct Solution:</span>
+                              <span className="font-bold text-emerald-700">
+                                Option {fb.correct_answer}
+                              </span>
+                            </div>
+                          </div>
+
+                          {fb.explanation && (
+                            <div className="mt-2.5 rounded-xl bg-white/90 p-2.5 border border-slate-200/80 text-[11px] text-slate-700">
+                              <strong className="text-slate-900">Solution Breakdown: </strong>
+                              {fb.explanation}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}

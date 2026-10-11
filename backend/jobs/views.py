@@ -75,6 +75,9 @@ class JobCreateView(CreateAPIView):
     permission_classes = [IsAuthenticated, IsEmployer]
 
     def perform_create(self, serializer):
+        from rest_framework.exceptions import PermissionDenied
+        if not self.request.user.is_approved_by_admin and not self.request.user.is_staff:
+            raise PermissionDenied("Your recruiter account is pending admin approval. You cannot post jobs yet.")
         job = serializer.save(employer=self.request.user)
         notify_matching_job_alerts(job)
 

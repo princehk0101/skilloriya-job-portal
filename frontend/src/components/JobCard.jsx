@@ -233,59 +233,109 @@ const JobCard = ({ fullPage = false }) => {
     <section className="py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-12 flex items-end justify-between">
-          <div>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3.5 py-1 text-xs font-bold text-blue-700 shadow-sm">
-              <Sparkles size={13} />
-              Curated Openings
-            </span>
-            <h2 className="display-font mt-2 text-3xl font-extrabold text-slate-900 sm:text-5xl">
-              {fullPage ? <>Find your next <span className="text-blue-700">opportunity</span></> : <>Latest <span className="text-blue-700">Job Openings</span></>}
-            </h2>
-            <p className="mt-1 text-sm text-slate-600">Search all {jobs.length} active roles by title, location, work style, and annual pay.</p>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <h2 className="display-font text-3xl font-extrabold text-slate-900 sm:text-5xl">
+                {fullPage ? 'All Jobs' : 'Latest Jobs'}
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Browse through our curated collection of tech jobs from top companies
+              </p>
+            </div>
+            {/* Toggle switch for All Jobs / New Jobs */}
+            <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 p-1">
+              <button className="rounded-xl bg-blue-100 px-5 py-2 text-sm font-bold text-blue-700 shadow-sm transition-all">All Jobs</button>
+              <button className="flex items-center gap-1.5 rounded-xl px-5 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all">
+                <Sparkles size={14} className="text-amber-500" /> New Jobs
+              </button>
+            </div>
           </div>
-          <Link
-            to="/categories"
-            className="hidden items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-600 hover:text-blue-600 md:flex"
-          >
-            Explore Categories <ArrowRight size={16} />
-          </Link>
         </div>
 
-        <form onSubmit={applyFilters} className="mb-7 grid gap-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm md:grid-cols-2 xl:grid-cols-7">
-          <input aria-label="Job title, company, or skill" value={filters.q} onChange={(e) => setFilters({ ...filters, q: e.target.value })} placeholder="Job title, company, or skill" className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500 xl:col-span-2" />
-          <input aria-label="Location" value={filters.location} onChange={(e) => setFilters({ ...filters, location: e.target.value })} placeholder="City or remote" className="rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-blue-500" />
-          <select aria-label="Work style" value={filters.job_type} onChange={(e) => setFilters({ ...filters, job_type: e.target.value })} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500">
-            <option value="">Any work style</option><option value="remote">Remote</option><option value="hybrid">Hybrid</option><option value="onsite">On-site</option>
-          </select>
-          <select aria-label="Minimum annual salary" value={filters.min_salary} onChange={(e) => setFilters({ ...filters, min_salary: e.target.value })} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500">
-            <option value="">Any minimum pay</option><option value="300000">₹3 lakh+</option><option value="500000">₹5 lakh+</option><option value="750000">₹7.5 lakh+</option><option value="1000000">₹10 lakh+</option>
-          </select>
-          <select aria-label="Maximum annual salary" value={filters.max_salary} onChange={(e) => setFilters({ ...filters, max_salary: e.target.value })} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500">
-            <option value="">Any maximum pay</option><option value="500000">Up to ₹5 lakh</option><option value="750000">Up to ₹7.5 lakh</option><option value="1000000">Up to ₹10 lakh</option><option value="1500000">Up to ₹15 lakh</option>
-          </select>
-          <select aria-label="Sort jobs" value={filters.sort} onChange={(e) => setFilters({ ...filters, sort: e.target.value })} className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-blue-500">
-            <option value="">Relevance</option><option value="newest">Newest</option><option value="salary_high">Highest pay</option><option value="salary_low">Lowest pay</option>
-          </select>
-          <div className="flex gap-2 md:col-span-2 xl:col-span-6">
-            <button type="submit" className="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-blue-800">Search jobs</button>
-            <button type="button" onClick={clearFilters} className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50">Clear filters</button>
+        {/* Filter Chips Sections */}
+        <div className="mb-8 space-y-6">
+          {/* Categories */}
+          <div>
+            <h3 className="mb-3 text-sm font-bold text-slate-900">Browse Jobs by Category</h3>
+            <div className="flex flex-wrap gap-2.5">
+              {filterOptions.slice(1).map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => handleCategoryFilter(option.id)}
+                  className={`rounded-full px-4 py-2 text-[11px] font-semibold transition ${
+                    selectedCategory === option.id
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-600'
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Locations (Mocked from image for now, can be wired up later) */}
+          <div>
+            <h3 className="mb-3 text-sm font-bold text-slate-900">Browse Jobs by Location</h3>
+            <div className="flex flex-wrap gap-2.5">
+              {['Bangalore', 'Mumbai and Pune', 'Hyderabad', 'Delhi NCR', 'Chennai', 'Kolkata', 'Kochi', 'Gujarat', 'Remote', 'USA', 'UK', 'Canada'].map((loc) => (
+                <button
+                  key={loc}
+                  onClick={() => setFilters({ ...filters, location: loc === 'Remote' ? 'remote' : loc })}
+                  className={`rounded-full px-4 py-2 text-[11px] font-semibold transition ${
+                    (filters.location || '').toLowerCase() === (loc === 'Remote' ? 'remote' : loc.toLowerCase())
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'border border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-600'
+                  }`}
+                >
+                  {loc}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Search & Filter Bar */}
+        <form onSubmit={applyFilters} className="mb-10 flex flex-col md:flex-row gap-3">
+          <div className="relative flex-1">
+            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </div>
+            <input 
+              aria-label="Job title, company, or skill" 
+              value={filters.q} 
+              onChange={(e) => setFilters({ ...filters, q: e.target.value })} 
+              placeholder="Search jobs, companies, or locations..." 
+              className="w-full rounded-2xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm font-medium outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-50" 
+            />
+          </div>
+          
+          <div className="flex shrink-0 gap-3 overflow-x-auto pb-1 md:pb-0">
+            <select aria-label="Country" className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition-all focus:border-blue-500 hover:bg-slate-50 min-w-[120px]">
+              <option value="india">India</option>
+              <option value="global">Global</option>
+            </select>
+            <select aria-label="Work style" value={filters.job_type} onChange={(e) => setFilters({ ...filters, job_type: e.target.value })} className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition-all focus:border-blue-500 hover:bg-slate-50 min-w-[130px]">
+              <option value="">All Types</option>
+              <option value="remote">Remote</option>
+              <option value="hybrid">Hybrid</option>
+              <option value="onsite">On-site</option>
+            </select>
+            <select aria-label="Experience" className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition-all focus:border-blue-500 hover:bg-slate-50 min-w-[150px]">
+              <option value="">All Experience</option>
+              <option value="entry">Entry Level</option>
+              <option value="mid">Mid Level</option>
+              <option value="senior">Senior Level</option>
+            </select>
           </div>
         </form>
-
-        <div className="mb-8 flex flex-wrap gap-2.5">
-          {filterOptions.map((option) => (
-            <button
-              key={option.id}
-              onClick={() => handleCategoryFilter(option.id)}
-              className={`rounded-full px-4 py-2 text-xs font-bold transition ${
-                selectedCategory === option.id
-                  ? 'bg-slate-900 text-white shadow-md'
-                  : 'border border-slate-200 bg-white/80 text-slate-700 hover:border-blue-300 hover:text-blue-700'
-              }`}
-            >
-              {option.label} ({option.count})
-            </button>
-          ))}
+        
+        <div className="mb-6 flex items-center justify-between">
+          <p className="text-sm font-bold text-slate-700">{filteredJobs.length} <span className="font-medium text-slate-500">jobs match this filter</span></p>
+          <div className="flex gap-2">
+             <button type="button" onClick={applyFilters} className="hidden rounded-xl bg-blue-700 px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-800 md:block">Apply Filters</button>
+             <button type="button" onClick={clearFilters} className="hidden rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 md:block">Clear</button>
+          </div>
         </div>
 
         {loading ? (

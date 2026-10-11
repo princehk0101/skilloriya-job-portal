@@ -8,6 +8,9 @@ import Categories from './pages/Categories';
 import Login from './pages/Login';
 import LoginWithOTP from './pages/LoginWithOTP';
 import Signup from './pages/Signup';
+import AdminLogin from './pages/AdminLogin';
+import EmployerLogin from './pages/EmployerLogin';
+import EmployerSignup from './pages/EmployerSignup';
 import Dashboard from './pages/Dashboard';
 import VerifyOTP from './pages/VerifyOTP';
 import ForgetPassword from './pages/ForgetPassword';
@@ -29,6 +32,8 @@ import Pricing from './pages/Pricing';
 import VideoInterview from './pages/VideoInterview';
 import InfoPage from './pages/InfoPage';
 import NotFound from './pages/NotFound';
+import AICopilot from './pages/AICopilot';
+import AIWorkspace from './pages/AIWorkspace';
 
 
 function App() {
@@ -42,9 +47,12 @@ function App() {
             <Route path="/categories" element={<Categories />} />
             <Route path="/jobs" element={<Jobs />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/employer/login" element={<EmployerLogin />} />
+            <Route path="/employer/signup" element={<EmployerSignup />} />
             <Route path="/login-otp" element={<LoginWithOTP />} />
             <Route path="/login-otp/verify" element={<VerifyLoginOTP />} />
-            <Route path="/signup" element={<Signup />} />
             <Route path="/VerifyOTP" element={<VerifyOTP />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/employer" element={<EmployerDashboard />} />
@@ -58,6 +66,18 @@ function App() {
             <Route path="/jobs/:id" element={<JobDescription />} />
             <Route path="/apply/:id" element={<Apply />} />
             <Route path="/companies" element={<Companies />} />
+            <Route path="/ai-copilot" element={<AIWorkspace />} />
+            <Route path="/ai/copilot" element={<AIWorkspace />} />
+            <Route path="/portfolio" element={<AIWorkspace />} />
+            <Route path="/ai/portfolio" element={<AIWorkspace />} />
+            <Route path="/ai/cover-letter" element={<AIWorkspace />} />
+            <Route path="/ai/mock-interview" element={<AIWorkspace />} />
+            <Route path="/ai/skill-gap" element={<AIWorkspace />} />
+            <Route path="/skill-gap" element={<AIWorkspace />} />
+            <Route path="/ai/resume-analysis" element={<AIWorkspace />} />
+            <Route path="/dsa-sheets" element={<AIWorkspace />} />
+            <Route path="/task-board" element={<AIWorkspace />} />
+            <Route path="/progress" element={<AIWorkspace />} />
             <Route path="/companies/:id" element={<CompanyProfile />} />
             <Route path="/assessments" element={<Assesstment />} />
             <Route path="/profile" element={<Profile />} />

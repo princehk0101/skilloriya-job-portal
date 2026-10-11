@@ -15,6 +15,23 @@ import {
   MessageSquare,
   CreditCard,
   Award,
+  FileText,
+  TrendingUp,
+  Layers,
+  Cpu,
+  BookOpenCheck,
+  Rocket,
+  Flame,
+  Target,
+  ShieldCheck,
+  Globe,
+  PenTool,
+  Mic,
+  Bot,
+  Chrome,
+  ListTodo,
+  Zap,
+  Bookmark,
 } from 'lucide-react'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -252,13 +269,31 @@ const Navbar = () => {
     return location.pathname.startsWith(to)
   }
 
+  const hideNavbarRoutes = [
+    '/admin-dashboard',
+    '/employer',
+    '/admin/login',
+    '/employer/login',
+    '/employer/signup',
+    '/portfolio',
+    '/ai-copilot',
+    '/ai',
+    '/dsa-sheets',
+    '/task-board',
+    '/progress',
+    '/skill-gap',
+  ]
+  if (hideNavbarRoutes.some((route) => location.pathname === route || location.pathname.startsWith(`${route}/`))) {
+    return null
+  }
+
   return (
-    <nav className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${isScrolled || !isHome ? 'pt-3' : 'pt-5'}`}>
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className={`glass-panel flex w-full items-center justify-between rounded-[1.75rem] px-4 py-3 transition-all duration-300 sm:px-5 ${isScrolled || !isHome ? 'shadow-[0_20px_60px_rgba(16,32,58,0.14)]' : 'bg-white/68'}`}>
-          <Link to="/" className="group flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] text-white shadow-[0_18px_34px_rgba(35,85,217,0.25)] transition-all duration-300 group-hover:-translate-y-0.5">
-              <Briefcase size={22} strokeWidth={2.4} />
+    <nav className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${isScrolled || !isHome ? 'pt-2' : 'pt-3'}`}>
+      <div className="mx-auto flex w-[98%] max-w-[1600px] items-center justify-between px-2 sm:px-4">
+        <div className={`glass-panel flex w-full items-center justify-between rounded-2xl px-4 py-2 transition-all duration-300 ${isScrolled || !isHome ? 'shadow-[0_10px_40px_rgba(16,32,58,0.1)]' : 'bg-white/75'}`}>
+          <Link to="/" className="group flex items-center gap-2.5">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[0.85rem] bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] text-white shadow-[0_10px_20px_rgba(35,85,217,0.2)] transition-all duration-300 group-hover:-translate-y-0.5">
+              <Briefcase size={20} strokeWidth={2.4} />
             </div>
             <div>
               <span className="block text-xl font-bold tracking-tight text-slate-900 transition-colors group-hover:text-blue-700">Skilloria</span>
@@ -279,6 +314,301 @@ const Navbar = () => {
                 {item.label}
               </Link>
             ))}
+
+            {/* Resources Mega Menu */}
+            {!isAdmin && !isEmployer && (
+              <div className="group relative">
+                <button className="flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition-all hover:bg-blue-50 hover:text-blue-700">
+                  Resources <ChevronDown size={14} className="transition-transform group-hover:rotate-180" />
+                </button>
+                <div className="invisible absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 transition-all duration-300 group-hover:visible group-hover:opacity-100">
+                  <div className="w-[850px] rounded-[1.75rem] border border-blue-100 bg-white p-8 shadow-[0_32px_64px_rgba(35,85,217,0.12)]">
+                    <div className="grid grid-cols-3 gap-8 text-left">
+                      {/* Column 1 */}
+                      <div>
+                        <h4 className="mb-4 text-xs font-bold tracking-wider text-slate-500 uppercase">Your Workspace</h4>
+                        <div className="space-y-4">
+                          <Link to="/resources" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors group-hover/item:bg-emerald-100">
+                              <TrendingUp size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Resources Home</p>
+                              <p className="text-xs text-slate-500 mt-0.5">See your prep progress</p>
+                            </div>
+                          </Link>
+                          <Link to="/task-board" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors group-hover/item:bg-emerald-100">
+                              <LayoutDashboard size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Task Board</p>
+                              <p className="text-xs text-slate-500 mt-0.5">Organize what to study next</p>
+                            </div>
+                          </Link>
+                          <Link to="/dsa-sheets" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors group-hover/item:bg-emerald-100">
+                              <Layers size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">DSA Sheets</p>
+                              <p className="text-xs text-slate-500 mt-0.5">Choose a coding sheet</p>
+                            </div>
+                          </Link>
+                        </div>
+                      </div>
+                      
+                      {/* Column 2 */}
+                      <div>
+                        <h4 className="mb-4 text-xs font-bold tracking-wider text-slate-500 uppercase">Interview Prep</h4>
+                        <div className="space-y-4">
+                          <Link to="/system-design" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors group-hover/item:bg-emerald-100">
+                              <Cpu size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">System Design Sheet</p>
+                              <p className="text-xs text-slate-500 mt-0.5">Work through design topics</p>
+                            </div>
+                          </Link>
+                          <Link to="/company-questions" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors group-hover/item:bg-emerald-100">
+                              <Briefcase size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Company Questions</p>
+                              <p className="text-xs text-slate-500 mt-0.5">Practice by company</p>
+                            </div>
+                          </Link>
+                          <Link to="/core-subjects" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors group-hover/item:bg-emerald-100">
+                              <BookOpenCheck size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Core Subjects</p>
+                              <p className="text-xs text-slate-500 mt-0.5">Review CS fundamentals</p>
+                            </div>
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* Column 3 */}
+                      <div>
+                        <h4 className="mb-4 text-xs font-bold tracking-wider text-slate-500 uppercase">Popular DSA Sheets</h4>
+                        <div className="space-y-4">
+                          <Link to="/sheet/striver" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors group-hover/item:bg-emerald-100">
+                              <Rocket size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Striver A2Z</p>
+                              <p className="text-xs text-slate-500 mt-0.5">433 problems</p>
+                            </div>
+                          </Link>
+                          <Link to="/sheet/love-babbar" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors group-hover/item:bg-emerald-100">
+                              <Flame size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Love Babbar</p>
+                              <p className="text-xs text-slate-500 mt-0.5">430 problems</p>
+                            </div>
+                          </Link>
+                          <Link to="/sheet/neetcode" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors group-hover/item:bg-emerald-100">
+                              <Target size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">NeetCode 150</p>
+                              <p className="text-xs text-slate-500 mt-0.5">150 problems</p>
+                            </div>
+                          </Link>
+                          <Link to="/sheet/rohit-negi" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors group-hover/item:bg-emerald-100">
+                              <ShieldCheck size={18} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Rohit Negi</p>
+                              <p className="text-xs text-slate-500 mt-0.5">725 problems</p>
+                            </div>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Products Mega Menu */}
+            {!isAdmin && !isEmployer && (
+              <div className="group relative">
+                <button className="flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition-all hover:bg-blue-50 hover:text-blue-700">
+                  Products <ChevronDown size={14} className="transition-transform group-hover:rotate-180" />
+                </button>
+                <div className="invisible absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 transition-all duration-300 group-hover:visible group-hover:opacity-100">
+                  <div className="w-[880px] rounded-[1.75rem] border border-blue-100 bg-white p-8 shadow-[0_32px_64px_rgba(35,85,217,0.12)]">
+                    <div className="grid grid-cols-3 gap-6 text-left">
+                      {/* Column 1 */}
+                      <div>
+                        <h4 className="mb-4 text-xs font-bold tracking-wider text-slate-500 uppercase">Find Jobs</h4>
+                        <div className="space-y-3">
+                          <Link to="/jobs" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <Briefcase size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">All Jobs</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Browse developer roles</p>
+                            </div>
+                          </Link>
+                          <Link to="/jobs?type=remote" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <Globe size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Remote Jobs</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Work from anywhere</p>
+                            </div>
+                          </Link>
+                          <Link to="/jobs?sort=newest" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <Zap size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">New Jobs Today</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Freshest roles, updated hourly</p>
+                            </div>
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* Column 2 */}
+                      <div>
+                        <h4 className="mb-4 text-xs font-bold tracking-wider text-slate-500 uppercase">AI Tools</h4>
+                        <div className="space-y-3">
+                          <Link to="/ai/resume-analysis" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <FileText size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Match Score & Resume Analysis</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Compare your resume with a job</p>
+                            </div>
+                          </Link>
+                          <Link to="/ai/cover-letter" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <PenTool size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Cover Letter</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Write for a specific role</p>
+                            </div>
+                          </Link>
+                          <Link to="/ai/mock-interview" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <Mic size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Mock Interview</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Practice with role-based questions</p>
+                            </div>
+                          </Link>
+                          <Link to="/ai/copilot" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <Bot size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">AI Copilot</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Your job search workspace</p>
+                            </div>
+                          </Link>
+                          <Link to="/portfolio" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <LayoutDashboard size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Portfolio Builder</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Publish your developer work</p>
+                            </div>
+                          </Link>
+                          <Link to="/extension" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <Chrome size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Chrome Auto-Fill Extension</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Fill applications with your profile</p>
+                            </div>
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* Column 3 */}
+                      <div>
+                        <h4 className="mb-4 text-xs font-bold tracking-wider text-slate-500 uppercase">Prepare</h4>
+                        <div className="space-y-3">
+                          <Link to="/dsa-sheets" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <Layers size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">DSA Sheets</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Structured coding practice</p>
+                            </div>
+                          </Link>
+                          <Link to="/dsa-patterns" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <TrendingUp size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">DSA Patterns</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Learn common problem patterns</p>
+                            </div>
+                          </Link>
+                          <Link to="/core-subjects" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <BookOpenCheck size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Core Subjects</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Review CS fundamentals</p>
+                            </div>
+                          </Link>
+                          <Link to="/system-design" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <Cpu size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">System Design</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Work through design topics</p>
+                            </div>
+                          </Link>
+                          <Link to="/company-questions" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <Briefcase size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Company Questions</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Practice by company</p>
+                            </div>
+                          </Link>
+                          <Link to="/task-board" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100 transition-colors group-hover/item:bg-blue-100">
+                              <ListTodo size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">Task Board</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Plan your next steps</p>
+                            </div>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
@@ -385,32 +715,38 @@ const Navbar = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 10, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
-                      className="absolute right-0 z-50 mt-3 w-60 origin-top-right rounded-[1.5rem] border border-blue-100/80 bg-white/92 p-2 shadow-[0_24px_60px_rgba(35,85,217,0.16)] backdrop-blur"
+                      className="absolute right-0 z-50 mt-3 w-64 origin-top-right rounded-3xl border border-blue-100/80 bg-white p-2 shadow-[0_24px_60px_rgba(35,85,217,0.16)] backdrop-blur"
                     >
-                      <Link to={dashboardPath} className="inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                        <LayoutDashboard size={16} />
-                        Dashboard
-                      </Link>
-                      <Link to="/profile" className="inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                        <User size={16} />
-                        Profile
-                      </Link>
-                      <Link to="/pricing" className="inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                        <CreditCard size={16} />
-                        Plans & Pricing
-                      </Link>
-                      <button onClick={handleOpenChat} className="inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                        <MessageSquare size={16} />
-                        Messages & Chat
-                      </button>
-                      <Link to="/settings" className="inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                        <Settings size={16} />
-                        Settings
-                      </Link>
-                      <button onClick={handleLogout} className="inline-flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50">
-                        <LogOut size={16} />
-                        Logout
-                      </button>
+                      <div className="border-b border-slate-100 px-3 py-3 mb-2">
+                        <p className="max-w-[200px] truncate text-sm font-bold text-slate-800 uppercase tracking-wide">{profile?.first_name || 'My Account'}</p>
+                        <p className="max-w-[200px] truncate text-xs text-slate-500 mt-0.5">{profile?.email}</p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Link to="/ai-copilot" className="inline-flex w-full items-center gap-2.5 rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100">
+                          <Bot size={16} />
+                          AI Copilot
+                        </Link>
+                        <Link to="/saved-jobs" className="inline-flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                          <Bookmark size={16} />
+                          Saved jobs
+                        </Link>
+                        <Link to="/profile" className="inline-flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                          <User size={16} />
+                          Profile
+                        </Link>
+                        <Link to="/feedback" className="inline-flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
+                          <MessageSquare size={16} />
+                          Send Feedback
+                        </Link>
+                      </div>
+
+                      <div className="mt-2 border-t border-slate-100 pt-2">
+                        <button onClick={handleLogout} className="inline-flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-red-500 transition-colors hover:bg-red-50">
+                          <LogOut size={16} />
+                          Log Out
+                        </button>
+                      </div>
                     </motion.div>
                   ) : null}
                 </AnimatePresence>

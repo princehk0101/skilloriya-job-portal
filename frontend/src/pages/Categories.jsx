@@ -203,71 +203,31 @@ const Categories = () => {
             {categoryFilteredList.map((cat, idx) => {
               const categoryJobs = (jobsByCategory[String(cat.id)] || []).filter((job) => doesJobMatchSearch(job, jobSearch, locationSearch))
               return (
-                <motion.div
+                <Link
                   key={cat.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: idx * 0.05 }}
-                  className="section-frame rounded-[1.8rem] p-6"
+                  to={`/jobs?category=${cat.id}`}
+                  className="block h-full"
                 >
-                  <div className="mb-5 flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-900">{cat.name}</h3>
-                      <p className="mt-2 text-sm text-slate-500">
-                        Recent openings in this category are listed below.
-                      </p>
-                    </div>
-                    <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
-                      <Briefcase size={14} />
-                      {categoryJobs.length} Jobs
-                    </span>
-                  </div>
-
-                  {categoryJobs.length === 0 ? (
-                    <p className="text-sm text-gray-500">No jobs currently in this category.</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {(expandedCategories[cat.id] ? categoryJobs : categoryJobs.slice(0, 2)).map((job) => (
-                        <Link
-                          key={job.id}
-                          to={`/jobs/${job.id}`}
-                          className="block rounded-[1.25rem] border border-gray-100 px-4 py-4 transition hover:border-blue-300 hover:bg-blue-50"
-                        >
-                          <div className="flex items-start justify-between gap-3">
-                            <div>
-                              <p className="font-semibold text-gray-900">{job.title}</p>
-                              <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                                <span className="inline-flex items-center gap-1"><MapPin size={12} /> {job.location}</span>
-                                <span>{job.job_type_display || job.job_type}</span>
-                              </div>
-                            </div>
-                            {appliedJobsMap[String(job.id)] ? (
-                              <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-semibold ${getApplicationStatusClass(appliedJobsMap[String(job.id)].status)}`}>
-                                <BadgeCheck size={12} />
-                                {getApplicationStatusLabel(appliedJobsMap[String(job.id)].status)}
-                              </span>
-                            ) : null}
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-
-                  {categoryJobs.length > 2 ? (
-                    <div className="mt-4 flex items-center justify-between gap-3">
-                      <button
-                        onClick={() => toggleCategoryJobs(cat.id)}
-                        className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
-                      >
-                        {expandedCategories[cat.id] ? 'Show Less' : `Show More Jobs (${categoryJobs.length - 2})`}
-                        <ArrowRight size={15} className={expandedCategories[cat.id] ? 'rotate-90' : ''} />
-                      </button>
-                      <span className="text-xs text-slate-500">
-                        Updated {categoryJobs[0]?.created_at ? new Date(categoryJobs[0].created_at).toLocaleDateString() : 'recently'}
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="section-frame rounded-[1.8rem] p-6 h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_24px_60px_rgba(35,85,217,0.12)] cursor-pointer bg-white"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-900">{cat.name}</h3>
+                        <p className="mt-2 text-sm text-slate-500">
+                          {categoryJobs.length > 0 ? `${categoryJobs.length} active openings available. Click to explore.` : 'No active jobs right now.'}
+                        </p>
+                      </div>
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700">
+                        <Briefcase size={14} />
+                        {categoryJobs.length} Jobs
                       </span>
                     </div>
-                  ) : null}
-                </motion.div>
+                  </motion.div>
+                </Link>
               )
             })}
           </div>

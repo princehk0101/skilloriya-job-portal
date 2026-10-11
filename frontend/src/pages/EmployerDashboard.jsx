@@ -24,6 +24,7 @@ import {
 import { resolveMediaUrl } from '../utils/media'
 import { getApplicationStatusLabel } from '../utils/applications'
 import ChatDrawer from '../components/ChatDrawer'
+import SidebarLayout from '../components/SidebarLayout'
 
 const normalizeList = (data) => {
   if (Array.isArray(data)) return data
@@ -364,8 +365,9 @@ const EmployerDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-24 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <SidebarLayout title="Employer Panel" role="employer" profile={user}>
+      <div className="px-4 pb-16 pt-8 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
         {/* Banner */}
         <div className="mb-8 flex flex-col justify-between gap-4 rounded-[2.5rem] border border-blue-100 bg-[linear-gradient(135deg,_#0f172a,_#1d4ed8,_#0ea5e9)] px-8 py-8 text-white shadow-[0_24px_60px_rgba(37,99,235,0.16)] md:flex-row md:items-center">
           <div className="flex items-center gap-4">
@@ -947,7 +949,8 @@ const EmployerDashboard = () => {
         onClose={() => setIsChatOpen(false)}
         initialPartnerId={chatPartnerId}
       />
-    </div>
+      </div>
+    </SidebarLayout>
   )
 }
 

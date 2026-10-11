@@ -43,6 +43,7 @@ class User(AbstractUser):
     skills = models.TextField(blank=True, help_text='Comma-separated skills')
     experience_years = models.PositiveIntegerField(default=0)
     job_email_alerts = models.BooleanField(default=True)
+    is_approved_by_admin = models.BooleanField(default=False, help_text='Only for recruiters')
     education = models.CharField(max_length=255, blank=True)
     company_name = models.CharField(max_length=255, blank=True)
     designation = models.CharField(max_length=255, blank=True)

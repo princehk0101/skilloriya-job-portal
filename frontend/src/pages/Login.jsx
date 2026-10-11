@@ -23,10 +23,15 @@ const Login = () => {
         headers: { Authorization: `Bearer ${data.access}` },
       })
       localStorage.setItem('user_profile', JSON.stringify(profileRes.data))
-      if (profileRes.data?.is_staff || profileRes.data?.is_superuser) navigate('/admin-dashboard')
-      else navigate(profileRes.data?.role === 'employer' ? '/employer' : '/dashboard')
+      
+      if (profileRes.data?.role === 'seeker') {
+        navigate('/dashboard')
+      } else {
+        setErrorMessage('This account is not registered as a Job Seeker. Please use the appropriate login portal.')
+        localStorage.clear()
+      }
     } catch {
-      navigate(role === 'employer' ? '/employer' : '/dashboard')
+      setErrorMessage('Verification failed.')
     }
   }
 
@@ -81,22 +86,37 @@ const Login = () => {
 
   return (
     <AuthShell
-      badge="Account access"
+      badge="Job Seeker Access"
       title="Sign in to your account."
-      description="Access your profile, job applications, and account settings from one place."
+      description="Access your profile, job applications, and track your job search progress."
       sideTitle="Welcome back"
       sideDescription="Use your email and password or continue with Google to sign in."
       highlights={[
         'Sign in with email and password.',
         'Use Google for quick access.',
-        'Available for job seekers and employers.',
+        'Track and manage your applications.',
       ]}
       footer={
-        <div className="flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
-          <span>New here? Build your account in one step.</span>
-          <Link to="/signup" className="font-semibold text-blue-700 transition hover:text-cyan-600">
-            Create account
-          </Link>
+        <div className="flex flex-col gap-4 text-sm text-slate-600">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <span>New here? Build your account in one step.</span>
+            <Link to="/signup" className="font-semibold text-blue-700 transition hover:text-cyan-600">
+              Create account
+            </Link>
+          </div>
+          <div className="h-px bg-slate-200" />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-xs">
+            <span>Are you a recruiter?</span>
+            <div className="flex gap-3">
+              <Link to="/employer/login" className="font-semibold text-emerald-700 transition hover:text-emerald-600">
+                Employer Login
+              </Link>
+              <span className="text-slate-300">•</span>
+              <Link to="/employer/signup" className="font-semibold text-emerald-700 transition hover:text-emerald-600">
+                Employer Signup
+              </Link>
+            </div>
+          </div>
         </div>
       }
     >
