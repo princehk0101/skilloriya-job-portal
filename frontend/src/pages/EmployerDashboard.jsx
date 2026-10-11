@@ -152,62 +152,90 @@ const EmployerDashboard = () => {
   }
 
   const loadEmployerData = async () => {
+    setError('')
     try {
-      const [profileRes, jobsRes, dashboardRes, companiesRes, interviewsRes] = await Promise.all([
+      const [profileResult, jobsResult, dashboardResult, companiesResult, interviewsResult] = await Promise.allSettled([
         axios.get('/api/users/profile/', getAuthConfig()),
         axios.get('/api/jobs/my-jobs/', getAuthConfig()),
         axios.get('/api/applications/employer/dashboard/', getAuthConfig()),
-        axios.get('/api/companies/'),
+        axios.get('/api/companies/', getAuthConfig()),
         axios.get('/api/applications/interviews/my/', getAuthConfig()),
       ])
 
-      if (profileRes.data?.is_staff || profileRes.data?.is_superuser) {
-        navigate('/admin-dashboard')
-        return
+      let profileData = null
+      if (profileResult.status === 'fulfilled' && profileResult.value?.data) {
+        profileData = profileResult.value.data
+        if (profileData.is_staff || profileData.is_superuser) {
+          navigate('/admin-dashboard')
+          return
+        }
+        if (profileData.role !== 'employer') {
+          navigate('/dashboard')
+          return
+        }
+        localStorage.setItem('user_role', 'employer')
+        localStorage.setItem('user_profile', JSON.stringify(profileData))
+        setUser(profileData)
+      } else {
+        const status = profileResult.reason?.response?.status
+        if (status === 401) {
+          navigate('/employer-login')
+          return
+        }
+        console.warn('Profile fetch warning in recruiter dashboard:', profileResult.reason?.message)
       }
 
-      if (profileRes.data?.role !== 'employer') {
-        navigate('/dashboard')
-        return
+      if (jobsResult.status === 'fulfilled' && jobsResult.value?.data) {
+        setJobs(normalizeList(jobsResult.value.data))
+      } else {
+        console.warn('Jobs fetch error:', jobsResult.reason?.message)
       }
 
-      localStorage.setItem('user_role', 'employer')
-      localStorage.setItem('user_profile', JSON.stringify(profileRes.data))
-      setUser(profileRes.data)
+      if (interviewsResult.status === 'fulfilled' && interviewsResult.value?.data) {
+        setInterviews(normalizeList(interviewsResult.value.data))
+      } else {
+        console.warn('Interviews fetch error:', interviewsResult.reason?.message)
+      }
 
-      const myJobs = normalizeList(jobsRes.data)
-      setJobs(myJobs)
-      setInterviews(normalizeList(interviewsRes.data))
-
-      setStats({
-        total_applications: dashboardRes.data?.total_applications || 0,
-        waitlist: dashboardRes.data?.waitlist || 0,
-        shortlisted: dashboardRes.data?.shortlisted || 0,
-        accepted: dashboardRes.data?.accepted || 0,
-        applied: dashboardRes.data?.applied || 0,
-        screening: dashboardRes.data?.screening || 0,
-        interview: dashboardRes.data?.interview || 0,
-        offer: dashboardRes.data?.offer || 0,
-        rejected: dashboardRes.data?.rejected || 0,
-        applications_per_job: dashboardRes.data?.applications_per_job || [],
-      })
-
-      const allCompanies = normalizeList(companiesRes.data)
-      const myCompany = allCompanies.find((c) => c.owner_email === profileRes.data.email) || null
-      setCompany(myCompany)
-      if (myCompany) {
-        setCompanyForm({
-          name: myCompany.name || '',
-          description: myCompany.description || '',
-          location: myCompany.location || '',
-          website: myCompany.website || '',
-          logo: null,
-          logo_url: myCompany.logo_url || myCompany.logo || '',
+      if (dashboardResult.status === 'fulfilled' && dashboardResult.value?.data) {
+        const dData = dashboardResult.value.data
+        setStats({
+          total_applications: dData?.total_applications || 0,
+          waitlist: dData?.waitlist || 0,
+          shortlisted: dData?.shortlisted || 0,
+          accepted: dData?.accepted || 0,
+          applied: dData?.applied || 0,
+          screening: dData?.screening || 0,
+          interview: dData?.interview || 0,
+          offer: dData?.offer || 0,
+          rejected: dData?.rejected || 0,
+          applications_per_job: dData?.applications_per_job || [],
         })
+      } else {
+        console.warn('Dashboard stats fetch error:', dashboardResult.reason?.message)
+      }
+
+      const effectiveEmail = profileData?.email || user?.email
+      if (companiesResult.status === 'fulfilled' && companiesResult.value?.data) {
+        const allCompanies = normalizeList(companiesResult.value.data)
+        const myCompany = allCompanies.find((c) => c.owner_email === effectiveEmail) || null
+        setCompany(myCompany)
+        if (myCompany) {
+          setCompanyForm({
+            name: myCompany.name || '',
+            description: myCompany.description || '',
+            location: myCompany.location || '',
+            website: myCompany.website || '',
+            logo: null,
+            logo_url: myCompany.logo_url || myCompany.logo || '',
+          })
+        }
+      } else {
+        console.warn('Companies fetch error:', companiesResult.reason?.message)
       }
     } catch (err) {
-      console.error('Employer dashboard load failed:', err.response?.data || err.message)
-      setError('Unable to load your employer dashboard right now.')
+      console.error('Employer dashboard load unexpected error:', err)
+      setError('Unable to load some employer dashboard data right now.')
     } finally {
       setIsLoading(false)
     }
