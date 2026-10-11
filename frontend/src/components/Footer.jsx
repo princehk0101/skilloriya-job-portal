@@ -7,6 +7,7 @@ const Footer = () => {
   const hideFooterRoutes = [
     '/admin-dashboard',
     '/employer',
+    '/post-job',
     '/portfolio',
     '/ai',
     '/ai-copilot',

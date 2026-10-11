@@ -1,7 +1,21 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Briefcase, Loader2, MapPin, Sparkles, Wallet } from 'lucide-react'
+import {
+  Briefcase,
+  Loader2,
+  MapPin,
+  Sparkles,
+  Wallet,
+  CheckCircle2,
+  ArrowRight,
+  PlusCircle,
+  HelpCircle,
+  FileCode,
+  Tag,
+  Clock,
+  Layers,
+} from 'lucide-react'
 import SidebarLayout from '../components/SidebarLayout'
 
 const normalizeList = (data) => {
@@ -39,7 +53,7 @@ const PostJob = () => {
     const loadPage = async () => {
       const token = localStorage.getItem('access_token')
       if (!token) {
-        navigate('/login')
+        navigate('/employer/login')
         return
       }
 
@@ -50,7 +64,7 @@ const PostJob = () => {
         ])
 
         if (profileRes.data?.role !== 'employer') {
-          navigate('/dashboard')
+          navigate('/employer/login')
           return
         }
 
@@ -60,7 +74,7 @@ const PostJob = () => {
         setCategories(normalizeList(categoriesRes.data))
       } catch (err) {
         console.error('Post job page load failed:', err.response?.data || err.message)
-        setError('Unable to open the post job page right now. Please try again in a moment.')
+        setError('Unable to open the post job page right now. Please try again.')
       } finally {
         setIsLoading(false)
       }
@@ -84,7 +98,10 @@ const PostJob = () => {
       const payload = {
         title: formData.title.trim(),
         description: formData.description.trim(),
-        required_skills: formData.required_skills.split(',').map((skill) => skill.trim()).filter(Boolean),
+        required_skills: formData.required_skills
+          .split(',')
+          .map((skill) => skill.trim())
+          .filter(Boolean),
         practical_challenge: formData.practical_challenge.trim(),
         location: formData.location.trim(),
         salary: Number(formData.salary),
@@ -94,7 +111,7 @@ const PostJob = () => {
       }
 
       await axios.post('/api/jobs/create/', payload, getAuthConfig())
-      setSuccessMsg('Job posted successfully.')
+      setSuccessMsg('Job posted successfully! Opening your active jobs list...')
       setFormData({
         title: '',
         description: '',
@@ -106,10 +123,14 @@ const PostJob = () => {
         experience_required: 0,
         category: '',
       })
-      setTimeout(() => navigate('/employer?tab=jobs'), 700)
+      setTimeout(() => navigate('/employer?tab=jobs'), 800)
     } catch (err) {
       console.error('Post job failed:', err.response?.data || err.message)
-      setError(err.response?.data?.detail || 'Unable to post job. Please verify required fields.')
+      setError(
+        err.response?.data?.detail ||
+          err.response?.data?.error ||
+          'Unable to post job. Please verify required fields.'
+      )
     } finally {
       setIsSubmitting(false)
     }
@@ -117,139 +138,141 @@ const PostJob = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-24 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <Loader2 className="h-10 w-10 animate-spin text-blue-700" />
       </div>
     )
   }
 
   return (
-    <SidebarLayout title="Post New Job" role="employer" profile={user}>
+    <SidebarLayout title="Post New Job Opening" role="employer" profile={user}>
       <div className="px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <Link to="/employer" className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-white/85 px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700">
-            <ArrowLeft size={16} />
-            Back to Employer Panel
-          </Link>
-        </div>
-
-        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-          <section className="rounded-[2rem] border border-blue-100 bg-[linear-gradient(140deg,_#0f172a,_#1d4ed8,_#06b6d4)] p-8 text-white shadow-[0_24px_60px_rgba(37,99,235,0.16)]">
-            <h1 className="mt-6 text-4xl font-bold leading-tight">Create a job post that candidates actually respond to.</h1>
-            <p className="mt-4 max-w-lg text-sm leading-7 text-blue-100">
-              Fill in the essentials, choose a category if available, and publish a role that looks clear, confident, and easy to understand.
-            </p>
-
-            <div className="mt-8 space-y-4">
-              <div className="rounded-2xl border border-white/10 bg-white/8 px-4 py-4">
-                <p className="text-sm font-semibold">Better visibility</p>
-                <p className="mt-1 text-sm text-blue-100">Category aur clear title se seekers ko relevant jobs jaldi milti hain.</p>
+        <div className="mx-auto max-w-5xl">
+          {/* Header Banner */}
+          <div className="mb-8 rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 p-8 text-white shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+              <div>
+                <span className="rounded-full bg-blue-500/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-cyan-300 border border-blue-500/30">
+                  New Opening Wizard
+                </span>
+                <h1 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
+                  Publish a Job Opening
+                </h1>
+                <p className="mt-1 text-xs text-slate-300 max-w-xl">
+                  Fill in the role details, skills, compensation, and practical challenges to reach top tech talent instantly.
+                </p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/8 px-4 py-4">
-                <p className="text-sm font-semibold">Direct applicant flow</p>
-                <p className="mt-1 text-sm text-blue-100">As candidates apply, you can review interest and responses from your employer area.</p>
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/employer?tab=jobs"
+                  className="rounded-xl bg-white/10 px-4 py-2 text-xs font-bold text-white hover:bg-white/20 transition"
+                >
+                  View Active Jobs ({user?.company_name || 'My Jobs'})
+                </Link>
               </div>
             </div>
-          </section>
+          </div>
 
-          <section className="rounded-[2rem] border border-blue-100 bg-white/90 p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur sm:p-8">
-            <div className="mb-6">
-              <h2 className="text-3xl font-bold text-slate-900">Publish a new opening</h2>
-            </div>
+          {/* Form Card */}
+          <form onSubmit={handleSubmit} className="space-y-8">
+            {/* 1. Basic Information Section */}
+            <div className="rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm space-y-6">
+              <div className="border-b border-slate-100 pb-4">
+                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Briefcase size={18} className="text-blue-600" />
+                  1. Role Details
+                </h2>
+                <p className="text-xs text-slate-500">Specify the position title, category, and workplace mode.</p>
+              </div>
 
-            <form className="space-y-5" onSubmit={handleSubmit}>
-              <div className="grid gap-5 md:grid-cols-2">
-                <label className="block md:col-span-2">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Required skills <span className="font-normal text-slate-400">(comma separated)</span></span>
-                  <input
-                    type="text"
-                    name="required_skills"
-                    value={formData.required_skills}
-                    onChange={handleChange}
-                    placeholder="React, JavaScript, REST APIs"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                  />
-                </label>
-
-                <label className="block md:col-span-2">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Optional practical challenge</span>
-                  <textarea
-                    name="practical_challenge"
-                    value={formData.practical_challenge}
-                    onChange={handleChange}
-                    rows={3}
-                    placeholder="Example: Share a small project or code sample that shows how you handle API errors."
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                  />
-                  <span className="mt-1 block text-xs text-slate-500">Candidates can attach a work sample and explain their approach with their application.</span>
-                </label>
-
-                <label className="block md:col-span-2">
-                  <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <Briefcase size={16} className="text-blue-600" />
-                    Job title
-                  </span>
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Job Title <span className="text-rose-500">*</span>
+                  </label>
                   <input
                     type="text"
                     name="title"
                     value={formData.title}
                     onChange={handleChange}
-                    placeholder="Frontend Developer Intern"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    placeholder="e.g. Senior Backend Engineer (Django / Python)"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-xs font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
                     required
                   />
-                </label>
+                </div>
 
-                <label className="block">
-                  <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <MapPin size={16} className="text-blue-600" />
-                    Location
-                  </span>
-                  <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Category <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    name="category"
+                    value={formData.category}
                     onChange={handleChange}
-                    placeholder="Remote / Delhi / Bangalore"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                    required
-                  />
-                </label>
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-xs font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                  >
+                    <option value="">Select Category</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                <label className="block">
-                  <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-                    <Wallet size={16} className="text-blue-600" />
-                    Annual salary (INR)
-                  </span>
-                  <input
-                    type="number"
-                    name="salary"
-                    min="0"
-                    value={formData.salary}
-                    onChange={handleChange}
-                    placeholder="600000 (annual)"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                    required
-                  />
-                </label>
-
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Job type</span>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Workplace Type <span className="text-rose-500">*</span>
+                  </label>
                   <select
                     name="job_type"
                     value={formData.job_type}
                     onChange={handleChange}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-xs font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
                   >
-                    <option value="remote">Remote</option>
-                    <option value="onsite">Onsite</option>
-                    <option value="hybrid">Hybrid</option>
+                    <option value="remote">Remote (Work from Anywhere)</option>
+                    <option value="hybrid">Hybrid (Office + Remote)</option>
+                    <option value="onsite">Onsite (Full Office)</option>
                   </select>
-                </label>
+                </div>
+              </div>
+            </div>
 
-                <label className="block">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Experience required</span>
+            {/* 2. Compensation & Location Section */}
+            <div className="rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm space-y-6">
+              <div className="border-b border-slate-100 pb-4">
+                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <Wallet size={18} className="text-blue-600" />
+                  2. Compensation & Location
+                </h2>
+                <p className="text-xs text-slate-500">Provide realistic salary and office location expectations.</p>
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Annual Salary (INR) <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3.5 top-3 text-xs font-bold text-slate-400">₹</span>
+                    <input
+                      type="number"
+                      name="salary"
+                      min="0"
+                      value={formData.salary}
+                      onChange={handleChange}
+                      placeholder="800000"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 pl-8 pr-4 py-3 text-xs font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                      required
+                    />
+                  </div>
+                  <p className="mt-1 text-[11px] text-slate-400">Gross Annual CTC</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Experience (Years)
+                  </label>
                   <input
                     type="number"
                     name="experience_required"
@@ -257,80 +280,134 @@ const PostJob = () => {
                     value={formData.experience_required}
                     onChange={handleChange}
                     placeholder="0"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-xs font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
                   />
-                </label>
+                  <p className="mt-1 text-[11px] text-slate-400">0 for Freshers / Interns</p>
+                </div>
 
-                <label className="block md:col-span-2">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Category</span>
-                  <select
-                    name="category"
-                    value={formData.category}
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Location <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={formData.location}
                     onChange={handleChange}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                  >
-                    <option value="">No category</option>
-                    {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
-                    ))}
-                  </select>
-                  {categories.length === 0 ? (
-                    <p className="mt-2 text-xs text-slate-500">
-                      Categories are not available right now, so this role will be posted without one.
-                    </p>
-                  ) : null}
-                </label>
+                    placeholder="Bengaluru / Remote"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-xs font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                    required
+                  />
+                  <p className="mt-1 text-[11px] text-slate-400">City, State or Remote</p>
+                </div>
+              </div>
+            </div>
 
-                <label className="block md:col-span-2">
-                  <span className="mb-2 block text-sm font-medium text-slate-700">Description</span>
+            {/* 3. Skills & Assessment Challenge Section */}
+            <div className="rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm space-y-6">
+              <div className="border-b border-slate-100 pb-4">
+                <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <FileCode size={18} className="text-blue-600" />
+                  3. Required Skills & Practical Challenge
+                </h2>
+                <p className="text-xs text-slate-500">Filter qualified applicants by testing concrete skills.</p>
+              </div>
+
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Key Technical Skills <span className="text-slate-400 font-normal">(Comma Separated)</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="required_skills"
+                    value={formData.required_skills}
+                    onChange={handleChange}
+                    placeholder="Python, Django, PostgreSQL, Docker, Redis"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-xs font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Optional Practical Challenge Prompt
+                  </label>
+                  <textarea
+                    name="practical_challenge"
+                    value={formData.practical_challenge}
+                    onChange={handleChange}
+                    rows={3}
+                    placeholder="e.g. Share a GitHub link or Loom video demonstration of an API or project you built recently."
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-xs font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
+                  />
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    Candidates can submit artifacts, repositories, or proof links with their application.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Detailed Job Description <span className="text-rose-500">*</span>
+                  </label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
                     rows={8}
-                    placeholder="Role responsibilities, skills required, and candidate expectations..."
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    placeholder="Describe role responsibilities, team structure, tech stack, and growth opportunities..."
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-xs font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 leading-relaxed"
                     required
                   />
-                </label>
+                </div>
               </div>
+            </div>
 
-              {error ? (
-                <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-                  {error}
-                </div>
-              ) : null}
+            {/* Error / Success Toast */}
+            {error && (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-xs font-semibold text-rose-700">
+                {error}
+              </div>
+            )}
+            {successMsg && (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-xs font-semibold text-emerald-700">
+                ✓ {successMsg}
+              </div>
+            )}
 
-              {successMsg ? (
-                <div className="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-sm text-cyan-700">
-                  {successMsg}
-                </div>
-              ) : null}
-
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-[linear-gradient(135deg,_#2563eb,_#0ea5e9)] px-6 py-3 text-sm font-semibold text-white shadow-[0_14px_32px_rgba(37,99,235,0.22)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Briefcase size={16} />}
-                  {isSubmitting ? 'Publishing...' : 'Publish Job'}
-                </button>
-
+            {/* Submit Action Bar */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-3xl border border-slate-200/80 bg-white p-5 shadow-sm">
+              <p className="text-xs text-slate-500">
+                Once published, this role will be active and visible to candidates on Skilloria immediately.
+              </p>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
                 <Link
-                  to="/employer"
-                  className="inline-flex items-center justify-center rounded-2xl border border-blue-100 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-blue-300 hover:text-blue-700"
+                  to="/employer?tab=jobs"
+                  className="w-full sm:w-auto text-center rounded-2xl border border-slate-200 px-5 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
                 >
                   Cancel
                 </Link>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-7 py-3 text-xs font-bold text-white shadow-md shadow-blue-600/20 hover:bg-blue-700 transition disabled:opacity-50"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={15} className="animate-spin" />
+                      Publishing Opening...
+                    </>
+                  ) : (
+                    <>
+                      <PlusCircle size={15} />
+                      Publish Job Live
+                    </>
+                  )}
+                </button>
               </div>
-            </form>
-          </section>
+            </div>
+          </form>
         </div>
       </div>
-    </div>
     </SidebarLayout>
   )
 }

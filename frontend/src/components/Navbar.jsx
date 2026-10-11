@@ -272,6 +272,7 @@ const Navbar = () => {
   const hideNavbarRoutes = [
     '/admin-dashboard',
     '/employer',
+    '/post-job',
     '/admin/login',
     '/employer/login',
     '/employer/signup',
