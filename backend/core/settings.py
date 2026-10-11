@@ -88,8 +88,24 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # ================= DATABASE =================
 USE_SQLITE = os.getenv("USE_SQLITE", "False") == "True"
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
 
-if USE_SQLITE:
+if DATABASE_URL:
+    from urllib.parse import urlparse, unquote
+    parsed_db = urlparse(DATABASE_URL)
+    is_neon_or_ssl = "neon.tech" in (parsed_db.hostname or "") or "sslmode=require" in DATABASE_URL
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": unquote(parsed_db.path.lstrip("/")),
+            "USER": unquote(parsed_db.username or ""),
+            "PASSWORD": unquote(parsed_db.password or ""),
+            "HOST": parsed_db.hostname,
+            "PORT": parsed_db.port or 5432,
+            "OPTIONS": {"sslmode": "require"} if is_neon_or_ssl else {},
+        }
+    }
+elif USE_SQLITE:
     if os.getenv("RENDER") == "true":
         db_path = "/opt/render/project/src/job_portal/media/db.sqlite3"
         try:
@@ -106,14 +122,17 @@ if USE_SQLITE:
         }
     }
 else:
+    db_host = os.getenv("DB_HOST", "")
+    is_neon_host = "neon.tech" in db_host or os.getenv("DB_SSL", "False") == "True"
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
             "NAME": os.getenv("DB_NAME"),
             "USER": os.getenv("DB_USER"),
             "PASSWORD": os.getenv("DB_PASSWORD"),
-            "HOST": os.getenv("DB_HOST"),
+            "HOST": db_host,
             "PORT": os.getenv("DB_PORT", "5432"),
+            "OPTIONS": {"sslmode": "require"} if is_neon_host else {},
         }
     }
 
