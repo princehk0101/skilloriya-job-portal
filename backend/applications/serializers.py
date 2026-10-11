@@ -17,6 +17,9 @@ class ApplicationSerializer(serializers.ModelSerializer):
     applicant_name = serializers.SerializerMethodField()
     applicant_profile_image_url = serializers.SerializerMethodField()
     job_title = serializers.ReadOnlyField(source='job.title')
+    employer_id = serializers.ReadOnlyField(source='job.employer_id')
+    employer_name = serializers.SerializerMethodField()
+    company_name = serializers.SerializerMethodField()
     resume_url = serializers.SerializerMethodField()
     status_history = ApplicationStatusEventSerializer(many=True, read_only=True)
     skill_proof = serializers.SerializerMethodField()
@@ -31,6 +34,9 @@ class ApplicationSerializer(serializers.ModelSerializer):
             'applicant_profile_image_url',
             'job',
             'job_title',
+            'employer_id',
+            'employer_name',
+            'company_name',
             'full_name',
             'college_name',
             'phone_number',
@@ -113,6 +119,24 @@ class ApplicationSerializer(serializers.ModelSerializer):
     def get_applicant_name(self, obj):
         full_name = f"{obj.applicant.first_name} {obj.applicant.last_name}".strip()
         return full_name or obj.applicant.email
+
+    def get_employer_name(self, obj):
+        if obj.job and obj.job.employer:
+            emp = obj.job.employer
+            return f"{emp.first_name} {emp.last_name}".strip() or emp.email
+        return "Recruiter"
+
+    def get_company_name(self, obj):
+        if obj.job and obj.job.employer:
+            emp = obj.job.employer
+            comp = getattr(emp, 'company_name', '')
+            if comp:
+                return comp
+            from companies.models import Company
+            comp_obj = Company.objects.filter(owner_email=emp.email).first()
+            if comp_obj:
+                return comp_obj.name
+        return ""
 
     def get_skill_proof(self, obj):
         try:

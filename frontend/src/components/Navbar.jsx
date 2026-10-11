@@ -259,6 +259,7 @@ const Navbar = () => {
         { to: '/categories', label: 'Categories' },
         { to: '/companies', label: 'Companies' },
         { to: '/assessments', label: 'Skill Tests' },
+        { to: '/ai/resume-analysis', label: 'AI Resume' },
         { to: '/pricing', label: 'Pricing' },
       ]
 
@@ -724,7 +725,15 @@ const Navbar = () => {
                       </div>
 
                       <div className="space-y-1">
-                        <Link to="/ai-copilot" className="inline-flex w-full items-center gap-2.5 rounded-xl bg-emerald-50 px-3 py-2.5 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100">
+                        <Link to={dashboardPath} className="inline-flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-blue-50 hover:text-blue-700">
+                          <LayoutDashboard size={16} />
+                          {isEmployer ? 'Recruiter Hub' : 'My Dashboard'}
+                        </Link>
+                        <Link to="/ai/resume-analysis" className="inline-flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-blue-50 hover:text-blue-700">
+                          <FileText size={16} />
+                          AI Resume & ATS
+                        </Link>
+                        <Link to="/ai-copilot" className="inline-flex w-full items-center gap-2.5 rounded-xl bg-emerald-50 px-3 py-2 text-sm font-bold text-emerald-700 transition-colors hover:bg-emerald-100">
                           <Bot size={16} />
                           AI Copilot
                         </Link>
@@ -735,10 +744,6 @@ const Navbar = () => {
                         <Link to="/profile" className="inline-flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
                           <User size={16} />
                           Profile
-                        </Link>
-                        <Link to="/feedback" className="inline-flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-600">
-                          <MessageSquare size={16} />
-                          Send Feedback
                         </Link>
                       </div>
 

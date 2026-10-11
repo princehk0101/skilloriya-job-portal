@@ -32,6 +32,7 @@ import {
   GraduationCap,
   Mail,
   ShieldCheck,
+  Send,
 } from 'lucide-react'
 import { resolveMediaUrl } from '../utils/media'
 import { getApplicationStatusLabel } from '../utils/applications'
@@ -119,6 +120,15 @@ const EmployerDashboard = () => {
   // Chat & Video State
   const [chatPartnerId, setChatPartnerId] = useState(null)
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const [conversations, setConversations] = useState([])
+  const [selectedChatPartner, setSelectedChatPartner] = useState(null)
+  const [chatMessages, setChatMessages] = useState([])
+  const [chatInputText, setChatInputText] = useState('')
+  const [isSendingMsg, setIsSendingMsg] = useState(false)
+  const [isLoadingConvs, setIsLoadingConvs] = useState(false)
+  const [isLoadingMsgs, setIsLoadingMsgs] = useState(false)
+  const [chatSearch, setChatSearch] = useState('')
+  const recruiterChatEndRef = React.useRef(null)
 
   // Interview Schedule Modal
   const [scheduleApp, setScheduleApp] = useState(null)
@@ -290,6 +300,106 @@ const EmployerDashboard = () => {
   useEffect(() => {
     loadApplicants(selectedJobId)
   }, [selectedJobId])
+
+  const loadRecruiterConversations = async () => {
+    setIsLoadingConvs(true)
+    try {
+      const res = await axios.get('/api/chat/conversations/', getAuthConfig())
+      const convs = res.data || []
+      setConversations(convs)
+      if (convs.length > 0 && !selectedChatPartner) {
+        setSelectedChatPartner(convs[0])
+        loadRecruiterMessages(convs[0].partner_id)
+      }
+    } catch (err) {
+      console.error('Failed to load recruiter conversations:', err)
+    } finally {
+      setIsLoadingConvs(false)
+    }
+  }
+
+  const loadRecruiterMessages = async (partnerId) => {
+    if (!partnerId) return
+    setIsLoadingMsgs(true)
+    try {
+      const res = await axios.get(`/api/chat/messages/${partnerId}/`, getAuthConfig())
+      setChatMessages(res.data || [])
+    } catch (err) {
+      console.error('Failed to load candidate messages:', err)
+    } finally {
+      setIsLoadingMsgs(false)
+    }
+  }
+
+  useEffect(() => {
+    if (activeTab === 'messages') {
+      loadRecruiterConversations()
+    }
+  }, [activeTab])
+
+  useEffect(() => {
+    if (activeTab === 'messages' && selectedChatPartner?.partner_id) {
+      loadRecruiterMessages(selectedChatPartner.partner_id)
+      const interval = setInterval(() => {
+        loadRecruiterMessages(selectedChatPartner.partner_id)
+      }, 5000)
+      return () => clearInterval(interval)
+    }
+  }, [activeTab, selectedChatPartner?.partner_id])
+
+  useEffect(() => {
+    recruiterChatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chatMessages])
+
+  const handleSendRecruiterMessage = async (e) => {
+    e?.preventDefault()
+    if (!chatInputText.trim() || !selectedChatPartner?.partner_id || isSendingMsg) return
+    const text = chatInputText.trim()
+    setChatInputText('')
+    setIsSendingMsg(true)
+    try {
+      const res = await axios.post(
+        '/api/chat/send/',
+        {
+          recipient_id: selectedChatPartner.partner_id,
+          content: text,
+          job_id: selectedChatPartner.job_id || null,
+        },
+        getAuthConfig()
+      )
+      setChatMessages((prev) => [...prev, res.data])
+      loadRecruiterConversations()
+    } catch (err) {
+      console.error('Failed to send recruiter message:', err)
+    } finally {
+      setIsSendingMsg(false)
+    }
+  }
+
+  const handleStartInstantVideoMeeting = async () => {
+    if (!selectedChatPartner?.partner_id || isSendingMsg) return
+    const roomId = `meet-${selectedChatPartner.partner_id}-${Date.now().toString().slice(-6)}`
+    const meetingMessage = `🎥 Recruiter has initiated a live video interview meeting!\nClick here to join meeting room: /interview/${roomId}`
+    setIsSendingMsg(true)
+    try {
+      const res = await axios.post(
+        '/api/chat/send/',
+        {
+          recipient_id: selectedChatPartner.partner_id,
+          content: meetingMessage,
+          job_id: selectedChatPartner.job_id || null,
+        },
+        getAuthConfig()
+      )
+      setChatMessages((prev) => [...prev, res.data])
+      loadRecruiterConversations()
+      window.open(`/interview/${roomId}`, '_blank')
+    } catch (err) {
+      console.error('Failed to start instant meeting:', err)
+    } finally {
+      setIsSendingMsg(false)
+    }
+  }
 
   const handleCompanyFormChange = (e) => {
     const { name, value } = e.target
@@ -515,6 +625,7 @@ const EmployerDashboard = () => {
               { id: 'overview', label: 'Dashboard Overview', icon: BarChart3 },
               { id: 'jobs', label: `My Jobs (${jobs.length})`, icon: Briefcase },
               { id: 'pipeline', label: `Candidate Pipeline (${applicants.length})`, icon: Users },
+              { id: 'messages', label: `Candidate Messages (${conversations.length})`, icon: MessageSquare },
               { id: 'talent', label: 'Search Talent (Resdex)', icon: Search },
               { id: 'interviews', label: `Video Interviews (${interviews.length})`, icon: Video },
               { id: 'company', label: 'Company Profile', icon: Building2 },
@@ -997,6 +1108,279 @@ const EmployerDashboard = () => {
                   </table>
                 </div>
               )}
+            </div>
+          )}
+
+
+          {/* TAB 3.5: CANDIDATE MESSAGES & VIDEO INTERVIEW STUDIO */}
+          {activeTab === 'messages' && (
+            <div className="rounded-3xl border border-blue-100 bg-white shadow-sm overflow-hidden flex flex-col md:flex-row h-[750px]">
+              {/* Left Column: Candidate Conversations List */}
+              <div className="w-full md:w-80 lg:w-96 border-r border-slate-100 flex flex-col bg-slate-50/40">
+                <div className="p-4 border-b border-slate-100 bg-white">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-extrabold text-sm text-slate-900">Candidate Conversations</h3>
+                    <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-[10px] font-bold text-blue-700">
+                      {conversations.length} Active
+                    </span>
+                  </div>
+                  <div className="relative">
+                    <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
+                    <input
+                      type="text"
+                      value={chatSearch}
+                      onChange={(e) => setChatSearch(e.target.value)}
+                      placeholder="Search candidates or jobs..."
+                      className="w-full rounded-xl border border-slate-200 pl-8 pr-3 py-1.5 text-xs text-slate-800 outline-none focus:border-blue-500 bg-slate-50 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto divide-y divide-slate-100 p-2 space-y-1">
+                  {isLoadingConvs ? (
+                    <div className="flex h-40 items-center justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                    </div>
+                  ) : conversations.length === 0 ? (
+                    <div className="p-8 text-center text-xs text-slate-400">
+                      <MessageSquare size={32} className="mx-auto mb-2 text-slate-300" />
+                      <p className="font-bold text-slate-700">No candidate messages yet</p>
+                      <p className="mt-1 text-[11px] text-slate-400">
+                        When candidates apply to your jobs, you can message them directly from here.
+                      </p>
+                    </div>
+                  ) : (
+                    conversations
+                      .filter(
+                        (c) =>
+                          c.partner_name?.toLowerCase().includes(chatSearch.toLowerCase()) ||
+                          c.job_title?.toLowerCase().includes(chatSearch.toLowerCase()) ||
+                          c.partner_email?.toLowerCase().includes(chatSearch.toLowerCase())
+                      )
+                      .map((conv) => {
+                        const active = selectedChatPartner?.partner_id === conv.partner_id
+                        return (
+                          <button
+                            key={conv.partner_id}
+                            onClick={() => {
+                              setSelectedChatPartner(conv)
+                              loadRecruiterMessages(conv.partner_id)
+                            }}
+                            className={`w-full text-left p-3 rounded-2xl transition flex items-start gap-3 ${
+                              active
+                                ? 'bg-blue-600 text-white shadow-sm'
+                                : 'hover:bg-blue-50/70 text-slate-800'
+                            }`}
+                          >
+                            <div
+                              className={`h-10 w-10 shrink-0 rounded-2xl flex items-center justify-center font-bold text-sm shadow-sm ${
+                                active ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-700'
+                              }`}
+                            >
+                              {conv.partner_name?.charAt(0).toUpperCase() || 'C'}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-1">
+                                <p className={`truncate text-xs font-bold ${active ? 'text-white' : 'text-slate-900'}`}>
+                                  {conv.partner_name}
+                                </p>
+                                {conv.unread_count > 0 && (
+                                  <span
+                                    className={`h-4 min-w-4 px-1 rounded-full text-[9px] font-extrabold flex items-center justify-center ${
+                                      active ? 'bg-white text-blue-700' : 'bg-blue-600 text-white'
+                                    }`}
+                                  >
+                                    {conv.unread_count}
+                                  </span>
+                                )}
+                              </div>
+                              {conv.job_title ? (
+                                <p
+                                  className={`truncate text-[11px] font-medium mt-0.5 ${
+                                    active ? 'text-blue-100' : 'text-indigo-600'
+                                  }`}
+                                >
+                                  Re: {conv.job_title}
+                                </p>
+                              ) : null}
+                              <p
+                                className={`truncate text-[10px] mt-0.5 ${
+                                  active ? 'text-blue-200' : 'text-slate-400'
+                                }`}
+                              >
+                                {conv.last_message || 'Ready to communicate'}
+                              </p>
+                            </div>
+                          </button>
+                        )
+                      })
+                  )}
+                </div>
+              </div>
+
+              {/* Right Column: Active Conversation Feed & Video Meeting Launcher */}
+              <div className="flex-1 flex flex-col bg-white">
+                {selectedChatPartner ? (
+                  <>
+                    {/* Header */}
+                    <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3 bg-white">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold shadow-md">
+                          {selectedChatPartner.partner_name?.charAt(0).toUpperCase() || 'C'}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-extrabold text-slate-900">
+                              {selectedChatPartner.partner_name}
+                            </h3>
+                            <span className="rounded bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                              Candidate
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500">
+                            {selectedChatPartner.job_title ? (
+                              <span>Applied for: <strong>{selectedChatPartner.job_title}</strong> · </span>
+                            ) : null}
+                            <span>{selectedChatPartner.partner_email}</span>
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Header Actions: Video Meeting + Interview Modal */}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={handleStartInstantVideoMeeting}
+                          disabled={isSendingMsg}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-bold text-white shadow-sm hover:bg-emerald-700 transition"
+                          title="Generate instant room and invite candidate"
+                        >
+                          <Video size={14} />
+                          <span>Start Video Meeting</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            const matchingApp = applicants.find(
+                              (a) => a.applicant === selectedChatPartner.partner_id
+                            )
+                            setScheduleApp(matchingApp || {
+                              id: null,
+                              applicant: selectedChatPartner.partner_id,
+                              job_title: selectedChatPartner.job_title || 'Direct Candidate',
+                              applicant_name: selectedChatPartner.partner_name,
+                            })
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3.5 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 transition"
+                        >
+                          <Calendar size={14} />
+                          <span>Schedule Round</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Messages Feed */}
+                    <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-slate-50/60">
+                      {isLoadingMsgs ? (
+                        <div className="flex h-40 items-center justify-center">
+                          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                        </div>
+                      ) : chatMessages.length === 0 ? (
+                        <div className="flex h-full flex-col items-center justify-center text-center p-6 text-slate-400">
+                          <MessageSquare size={36} className="mb-2 text-slate-300" />
+                          <p className="text-sm font-bold text-slate-700">
+                            Start conversation with {selectedChatPartner.partner_name}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                            Send candidate interview details, ask technical questions, or launch a live video meeting right now.
+                          </p>
+                        </div>
+                      ) : (
+                        chatMessages.map((msg) => {
+                          const isMe = msg.sender === user?.id || msg.sender_email === user?.email
+                          const isMeeting = msg.content?.includes('/interview/')
+                          let meetingPath = null
+                          if (isMeeting) {
+                            const match = msg.content.match(/\/interview\/[a-zA-Z0-9_\-]+/)
+                            if (match) meetingPath = match[0]
+                          }
+
+                          return (
+                            <div
+                              key={msg.id}
+                              className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
+                            >
+                              <div
+                                className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-xs shadow-sm ${
+                                  isMe
+                                    ? 'bg-blue-600 text-white'
+                                    : 'bg-white text-slate-900 border border-slate-200'
+                                }`}
+                              >
+                                {msg.job_title && (
+                                  <div className="mb-1 text-[10px] font-semibold opacity-85">
+                                    Re: {msg.job_title}
+                                  </div>
+                                )}
+                                <p className="leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+
+                                {meetingPath && (
+                                  <div className="mt-3 pt-2 border-t border-white/20">
+                                    <Link
+                                      to={meetingPath}
+                                      target="_blank"
+                                      className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-500 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-600 transition shadow"
+                                    >
+                                      <Video size={13} />
+                                      <span>Join Video Meeting Now ↗</span>
+                                    </Link>
+                                  </div>
+                                )}
+                              </div>
+                              <span className="mt-1 text-[10px] text-slate-400 px-1">
+                                {new Date(msg.created_at).toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </span>
+                            </div>
+                          )
+                        })
+                      )}
+                      <div ref={recruiterChatEndRef} />
+                    </div>
+
+                    {/* Chat Input Bar */}
+                    <form
+                      onSubmit={handleSendRecruiterMessage}
+                      className="p-3 border-t border-slate-100 bg-white flex items-center gap-2"
+                    >
+                      <input
+                        type="text"
+                        value={chatInputText}
+                        onChange={(e) => setChatInputText(e.target.value)}
+                        placeholder={`Type a message to ${selectedChatPartner.partner_name}...`}
+                        className="flex-1 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!chatInputText.trim() || isSendingMsg}
+                        className="rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white hover:bg-blue-700 transition disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        {isSendingMsg ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+                        <span>Send</span>
+                      </button>
+                    </form>
+                  </>
+                ) : (
+                  <div className="flex h-full flex-col items-center justify-center p-8 text-center text-slate-400">
+                    <MessageSquare size={48} className="mb-3 text-slate-300" />
+                    <h3 className="text-base font-bold text-slate-800">Select a Candidate Conversation</h3>
+                    <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                      Choose an applicant from the left panel to review message threads, send updates, or launch instant live video interviews.
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 

@@ -35,13 +35,15 @@ class AssessmentDetailView(APIView):
         
         # If user retakes the test (attempts > 0) OR dynamic param is passed, generate fresh AI questions!
         # This guarantees questions change every time!
-        from core.ai_service import call_llm
+        import time
         import random
         import json
         import re
+        from core.ai_service import call_llm
 
         TARGET_QUESTIONS = 20
-        use_ai_dynamic = (attempts_count > 0 or len(db_questions) < TARGET_QUESTIONS or request.query_params.get('dynamic') == 'true')
+        # Always enable dynamic generation on every request or retake
+        use_ai_dynamic = True
 
         if use_ai_dynamic:
             try:
@@ -49,8 +51,8 @@ class AssessmentDetailView(APIView):
                 prompt = f"""
 You are creating an official technical certification assessment for: "{assessment.title}" (Level: {assessment.level}).
 Candidate Attempt Number: {attempts_count + 1}
-Generate up to 10 original, rigorous, and thought-provoking multiple choice questions.
-Do NOT repeat basic generic questions. Focus on practical real-world scenarios, debugging, and architectural principles.
+Generate 10 to 15 original, rigorous, and thought-provoking multiple choice questions.
+Do NOT repeat basic generic questions. Focus on practical real-world scenarios, debugging, code outputs, and architectural principles for {assessment.title}.
 
 Return ONLY a valid JSON array of objects matching this exact schema:
 [
@@ -72,7 +74,7 @@ Return ONLY a valid JSON array of objects matching this exact schema:
                     if isinstance(gen_data, dict) and "questions" in gen_data:
                         gen_data = gen_data["questions"]
 
-                    if isinstance(gen_data, list) and len(gen_data) >= 2:
+                    if isinstance(gen_data, list) and len(gen_data) >= 1:
                         start_order = assessment.questions.count() + 1
                         for idx, q_item in enumerate(gen_data):
                             new_q = AssessmentQuestion.objects.create(
@@ -88,18 +90,20 @@ Return ONLY a valid JSON array of objects matching this exact schema:
                             )
                             db_questions.append(new_q)
             except Exception as e:
-                print("Failed to generate dynamic assessment questions with LLM:", e)
+                print("Dynamic assessment question generation:", e)
 
-        # Shuffle and sample exactly 20 questions (or all if slightly less)
-        # Seed with user ID + attempt count so retakes always get a fresh combination
-        random.seed(f"{user.id}-{attempts_count}-{pk}")
+        # Shuffle and sample questions so every test session has brand new question orders and choices
+        random.seed(int(time.time() * 1000) + user.id)
         if len(db_questions) >= TARGET_QUESTIONS:
-            db_questions = random.sample(db_questions, TARGET_QUESTIONS)
+            selected_questions = random.sample(db_questions, TARGET_QUESTIONS)
         else:
-            random.shuffle(db_questions)
+            selected_questions = list(db_questions)
+            random.shuffle(selected_questions)
 
         assessment_data = AssessmentListSerializer(assessment, context={'request': request}).data
-        questions_data = AssessmentQuestionPublicSerializer(db_questions, many=True).data
+        assessment_data['time_minutes'] = 20
+        questions_data = AssessmentQuestionPublicSerializer(selected_questions, many=True).data
+
 
         return Response({
             'assessment': assessment_data,

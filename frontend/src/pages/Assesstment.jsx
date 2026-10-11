@@ -84,7 +84,7 @@ const Assesstment = () => {
     return () => clearInterval(timer)
   }, [activeTest, testResult, timeLeft])
 
-  const startAssessment = async (testId, forceDynamic = false) => {
+  const startAssessment = async (testId, forceDynamic = true) => {
     const auth = getAuthConfig()
     if (!auth) {
       alert('Please login to take skill assessments.')
@@ -93,9 +93,7 @@ const Assesstment = () => {
 
     try {
       setLoading(true)
-      const url = forceDynamic
-        ? `/api/skills/assessments/${testId}/?dynamic=true&t=${Date.now()}`
-        : `/api/skills/assessments/${testId}/`
+      const url = `/api/skills/assessments/${testId}/?dynamic=true&t=${Date.now()}`
       const res = await axios.get(url, auth)
       setActiveTest(res.data.assessment)
       setQuestions(res.data.questions || [])

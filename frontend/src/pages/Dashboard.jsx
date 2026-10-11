@@ -24,6 +24,7 @@ import {
   BellRing,
   FileUp,
   Printer,
+  MessageSquare,
 } from 'lucide-react'
 import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
@@ -481,6 +482,26 @@ const Dashboard = () => {
                         <span className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-bold ${getApplicationStatusClass(app.status)}`}>
                           {getApplicationStatusLabel(app.status)}
                         </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            window.dispatchEvent(
+                              new CustomEvent('open-chat', {
+                                detail: {
+                                  partnerId: app.employer_id,
+                                  jobId: app.job,
+                                  partnerName: `${app.company_name || app.employer_name || 'Recruiter'} · ${app.job_title}`,
+                                  companyName: app.company_name,
+                                  jobTitle: app.job_title,
+                                },
+                              })
+                            )
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 bg-indigo-50 px-3.5 py-1.5 text-xs font-bold text-indigo-700 hover:bg-indigo-100 transition shadow-sm"
+                        >
+                          <MessageSquare size={13} />
+                          Message Recruiter
+                        </button>
                         <button
                           type="button"
                           onClick={() => setExpandedApplicationId((current) => current === app.id ? null : app.id)}

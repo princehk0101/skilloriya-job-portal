@@ -15,6 +15,7 @@ import {
   X,
   ShieldCheck,
   Sparkles,
+  MessageSquare,
 } from 'lucide-react'
 
 const SidebarLayout = ({ children, title, role, profile }) => {
@@ -54,6 +55,7 @@ const SidebarLayout = ({ children, title, role, profile }) => {
       title: 'CANDIDATES & ATS',
       links: [
         { to: '/employer?tab=pipeline', tab: 'pipeline', icon: Users, label: 'Candidate Pipeline' },
+        { to: '/employer?tab=messages', tab: 'messages', icon: MessageSquare, label: 'Candidate Messages' },
         { to: '/employer?tab=talent', tab: 'talent', icon: Search, label: 'Search Talent (Resdex)' },
         { to: '/employer?tab=interviews', tab: 'interviews', icon: Video, label: 'Video Interviews' },
       ],

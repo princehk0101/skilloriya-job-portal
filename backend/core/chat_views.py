@@ -21,6 +21,39 @@ class ConversationListView(APIView):
             if msg.recipient_id != user.id:
                 partner_ids.add(msg.recipient_id)
 
+        # Include recruiters/candidates from job applications
+        from applications.models import Application
+        from companies.models import Company
+
+        app_info_map = {}  # partner_id -> {'job_id': ..., 'job_title': ..., 'status': ..., 'company': ...}
+
+        if user.role == 'employer':
+            employer_apps = Application.objects.filter(job__employer=user).select_related('applicant', 'job')
+            for app in employer_apps:
+                pid = app.applicant_id
+                partner_ids.add(pid)
+                if pid not in app_info_map:
+                    app_info_map[pid] = {
+                        'job_id': app.job_id,
+                        'job_title': app.job.title if app.job else '',
+                        'status': app.status,
+                        'company': getattr(user, 'company_name', '') or '',
+                    }
+        else:
+            # Job seeker: include recruiters of applied jobs
+            seeker_apps = Application.objects.filter(applicant=user).select_related('job__employer', 'job')
+            for app in seeker_apps:
+                recruiter = getattr(app.job, 'employer', None)
+                if recruiter and recruiter.id != user.id:
+                    partner_ids.add(recruiter.id)
+                    if recruiter.id not in app_info_map:
+                        app_info_map[recruiter.id] = {
+                            'job_id': app.job_id,
+                            'job_title': app.job.title if app.job else '',
+                            'status': app.status,
+                            'company': getattr(recruiter, 'company_name', '') or '',
+                        }
+
         conversations = []
         for pid in partner_ids:
             try:
@@ -37,20 +70,32 @@ class ConversationListView(APIView):
             ).count()
 
             partner_name = f"{partner.first_name} {partner.last_name}".strip() or partner.email
+            app_meta = app_info_map.get(pid, {})
+
+            # Determine company
+            company_name = getattr(partner, 'company_name', '') or app_meta.get('company', '')
+            if not company_name and partner.role == 'employer':
+                comp_obj = Company.objects.filter(owner_email=partner.email).first()
+                if comp_obj:
+                    company_name = comp_obj.name
 
             conversations.append({
                 'partner_id': partner.id,
                 'partner_email': partner.email,
                 'partner_name': partner_name,
                 'partner_role': partner.role,
-                'partner_company': getattr(partner, 'company_name', '') or (partner.company.name if hasattr(partner, 'company') else ''),
-                'last_message': last_msg.content if last_msg else '',
+                'partner_company': company_name,
+                'job_id': app_meta.get('job_id', getattr(last_msg, 'job_id', None)),
+                'job_title': app_meta.get('job_title', getattr(last_msg, 'job_title', '') if last_msg else ''),
+                'application_status': app_meta.get('status', ''),
+                'last_message': last_msg.content if last_msg else ('Applied for role' if app_meta else ''),
                 'last_message_at': last_msg.created_at if last_msg else None,
                 'unread_count': unread_count,
             })
 
         conversations.sort(key=lambda c: str(c['last_message_at'] or ''), reverse=True)
         return Response(conversations)
+
 
 
 class MessageHistoryView(APIView):
