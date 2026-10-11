@@ -177,7 +177,7 @@ const Apply = () => {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] px-4 pb-12 pt-24 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto w-[98%] max-w-[1500px] px-2 sm:px-4">
         <button
           onClick={() => navigate(-1)}
           className="mb-6 inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700"

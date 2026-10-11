@@ -151,8 +151,8 @@ const CompanyProfile = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-28 pb-16 px-4 sm:px-6 lg:px-8">
-      <div className="relative max-w-5xl mx-auto z-10">
+    <div className="relative min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-28 pb-16">
+      <div className="relative w-[98%] max-w-[1600px] mx-auto z-10 px-2 sm:px-4">
         <button
           onClick={() => navigate(-1)}
           className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 mb-6 font-semibold transition-colors"

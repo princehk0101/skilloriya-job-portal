@@ -346,8 +346,8 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-24 pb-16">
+      <div className="w-[98%] max-w-[1400px] mx-auto px-2 sm:px-4">
         {/* Banner Header */}
         <div className="mb-6 rounded-[2rem] border border-blue-100 bg-[linear-gradient(135deg,_#0f172a,_#1d4ed8,_#06b6d4)] p-6 sm:p-8 text-white shadow-[0_24px_60px_rgba(37,99,235,0.16)]">
           <div className="flex flex-wrap items-center justify-between gap-4">

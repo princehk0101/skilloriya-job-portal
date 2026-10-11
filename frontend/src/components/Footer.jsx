@@ -24,7 +24,7 @@ const Footer = () => {
       <div className="pointer-events-none absolute -left-24 top-20 h-56 w-56 rounded-full bg-blue-200/25 blur-3xl" />
       <div className="pointer-events-none absolute right-0 top-12 h-48 w-48 rounded-full bg-amber-200/20 blur-3xl" />
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
         <div className="section-frame rounded-[2rem] px-6 py-8 sm:px-8">
           <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
             <div>
@@ -56,7 +56,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="my-14 grid max-w-7xl grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
+        <div className="my-14 grid w-full grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-6">
             <Link to="/" className="group flex items-center gap-3 text-slate-900">
               <div className="rounded-2xl bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] p-2 shadow-[0_12px_28px_rgba(35,85,217,0.28)] transition-all group-hover:-translate-y-0.5">
@@ -113,7 +113,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-slate-200/80 py-8">
-          <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-4 text-sm text-slate-500 sm:px-6 md:flex-row lg:px-8">
+          <div className="mx-auto flex w-full flex-col items-center justify-between gap-4 text-sm text-slate-500 md:flex-row">
             <p>(c) 2026 Skilloria. All rights reserved.</p>
             <div className="flex gap-6">
               <Link to="/terms" className="transition-colors hover:text-blue-700">Terms</Link>

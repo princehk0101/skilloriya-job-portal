@@ -46,7 +46,7 @@ const Hero = () => {
     <section className="relative overflow-hidden pb-24 pt-32 lg:pb-28 lg:pt-40">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(circle_at_top_left,_rgba(35,85,217,0.18),_transparent_40%),radial-gradient(circle_at_80%_20%,_rgba(243,180,79,0.18),_transparent_24%)]" />
 
-      <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:px-8">
+      <div className="relative mx-auto grid w-[98%] max-w-[1600px] items-center gap-12 px-2 sm:px-4 lg:grid-cols-[1.02fr_0.98fr]">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -174,7 +174,7 @@ const Hero = () => {
         </motion.div>
       </div>
 
-      <div className="relative mx-auto mt-20 max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative mx-auto mt-20 w-[98%] max-w-[1600px] px-2 sm:px-4">
         <div className="section-frame rounded-[2rem] px-6 py-8">
           <div className="flex flex-wrap justify-center gap-4 text-sm text-slate-600">
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm">

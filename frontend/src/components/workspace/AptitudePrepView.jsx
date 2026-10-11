@@ -86,7 +86,7 @@ export default function AptitudePrepView() {
   }).length
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-4 px-2 sm:px-4 space-y-6">
+    <div className="w-full max-w-[1600px] mx-auto py-4 px-2 sm:px-4 space-y-6">
       {/* Title */}
       <div className="border-b border-[#eae6dc] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

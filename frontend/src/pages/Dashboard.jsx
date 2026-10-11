@@ -240,7 +240,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-24 pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-[98%] max-w-[1600px] mx-auto px-2 sm:px-4">
         {/* Banner */}
         <div className="mb-8 flex flex-col justify-between gap-4 rounded-[2.5rem] border border-blue-100 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-8 py-8 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] md:flex-row md:items-center">
           <div className="flex items-center gap-4">

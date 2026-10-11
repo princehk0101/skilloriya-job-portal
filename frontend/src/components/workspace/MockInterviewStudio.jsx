@@ -290,7 +290,7 @@ export default function MockInterviewStudio() {
       : null
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-4 px-2 sm:px-4 space-y-6">
+    <div className="w-full max-w-[1600px] mx-auto py-4 px-2 sm:px-4 space-y-6">
       {/* Studio Header */}
       <div className="border-b border-[#eae6dc] pb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

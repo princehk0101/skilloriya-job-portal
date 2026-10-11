@@ -132,7 +132,7 @@ export default function TaskBoardView() {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-4 px-2 sm:px-4 space-y-6">
+    <div className="w-full max-w-[1600px] mx-auto py-4 px-2 sm:px-4 space-y-6">
       {/* Header matching screenshot exactly */}
       <div className="space-y-2">
         <h1 className="text-4xl sm:text-5xl font-black tracking-tight text-slate-900 uppercase">

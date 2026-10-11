@@ -170,7 +170,7 @@ export default function SkillGapRoadmapView() {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto py-4 px-2 sm:px-4 space-y-6">
+    <div className="w-full max-w-[1600px] mx-auto py-4 px-2 sm:px-4 space-y-6">
       {/* Title */}
       <div className="border-b border-[#eae6dc] pb-4">
         <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 mb-2">

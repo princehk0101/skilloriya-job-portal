@@ -157,38 +157,40 @@ const Categories = () => {
 
   return (
     <div className="min-h-screen pt-24 pb-16">
-      <section className="px-4 pb-10 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-12 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
-          <h1 className="display-font text-4xl font-bold md:text-6xl">
-            Explore by <span className="text-amber-200">category</span>
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-50/85">
-            Browse openings category-wise, scan active roles quickly, and expand any section to view more listings.
-          </p>
-          <div className="relative mx-auto mt-8 max-w-lg">
-            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-              <Search size={20} className="text-slate-400" />
+      <section className="pb-10">
+        <div className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
+          <div className="overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-12 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
+            <h1 className="display-font text-4xl font-bold md:text-6xl">
+              Explore by <span className="text-amber-200">category</span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-50/85">
+              Browse openings category-wise, scan active roles quickly, and expand any section to view more listings.
+            </p>
+            <div className="relative mx-auto mt-8 max-w-lg">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                <Search size={20} className="text-slate-400" />
+              </div>
+              <input
+                type="text"
+                className="block w-full rounded-full border border-white/40 bg-white py-3 pl-11 pr-4 text-gray-900 outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-blue-200"
+                placeholder="Search category..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
             </div>
-            <input
-              type="text"
-              className="block w-full rounded-full border border-white/40 bg-white py-3 pl-11 pr-4 text-gray-900 outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-blue-200"
-              placeholder="Search category..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+            {searchParams.get('category') || jobSearch || locationSearch ? (
+              <button
+                onClick={clearCategoryFilter}
+                className="mt-4 inline-flex rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
+              >
+                Clear job filters
+              </button>
+            ) : null}
           </div>
-          {searchParams.get('category') || jobSearch || locationSearch ? (
-            <button
-              onClick={clearCategoryFilter}
-              className="mt-4 inline-flex rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
-            >
-              Clear job filters
-            </button>
-          ) : null}
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
         {isLoading ? (
             <p className="text-center text-gray-500">Loading categories and jobs...</p>
         ) : categoryFilteredList.length === 0 ? (

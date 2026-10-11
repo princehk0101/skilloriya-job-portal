@@ -139,7 +139,7 @@ const VideoInterview = () => {
     <div className="flex min-h-screen flex-col bg-slate-950 text-white pt-20">
       {/* Top Bar */}
       <header className="border-b border-white/10 bg-slate-900/80 px-4 py-3 backdrop-blur sm:px-6">
-        <div className="mx-auto flex max-w-7xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mx-auto flex w-[98%] max-w-[1600px] flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-2">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md">
               <Video size={20} />

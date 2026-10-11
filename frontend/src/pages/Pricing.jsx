@@ -82,8 +82,8 @@ const Pricing = () => {
   }
 
   return (
-    <div className="min-h-screen px-4 pb-20 pt-28 sm:px-6 lg:px-8 bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)]">
-      <div className="mx-auto max-w-7xl">
+    <div className="min-h-screen pb-20 pt-28 bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)]">
+      <div className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">

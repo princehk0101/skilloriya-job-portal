@@ -13,8 +13,8 @@ const Home = () => {
       <CategoryCard />
       <JobCard />
 
-      <section className="px-4 pb-24 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section className="pb-24">
+        <div className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
           <div className="section-frame flex flex-col items-start justify-between gap-6 rounded-[2rem] px-8 py-10 sm:flex-row sm:items-center">
             <div className="space-y-2">
               <h2 className="display-font text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">

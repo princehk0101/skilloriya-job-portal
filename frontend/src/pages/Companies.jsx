@@ -68,27 +68,29 @@ const Companies = () => {
 
   return (
     <div className="min-h-screen pt-24">
-      <section className="px-4 pb-10 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/60 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-10 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
-          <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
-            <div>
-              <h1 className="display-font mt-6 text-4xl font-bold leading-tight sm:text-6xl">Find companies that are hiring now.</h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-100">
-                Browse company profiles, check locations, and view active job openings before you apply.
-              </p>
-            </div>
-            <div className="overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/8">
-              <img
-                src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&q=80&w=1200"
-                alt="Professional office environment"
-                className="h-72 w-full object-cover"
-              />
+      <section className="pb-10">
+        <div className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
+          <div className="rounded-[2rem] border border-white/60 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-10 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
+            <div className="grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
+              <div>
+                <h1 className="display-font mt-6 text-4xl font-bold leading-tight sm:text-6xl">Find companies that are hiring now.</h1>
+                <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-100">
+                  Browse company profiles, check locations, and view active job openings before you apply.
+                </p>
+              </div>
+              <div className="overflow-hidden rounded-[1.75rem] border border-white/15 bg-white/8">
+                <img
+                  src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&q=80&w=1200"
+                  alt="Professional office environment"
+                  className="h-72 w-full object-cover"
+                />
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+      <section className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4 pb-12">
         <div className="mb-10 grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
             <h2 className="display-font text-3xl font-bold text-slate-900 sm:text-5xl">Top companies hiring now</h2>

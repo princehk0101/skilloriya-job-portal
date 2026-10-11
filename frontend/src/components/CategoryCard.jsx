@@ -92,7 +92,7 @@ const CategoryCard = () => {
       <div className="pointer-events-none absolute right-[-5%] top-0 h-[400px] w-[400px] rounded-full bg-blue-300/16 blur-[100px]" />
       <div className="pointer-events-none absolute bottom-10 left-[-5%] h-[300px] w-[300px] rounded-full bg-amber-300/16 blur-[100px]" />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
         <div className="mb-14 flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <motion.div
             initial={{ opacity: 0, x: -20 }}

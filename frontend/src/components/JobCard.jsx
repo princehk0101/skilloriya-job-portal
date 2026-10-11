@@ -231,7 +231,7 @@ const JobCard = ({ fullPage = false }) => {
 
   return (
     <section className="py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
         <div className="mb-12 flex items-end justify-between">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>

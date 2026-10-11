@@ -156,8 +156,8 @@ const Assesstment = () => {
   }
 
   return (
-    <div className="min-h-screen px-4 pb-20 pt-24 sm:px-6 lg:px-8 bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)]">
-      <div className="mx-auto max-w-7xl">
+    <div className="min-h-screen pb-20 pt-24 bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)]">
+      <div className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
         {/* Banner */}
         <section className="overflow-hidden rounded-[2.5rem] border border-white/70 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-12 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-10">
           <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
