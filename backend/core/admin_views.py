@@ -109,6 +109,7 @@ class AdminDashboardView(APIView):
 
 class AdminUserListView(ListAPIView):
     permission_classes = [IsAuthenticated, IsPlatformAdmin]
+    pagination_class = None
     serializer_class = AdminUserSerializer
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ["email", "first_name", "last_name", "phone_number", "company_name"]
@@ -129,6 +130,7 @@ class AdminUserUpdateView(UpdateAPIView):
 
 class AdminJobListView(ListAPIView):
     permission_classes = [IsAuthenticated, IsPlatformAdmin]
+    pagination_class = None
     serializer_class = JobSerializer
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ["title", "employer__email", "location", "description"]
@@ -156,6 +158,7 @@ class AdminJobDeleteView(DestroyAPIView):
 
 class AdminCompanyListView(ListAPIView):
     permission_classes = [IsAuthenticated, IsPlatformAdmin]
+    pagination_class = None
     serializer_class = CompanySerializer
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ["name", "owner__email", "location", "description"]
@@ -295,6 +298,7 @@ class AdminJobCreateView(APIView):
 
 class AdminApplicationListView(ListAPIView):
     permission_classes = [IsAuthenticated, IsPlatformAdmin]
+    pagination_class = None
     serializer_class = ApplicationSerializer
     filter_backends = [SearchFilter, OrderingFilter]
     search_fields = ["full_name", "applicant__email", "job__title", "college_name", "skills"]
