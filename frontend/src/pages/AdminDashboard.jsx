@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Shield,
+  ShieldCheck,
+  ShieldAlert,
   Users,
   Briefcase,
   Building2,
@@ -18,6 +20,22 @@ import {
   Eye,
   ExternalLink,
   FileCheck,
+  BarChart3,
+  GraduationCap,
+  Sparkles,
+  TrendingUp,
+  UserCheck,
+  UserX,
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  Award,
+  AlertTriangle,
+  ArrowUpRight,
+  ChevronRight,
+  Check,
+  Percent,
 } from 'lucide-react'
 import { resolveMediaUrl } from '../utils/media'
 import SidebarLayout from '../components/SidebarLayout'
@@ -37,6 +55,18 @@ const normalizeList = (data) => {
 
 const AdminDashboard = () => {
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = searchParams.get('tab') || 'all'
+  const [recruiterFilter, setRecruiterFilter] = useState('all') // 'all' | 'pending' | 'approved'
+
+  const handleTabChange = (tabKey) => {
+    if (tabKey === 'all') {
+      setSearchParams({})
+    } else {
+      setSearchParams({ tab: tabKey })
+    }
+  }
+
   const [profile, setProfile] = useState(null)
   const [stats, setStats] = useState({})
   const [users, setUsers] = useState([])
@@ -47,7 +77,6 @@ const AdminDashboard = () => {
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
-  const [activeTab, setActiveTab] = useState('all')
 
   // Modals for Admin Additions
   const [showAddCompanyModal, setShowAddCompanyModal] = useState(false)
@@ -306,6 +335,73 @@ const AdminDashboard = () => {
     )
   }, [applications, searchTerm])
 
+  const pendingRecruiters = useMemo(() => {
+    return users.filter((u) => u.role === 'employer' && !u.is_approved_by_admin)
+  }, [users])
+
+  const allRecruiters = useMemo(() => {
+    return users.filter((u) => u.role === 'employer')
+  }, [users])
+
+  const filteredRecruiters = useMemo(() => {
+    let list = filteredUsers.filter((u) => u.role === 'employer')
+    if (recruiterFilter === 'pending') {
+      list = list.filter((u) => !u.is_approved_by_admin)
+    } else if (recruiterFilter === 'approved') {
+      list = list.filter((u) => u.is_approved_by_admin)
+    }
+    return list
+  }, [filteredUsers, recruiterFilter])
+
+  const filteredSeekers = useMemo(() => {
+    return filteredUsers.filter((u) => u.role === 'seeker')
+  }, [filteredUsers])
+
+  const analyticsMetrics = useMemo(() => {
+    const totalUsersCount = users.length || 1
+    const seekersCount = users.filter((u) => u.role === 'seeker').length
+    const employersCount = users.filter((u) => u.role === 'employer').length
+    const verifiedUsersCount = users.filter((u) => u.is_verified).length
+    const approvedEmployersCount = users.filter((u) => u.role === 'employer' && u.is_approved_by_admin).length
+    const pendingEmployersCount = employersCount - approvedEmployersCount
+
+    const activeJobsCount = jobs.filter((j) => j.is_active).length
+    const featuredJobsCount = jobs.filter((j) => j.is_featured).length
+
+    const verifiedCompaniesCount = companies.filter((c) => c.is_verified).length
+    const featuredCompaniesCount = companies.filter((c) => c.is_featured).length
+
+    const appStatusCounts = {
+      applied: applications.filter((a) => a.status === 'applied').length,
+      screening: applications.filter((a) => a.status === 'screening').length,
+      interview: applications.filter((a) => a.status === 'interview').length,
+      shortlisted: applications.filter((a) => a.status === 'shortlisted').length,
+      accepted: applications.filter((a) => a.status === 'accepted' || a.status === 'offer').length,
+      rejected: applications.filter((a) => a.status === 'rejected').length,
+    }
+
+    return {
+      seekersCount,
+      employersCount,
+      verifiedUsersCount,
+      approvedEmployersCount,
+      pendingEmployersCount,
+      totalJobsCount: jobs.length,
+      activeJobsCount,
+      featuredJobsCount,
+      totalCompaniesCount: companies.length,
+      verifiedCompaniesCount,
+      featuredCompaniesCount,
+      totalAppsCount: applications.length,
+      appStatusCounts,
+      seekerPercent: Math.round((seekersCount / totalUsersCount) * 100),
+      employerPercent: Math.round((employersCount / totalUsersCount) * 100),
+      recruiterApprovalRate: employersCount > 0 ? Math.round((approvedEmployersCount / employersCount) * 100) : 100,
+      jobActiveRate: jobs.length > 0 ? Math.round((activeJobsCount / jobs.length) * 100) : 0,
+      companyVerificationRate: companies.length > 0 ? Math.round((verifiedCompaniesCount / companies.length) * 100) : 0,
+    }
+  }, [users, jobs, companies, applications])
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center pt-24">
@@ -314,24 +410,35 @@ const AdminDashboard = () => {
     )
   }
 
+  const showAnalytics = activeTab === 'analytics'
+  const showRecruiters = activeTab === 'recruiters'
+  const showSeekers = activeTab === 'seekers'
   const showUsers = activeTab === 'all' || activeTab === 'users'
   const showJobs = activeTab === 'all' || activeTab === 'jobs'
   const showCompanies = activeTab === 'all' || activeTab === 'companies'
   const showApplications = activeTab === 'all' || activeTab === 'applications'
 
   return (
-    <SidebarLayout title="Admin Panel" role="admin" profile={profile}>
+    <SidebarLayout
+      title="Admin Panel"
+      role="admin"
+      profile={profile}
+      pendingRecruitersCount={pendingRecruiters.length}
+    >
       <div className="min-h-screen px-4 pb-12 pt-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
         <section className="overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-10 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="display-font mt-5 text-4xl font-bold sm:text-5xl">Platform Control Panel</h1>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-cyan-300">
+                <ShieldCheck size={14} /> Master Platform Administration
+              </div>
+              <h1 className="display-font mt-3 text-4xl font-bold sm:text-5xl">Platform Control Panel</h1>
               <p className="mt-3 max-w-2xl text-sm leading-7 text-blue-100">
-                Manage users, jobs, companies, and applications from one place with instant real-time search.
+                Govern users, verify recruiters, monitor job postings, and audit applications across Skilloria.
               </p>
             </div>
-            <div className="rounded-[1.5rem] border border-white/15 bg-white/10 px-5 py-4">
+            <div className="rounded-[1.5rem] border border-white/15 bg-white/10 px-5 py-4 backdrop-blur-md">
               <p className="text-xs text-blue-100/80">Signed in as Admin</p>
               <p className="mt-2 text-lg font-bold">{profile?.email}</p>
               <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -367,13 +474,21 @@ const AdminDashboard = () => {
           </div>
         ) : null}
 
+        {/* Global Key Metrics Bar */}
         <section className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
           {cardConfig.map((item) => {
             const Icon = item.icon
             return (
-              <div key={item.key} className="section-frame rounded-[1.75rem] p-5 bg-white/90 border border-blue-100 shadow-sm">
-                <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.bg} ${item.color}`}>
-                  <Icon size={22} />
+              <div key={item.key} className="section-frame rounded-[1.75rem] p-5 bg-white/90 border border-blue-100 shadow-sm transition hover:shadow-md">
+                <div className="flex items-center justify-between">
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${item.bg} ${item.color}`}>
+                    <Icon size={22} />
+                  </div>
+                  {item.key === 'total_users' && pendingRecruiters.length > 0 && (
+                    <span className="rounded-full bg-rose-100 border border-rose-200 px-2.5 py-0.5 text-[11px] font-bold text-rose-700 animate-pulse">
+                      {pendingRecruiters.length} Pending Approval
+                    </span>
+                  )}
                 </div>
                 <p className="mt-4 text-sm text-slate-500">{item.label}</p>
                 <p className="mt-1 text-3xl font-extrabold text-slate-900">{stats[item.key] || 0}</p>
@@ -382,16 +497,16 @@ const AdminDashboard = () => {
           })}
         </section>
 
-        {/* Live Search & Filter Bar */}
+        {/* Live Search & Segment Switcher Bar */}
         <section className="mt-8 rounded-[2rem] border border-blue-100 bg-white/90 p-5 shadow-sm backdrop-blur">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="relative flex-1">
+          <div className="flex flex-col gap-4">
+            <div className="relative w-full">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search across users, jobs, companies, skills, emails, locations..."
+                placeholder="Search across users, recruiters, jobs, companies, skills, emails, locations..."
                 className="w-full rounded-2xl border border-slate-200 bg-slate-50/70 pl-11 pr-10 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100"
               />
               {searchTerm ? (
@@ -404,30 +519,75 @@ const AdminDashboard = () => {
               ) : null}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
               <button
-                onClick={() => setActiveTab('all')}
-                className={`rounded-xl px-4 py-2.5 text-xs font-bold transition ${
+                onClick={() => handleTabChange('all')}
+                className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
                   activeTab === 'all'
                     ? 'bg-slate-900 text-white shadow-sm'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
               >
-                All
+                Platform Overview
               </button>
+
               <button
-                onClick={() => setActiveTab('users')}
-                className={`rounded-xl px-4 py-2.5 text-xs font-bold transition ${
+                onClick={() => handleTabChange('analytics')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
+                  activeTab === 'analytics'
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'
+                }`}
+              >
+                <BarChart3 size={14} />
+                Analytics & Insights
+              </button>
+
+              <button
+                onClick={() => handleTabChange('recruiters')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
+                  activeTab === 'recruiters'
+                    ? 'bg-rose-600 text-white shadow-sm'
+                    : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                }`}
+              >
+                <ShieldCheck size={14} />
+                Recruiter Approvals
+                {pendingRecruiters.length > 0 && (
+                  <span className={`ml-1 rounded-full px-1.5 py-0.2 text-[10px] font-extrabold ${
+                    activeTab === 'recruiters' ? 'bg-white text-rose-600' : 'bg-rose-600 text-white animate-pulse'
+                  }`}>
+                    {pendingRecruiters.length}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => handleTabChange('seekers')}
+                className={`inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold transition ${
+                  activeTab === 'seekers'
+                    ? 'bg-purple-600 text-white shadow-sm'
+                    : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
+                }`}
+              >
+                <GraduationCap size={14} />
+                Job Seekers ({filteredSeekers.length})
+              </button>
+
+              <button
+                onClick={() => handleTabChange('users')}
+                className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
                   activeTab === 'users'
                     ? 'bg-blue-600 text-white shadow-sm'
                     : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
                 }`}
               >
-                Users ({filteredUsers.length})
+                All Users ({filteredUsers.length})
               </button>
+
               <button
-                onClick={() => setActiveTab('jobs')}
-                className={`rounded-xl px-4 py-2.5 text-xs font-bold transition ${
+                onClick={() => handleTabChange('jobs')}
+                className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
                   activeTab === 'jobs'
                     ? 'bg-cyan-600 text-white shadow-sm'
                     : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
@@ -435,9 +595,10 @@ const AdminDashboard = () => {
               >
                 Jobs ({filteredJobs.length})
               </button>
+
               <button
-                onClick={() => setActiveTab('companies')}
-                className={`rounded-xl px-4 py-2.5 text-xs font-bold transition ${
+                onClick={() => handleTabChange('companies')}
+                className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
                   activeTab === 'companies'
                     ? 'bg-amber-600 text-white shadow-sm'
                     : 'bg-amber-50 text-amber-700 hover:bg-amber-100'
@@ -445,9 +606,10 @@ const AdminDashboard = () => {
               >
                 Companies ({filteredCompanies.length})
               </button>
+
               <button
-                onClick={() => setActiveTab('applications')}
-                className={`rounded-xl px-4 py-2.5 text-xs font-bold transition ${
+                onClick={() => handleTabChange('applications')}
+                className={`rounded-xl px-4 py-2 text-xs font-bold transition ${
                   activeTab === 'applications'
                     ? 'bg-emerald-600 text-white shadow-sm'
                     : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
@@ -460,6 +622,364 @@ const AdminDashboard = () => {
         </section>
 
         <section className="mt-8 grid gap-8">
+          {showAnalytics ? (
+            <div className="space-y-6">
+              {/* Analytics Header */}
+              <div className="section-frame rounded-[2rem] border border-indigo-100 bg-white/95 p-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600">
+                      <BarChart3 size={24} />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900">Platform Analytics & Intelligence</h2>
+                      <p className="text-xs text-slate-500">Real-time health, ratio breakdowns, and platform conversion insights</p>
+                    </div>
+                  </div>
+                  <div className="inline-flex items-center gap-2 rounded-xl bg-indigo-50 border border-indigo-100 px-3.5 py-1.5 text-xs font-bold text-indigo-700">
+                    <TrendingUp size={14} /> Live Telemetry
+                  </div>
+                </div>
+
+                {/* 4 Ratio Cards */}
+                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                    <p className="text-xs font-semibold text-slate-500">Seekers vs Employers</p>
+                    <div className="mt-2 flex items-baseline justify-between">
+                      <span className="text-2xl font-black text-slate-900">{analyticsMetrics.seekersCount} : {analyticsMetrics.employersCount}</span>
+                      <span className="text-xs font-bold text-blue-600">{analyticsMetrics.seekerPercent}% seekers</span>
+                    </div>
+                    <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                      <div className="h-full bg-blue-600 rounded-full" style={{ width: `${analyticsMetrics.seekerPercent}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                    <p className="text-xs font-semibold text-slate-500">Recruiter Approval Rate</p>
+                    <div className="mt-2 flex items-baseline justify-between">
+                      <span className="text-2xl font-black text-slate-900">{analyticsMetrics.recruiterApprovalRate}%</span>
+                      <span className="text-xs font-bold text-rose-600">{analyticsMetrics.pendingEmployersCount} pending</span>
+                    </div>
+                    <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                      <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${analyticsMetrics.recruiterApprovalRate}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                    <p className="text-xs font-semibold text-slate-500">Job Activity Rate</p>
+                    <div className="mt-2 flex items-baseline justify-between">
+                      <span className="text-2xl font-black text-slate-900">{analyticsMetrics.jobActiveRate}%</span>
+                      <span className="text-xs font-bold text-cyan-600">{analyticsMetrics.activeJobsCount} / {analyticsMetrics.totalJobsCount} active</span>
+                    </div>
+                    <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                      <div className="h-full bg-cyan-500 rounded-full" style={{ width: `${analyticsMetrics.jobActiveRate}%` }} />
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
+                    <p className="text-xs font-semibold text-slate-500">Company Verification</p>
+                    <div className="mt-2 flex items-baseline justify-between">
+                      <span className="text-2xl font-black text-slate-900">{analyticsMetrics.companyVerificationRate}%</span>
+                      <span className="text-xs font-bold text-amber-600">{analyticsMetrics.verifiedCompaniesCount} verified</span>
+                    </div>
+                    <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+                      <div className="h-full bg-amber-500 rounded-full" style={{ width: `${analyticsMetrics.companyVerificationRate}%` }} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pipeline Breakdown */}
+                <div className="mt-8 border-t border-slate-100 pt-6">
+                  <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <FileText size={16} className="text-emerald-600" /> Candidate Application Pipeline Stages
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    {[
+                      { label: 'Applied', count: analyticsMetrics.appStatusCounts.applied, bg: 'bg-blue-50 text-blue-700 border-blue-200' },
+                      { label: 'Screening', count: analyticsMetrics.appStatusCounts.screening, bg: 'bg-amber-50 text-amber-700 border-amber-200' },
+                      { label: 'Interview', count: analyticsMetrics.appStatusCounts.interview, bg: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+                      { label: 'Shortlisted', count: analyticsMetrics.appStatusCounts.shortlisted, bg: 'bg-purple-50 text-purple-700 border-purple-200' },
+                      { label: 'Accepted / Offer', count: analyticsMetrics.appStatusCounts.accepted, bg: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                      { label: 'Rejected', count: analyticsMetrics.appStatusCounts.rejected, bg: 'bg-rose-50 text-rose-700 border-rose-200' },
+                    ].map((stage) => (
+                      <div key={stage.label} className={`rounded-2xl border p-4 text-center ${stage.bg}`}>
+                        <p className="text-2xl font-black">{stage.count}</p>
+                        <p className="text-xs font-semibold mt-1">{stage.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quick Shortcuts */}
+                <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {analyticsMetrics.pendingEmployersCount > 0 ? (
+                    <div className="rounded-2xl border border-rose-200 bg-rose-50/70 p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <AlertTriangle className="text-rose-600" size={24} />
+                        <div>
+                          <p className="text-xs font-bold text-rose-900">{analyticsMetrics.pendingEmployersCount} Recruiters awaiting approval</p>
+                          <p className="text-[11px] text-rose-700">Grant posting authorization to pending corporate accounts</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleTabChange('recruiters')}
+                        className="rounded-xl bg-rose-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-rose-700 transition"
+                      >
+                        Review
+                      </button>
+                    </div>
+                  ) : null}
+
+                  <div className="rounded-2xl border border-cyan-200 bg-cyan-50/70 p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Briefcase className="text-cyan-700" size={24} />
+                      <div>
+                        <p className="text-xs font-bold text-cyan-900">{analyticsMetrics.featuredJobsCount} Featured Job Postings</p>
+                        <p className="text-[11px] text-cyan-700">Currently boosted on student home and discovery feeds</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleTabChange('jobs')}
+                      className="rounded-xl bg-cyan-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-cyan-700 transition"
+                    >
+                      Manage
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
+          {showRecruiters ? (
+            <div className="section-frame overflow-hidden rounded-[2rem] border border-rose-100 bg-white/95 shadow-sm">
+              <div className="border-b border-slate-200 px-6 py-5">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+                      <ShieldCheck size={20} />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-slate-900">Recruiter Governance & Approvals</h2>
+                      <p className="text-xs text-slate-500">Validate employer authenticity, grant posting licenses, and prevent spam</p>
+                    </div>
+                  </div>
+
+                  {/* Sub-filter pills */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setRecruiterFilter('all')}
+                      className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
+                        recruiterFilter === 'all' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      All ({allRecruiters.length})
+                    </button>
+                    <button
+                      onClick={() => setRecruiterFilter('pending')}
+                      className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition ${
+                        recruiterFilter === 'pending'
+                          ? 'bg-rose-600 text-white shadow-sm'
+                          : 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                      }`}
+                    >
+                      Pending ({pendingRecruiters.length})
+                    </button>
+                    <button
+                      onClick={() => setRecruiterFilter('approved')}
+                      className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${
+                        recruiterFilter === 'approved' ? 'bg-emerald-600 text-white shadow-sm' : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                      }`}
+                    >
+                      Approved ({allRecruiters.length - pendingRecruiters.length})
+                    </button>
+                  </div>
+                </div>
+
+                {pendingRecruiters.length > 0 && recruiterFilter !== 'approved' && (
+                  <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 flex items-center justify-between text-xs text-rose-800 font-semibold">
+                    <span className="flex items-center gap-2">
+                      <AlertTriangle size={16} className="text-rose-600 shrink-0" />
+                      Attention: {pendingRecruiters.length} recruiter account(s) are awaiting admin clearance before posting jobs.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-slate-50/80 text-left text-slate-500">
+                    <tr>
+                      <th className="px-6 py-3">Recruiter Profile</th>
+                      <th className="px-6 py-3">Company & Location</th>
+                      <th className="px-6 py-3">Approval Status</th>
+                      <th className="px-6 py-3">Security & Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredRecruiters.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="px-6 py-8 text-center text-slate-500">
+                          No recruiters found for the selected filter.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredRecruiters.map((user) => (
+                        <tr key={user.id} className="border-t border-slate-100 hover:bg-slate-50/50 transition">
+                          <td className="px-6 py-4">
+                            <p className="font-bold text-slate-900">{user.full_name}</p>
+                            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                              <Mail size={12} className="text-slate-400" /> {user.email}
+                            </p>
+                            {user.phone_number && (
+                              <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                                <Phone size={12} /> {user.phone_number}
+                              </p>
+                            )}
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="font-semibold text-slate-800 flex items-center gap-1.5">
+                              <Building2 size={14} className="text-indigo-600" />
+                              {user.company_name || 'Individual Recruiter'}
+                            </p>
+                            <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                              <MapPin size={12} className="text-slate-400" />
+                              {user.location || 'Location Not Specified'}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-col items-start gap-1">
+                              <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${
+                                user.is_approved_by_admin
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : 'bg-rose-100 text-rose-800 animate-pulse'
+                              }`}>
+                                {user.is_approved_by_admin ? <Check size={12} /> : <AlertTriangle size={12} />}
+                                {user.is_approved_by_admin ? 'Approved Recruiter' : 'Pending Approval'}
+                              </span>
+                              <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+                                user.is_verified ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-500'
+                              }`}>
+                                {user.is_verified ? 'Verified Email' : 'Unverified Email'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button
+                                onClick={() => updateUser(user.id, { is_approved_by_admin: !user.is_approved_by_admin })}
+                                className={`inline-flex items-center gap-1 rounded-xl px-3.5 py-1.5 text-xs font-bold shadow-sm transition ${
+                                  user.is_approved_by_admin
+                                    ? 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                                    : 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-600/20'
+                                }`}
+                              >
+                                {user.is_approved_by_admin ? 'Revoke Approval' : '✓ Approve Recruiter'}
+                              </button>
+                              <button
+                                onClick={() => updateUser(user.id, { is_verified: !user.is_verified })}
+                                className="rounded-xl border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                              >
+                                {user.is_verified ? 'Unverify' : 'Verify'}
+                              </button>
+                              <button
+                                onClick={() => updateUser(user.id, { is_active: !user.is_active })}
+                                className={`rounded-xl px-2.5 py-1.5 text-xs font-semibold transition ${
+                                  user.is_active ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-rose-100 text-rose-700 hover:bg-rose-200'
+                                }`}
+                              >
+                                {user.is_active ? 'Disable' : 'Enable'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : null}
+
+          {showSeekers ? (
+            <div className="section-frame overflow-hidden rounded-[2rem] border border-purple-100 bg-white/95 shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+                    <GraduationCap size={18} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900">Job Seekers & Candidates ({filteredSeekers.length})</h2>
+                    <p className="text-xs text-slate-500">Candidate accounts, applicant profiles, and student verification</p>
+                  </div>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="bg-slate-50/80 text-left text-slate-500">
+                    <tr>
+                      <th className="px-6 py-3">Candidate</th>
+                      <th className="px-6 py-3">Contact & Location</th>
+                      <th className="px-6 py-3">Status</th>
+                      <th className="px-6 py-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredSeekers.length === 0 ? (
+                      <tr>
+                        <td colSpan="4" className="px-6 py-8 text-center text-slate-500">
+                          No job seekers matched your query.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredSeekers.map((user) => (
+                        <tr key={user.id} className="border-t border-slate-100 hover:bg-slate-50/50 transition">
+                          <td className="px-6 py-4">
+                            <p className="font-bold text-slate-900">{user.full_name}</p>
+                            <p className="text-xs text-slate-500">{user.email}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <p className="text-xs text-slate-600">{user.location || 'Location not set'}</p>
+                            <p className="text-xs text-slate-400 mt-0.5">{user.phone_number || 'No phone'}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap gap-1.5">
+                              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                user.is_verified ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                              }`}>
+                                {user.is_verified ? 'Verified Candidate' : 'Unverified'}
+                              </span>
+                              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                                user.is_active ? 'bg-slate-100 text-slate-700' : 'bg-slate-300 text-slate-800'
+                              }`}>
+                                {user.is_active ? 'Active' : 'Disabled'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button
+                                onClick={() => updateUser(user.id, { is_verified: !user.is_verified })}
+                                className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-200 transition"
+                              >
+                                {user.is_verified ? 'Unverify' : 'Verify'}
+                              </button>
+                              <button
+                                onClick={() => updateUser(user.id, { is_active: !user.is_active })}
+                                className="rounded-full bg-slate-200 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-300 transition"
+                              >
+                                {user.is_active ? 'Disable' : 'Enable'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ) : null}
+
           {showUsers ? (
             <div className="section-frame overflow-hidden rounded-[2rem] border border-blue-100 bg-white/95 shadow-sm">
               <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">

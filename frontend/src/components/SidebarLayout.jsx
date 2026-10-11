@@ -16,14 +16,18 @@ import {
   ShieldCheck,
   Sparkles,
   MessageSquare,
+  GraduationCap,
+  Award,
+  FileText,
+  CheckCircle2,
 } from 'lucide-react'
 
-const SidebarLayout = ({ children, title, role, profile }) => {
+const SidebarLayout = ({ children, title, role, profile, pendingRecruitersCount = 0 }) => {
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = React.useState(false)
-  const currentTab = searchParams.get('tab') || 'overview'
+  const currentTab = searchParams.get('tab') || (role === 'admin' ? 'all' : 'overview')
 
   const handleLogout = () => {
     localStorage.removeItem('access_token')
@@ -35,9 +39,33 @@ const SidebarLayout = ({ children, title, role, profile }) => {
 
   const adminSections = [
     {
-      title: 'Management',
+      title: 'COMMAND HUB',
       links: [
-        { to: '/admin-dashboard', icon: LayoutDashboard, label: 'Admin Console' },
+        { to: '/admin-dashboard', tab: 'all', icon: LayoutDashboard, label: 'Platform Overview' },
+        { to: '/admin-dashboard?tab=analytics', tab: 'analytics', icon: BarChart3, label: 'Platform Analytics' },
+      ],
+    },
+    {
+      title: 'USERS & ACCESS',
+      links: [
+        { to: '/admin-dashboard?tab=users', tab: 'users', icon: Users, label: 'All Users' },
+        { to: '/admin-dashboard?tab=recruiters', tab: 'recruiters', icon: ShieldCheck, label: 'Recruiter Approvals' },
+        { to: '/admin-dashboard?tab=seekers', tab: 'seekers', icon: GraduationCap, label: 'Job Seekers' },
+      ],
+    },
+    {
+      title: 'JOB ECOSYSTEM',
+      links: [
+        { to: '/admin-dashboard?tab=jobs', tab: 'jobs', icon: Briefcase, label: 'Job Postings' },
+        { to: '/admin-dashboard?tab=companies', tab: 'companies', icon: Building2, label: 'Companies & Brands' },
+        { to: '/admin-dashboard?tab=applications', tab: 'applications', icon: FileText, label: 'Candidate Applications' },
+      ],
+    },
+    {
+      title: 'PLATFORM TOOLS',
+      links: [
+        { to: '/assessments', tab: 'assessments', icon: Award, label: 'Skill Assessment Engine' },
+        { to: '/pricing', tab: 'pricing', icon: Sparkles, label: 'Pricing & Plans' },
       ],
     },
   ]
@@ -73,6 +101,9 @@ const SidebarLayout = ({ children, title, role, profile }) => {
 
   const isLinkActive = (link) => {
     if (role === 'admin') {
+      if (location.pathname === '/admin-dashboard') {
+        return currentTab === (link.tab || 'all')
+      }
       return location.pathname === link.to
     }
     if (link.to === '/post-job') {
@@ -147,6 +178,13 @@ const SidebarLayout = ({ children, title, role, profile }) => {
                           Resdex
                         </span>
                       )}
+                      {link.tab === 'recruiters' && pendingRecruitersCount > 0 && (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm ${
+                          active ? 'bg-white text-rose-600' : 'bg-rose-500 text-white animate-pulse'
+                        }`}>
+                          {pendingRecruitersCount} pending
+                        </span>
+                      )}
                     </Link>
                   )
                 })}
@@ -159,12 +197,14 @@ const SidebarLayout = ({ children, title, role, profile }) => {
         {/* Footer Profile */}
         <div className="p-4 border-t border-slate-100 bg-slate-50/70">
           <div className="flex items-center gap-3 mb-3 px-1">
-            <div className="h-9 w-9 rounded-xl bg-blue-600/10 text-blue-700 flex items-center justify-center font-bold text-sm shrink-0 border border-blue-200">
-              {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || 'R'}
+            <div className={`h-9 w-9 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 border ${
+              role === 'admin' ? 'bg-indigo-600/10 text-indigo-700 border-indigo-200' : 'bg-blue-600/10 text-blue-700 border-blue-200'
+            }`}>
+              {profile?.first_name?.[0]?.toUpperCase() || profile?.email?.[0]?.toUpperCase() || (role === 'admin' ? 'A' : 'R')}
             </div>
             <div className="overflow-hidden">
               <p className="text-xs font-bold text-slate-900 truncate">
-                {profile?.company_name || profile?.first_name ? `${profile?.first_name} ${profile?.last_name || ''}`.trim() : profile?.email}
+                {role === 'admin' ? 'Platform Administrator' : (profile?.company_name || profile?.first_name ? `${profile?.first_name} ${profile?.last_name || ''}`.trim() : profile?.email)}
               </p>
               <p className="text-[11px] text-slate-500 truncate">{profile?.email}</p>
             </div>
@@ -174,7 +214,7 @@ const SidebarLayout = ({ children, title, role, profile }) => {
             className="flex w-full items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition border border-rose-100"
           >
             <LogOut size={14} />
-            Logout from Recruiter Hub
+            {role === 'admin' ? 'Sign Out Admin Console' : 'Logout from Recruiter Hub'}
           </button>
         </div>
       </aside>
