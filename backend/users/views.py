@@ -61,27 +61,30 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        user.is_verified = True
+        user.save(update_fields=['is_verified'])
 
-        otp_code = str(random.randint(100000, 999999))
-        otp_record = EmailOTP.objects.create(user=user, otp=otp_code, purpose='verification')
-
+        # Optional background notification / OTP record
         try:
-            if not send_otp_email(user.email, otp_code):
-                otp_record.delete()
-                return Response({
-                    'message': 'Account created, but the verification email could not be sent. You can sign in with your password and verify later.',
-                    'verification_email_sent': False,
-                }, status=status.HTTP_201_CREATED)
+            otp_code = str(random.randint(100000, 999999))
+            EmailOTP.objects.create(user=user, otp=otp_code, purpose='verification')
+            send_otp_email(user.email, otp_code)
         except Exception:
-            logger.exception("Failed to send signup OTP email for %s", user.email)
-            otp_record.delete()
-            return Response({
-                'message': 'Account created, but the verification email could not be sent. You can sign in with your password and verify later.',
-                'verification_email_sent': False,
-            }, status=status.HTTP_201_CREATED)
+            logger.warning("Could not send welcome OTP email for %s", user.email)
 
+        # Issue JWT tokens directly so user is immediately logged in
+        refresh = RefreshToken.for_user(user)
         return Response({
-            "message": "User registered successfully. OTP sent to email."
+            "message": "User registered successfully.",
+            "access": str(refresh.access_token),
+            "refresh": str(refresh),
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "role": user.role,
+                "company_name": getattr(user, 'company_name', '') or "",
+                "is_verified": user.is_verified,
+            }
         }, status=status.HTTP_201_CREATED)
 
 
@@ -105,10 +108,22 @@ class VerifyOTPView(APIView):
                 return Response({"error": "Invalid OTP"}, status=400)
 
             user.is_verified = True
-            user.save()
+            user.save(update_fields=['is_verified'])
             otp_obj.delete()
 
-            return Response({"message": "Email verified successfully"})
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                "message": "Email verified successfully",
+                "access": str(refresh.access_token),
+                "refresh": str(refresh),
+                "user": {
+                    "id": user.id,
+                    "email": user.email,
+                    "role": user.role,
+                    "company_name": getattr(user, 'company_name', '') or "",
+                    "is_verified": user.is_verified,
+                }
+            })
 
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=400)

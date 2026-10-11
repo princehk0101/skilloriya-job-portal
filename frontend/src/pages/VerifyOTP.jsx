@@ -19,8 +19,28 @@ const VerifyOTP = () => {
     setErrorMessage('')
 
     try {
-      await axios.post('/api/users/verify-otp/', { email, otp })
-      navigate('/')
+      const res = await axios.post('/api/users/verify-otp/', { email, otp })
+      if (res.data?.access) {
+        localStorage.setItem('access_token', res.data.access)
+        localStorage.setItem('refresh_token', res.data.refresh)
+        const role = res.data?.user?.role || 'seeker'
+        localStorage.setItem('user_role', role)
+
+        try {
+          const profileRes = await axios.get('/api/users/profile/', {
+            headers: { Authorization: `Bearer ${res.data.access}` },
+          })
+          localStorage.setItem('user_profile', JSON.stringify(profileRes.data))
+        } catch {
+          if (res.data?.user) {
+            localStorage.setItem('user_profile', JSON.stringify(res.data.user))
+          }
+        }
+
+        navigate(role === 'employer' ? '/employer' : '/dashboard')
+      } else {
+        navigate('/')
+      }
     } catch (error) {
       console.error('Verify OTP failed:', error.response?.data || error.message)
       setErrorMessage(error.response?.data?.detail || error.response?.data?.message || 'Invalid OTP. Please try again.')

@@ -48,6 +48,27 @@ const Signup = () => {
         company_name: formData.company_name
       }
       const response = await axios.post('/api/users/register/', payload)
+      if (response.data?.access) {
+        localStorage.setItem('access_token', response.data.access)
+        localStorage.setItem('refresh_token', response.data.refresh)
+        const role = response.data?.user?.role || formData.role || 'seeker'
+        localStorage.setItem('user_role', role)
+
+        try {
+          const profileRes = await axios.get('/api/users/profile/', {
+            headers: { Authorization: `Bearer ${response.data.access}` },
+          })
+          localStorage.setItem('user_profile', JSON.stringify(profileRes.data))
+        } catch {
+          if (response.data?.user) {
+            localStorage.setItem('user_profile', JSON.stringify(response.data.user))
+          }
+        }
+
+        navigate(role === 'employer' ? '/employer' : '/dashboard')
+        return
+      }
+
       if (response.data.verification_email_sent === false) {
         setErrorMessage(response.data.message)
         setShowLoginLink(true)
