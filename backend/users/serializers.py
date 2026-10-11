@@ -140,18 +140,36 @@ class ProfileSerializer(serializers.ModelSerializer):
     def get_profile_image_url(self, obj):
         if not obj.profile_image:
             return None
+        name = str(obj.profile_image)
+        if name.startswith('http://') or name.startswith('https://'):
+            return name
         request = self.context.get("request")
         if request:
-            return request.build_absolute_uri(obj.profile_image.url)
-        return obj.profile_image.url
+            try:
+                return request.build_absolute_uri(obj.profile_image.url)
+            except Exception:
+                return obj.profile_image.url
+        try:
+            return obj.profile_image.url
+        except Exception:
+            return str(obj.profile_image)
 
     def get_resume_url(self, obj):
         if not obj.resume:
             return None
+        name = str(obj.resume)
+        if name.startswith('http://') or name.startswith('https://'):
+            return name
         request = self.context.get("request")
         if request:
-            return request.build_absolute_uri(obj.resume.url)
-        return obj.resume.url
+            try:
+                return request.build_absolute_uri(obj.resume.url)
+            except Exception:
+                return obj.resume.url
+        try:
+            return obj.resume.url
+        except Exception:
+            return str(obj.resume)
 
     def validate_profile_image(self, value):
         if value and hasattr(value, 'size') and value.size > 5 * 1024 * 1024:

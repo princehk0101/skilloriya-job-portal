@@ -21,6 +21,7 @@ urlpatterns = [
     path('api/companies/', include('companies.urls')),
     path('api/chat/', include('core.chat_urls')),
     path('api/ai/', include('core.ai_urls')),
+    path('api/storage/', include('core.storage_urls')),
 
     #  JWT LOGIN ROUTES
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),

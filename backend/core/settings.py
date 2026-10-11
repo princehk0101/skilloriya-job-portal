@@ -171,6 +171,15 @@ MEDIA_URL = "/media/"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
+# ================= CLOUD STORAGE (ImageKit & Supabase) =================
+IMAGEKIT_PUBLIC_KEY = os.getenv("IMAGEKIT_PUBLIC_KEY", "")
+IMAGEKIT_PRIVATE_KEY = os.getenv("IMAGEKIT_PRIVATE_KEY", "")
+IMAGEKIT_URL_ENDPOINT = os.getenv("IMAGEKIT_URL_ENDPOINT", "")
+
+SUPABASE_URL = os.getenv("SUPABASE_URL", "")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY", "") or os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME", "resumes")
+
 # ================= REST FRAMEWORK =================
 REST_FRAMEWORK = {
 
