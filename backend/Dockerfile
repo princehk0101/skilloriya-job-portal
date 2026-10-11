@@ -13,6 +13,10 @@ RUN apt-get update \
 COPY requirements.txt /app/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-RUN pip install celery redis psycopg2-binary
+RUN pip install celery redis psycopg2-binary gunicorn
 
 COPY . /app/
+
+EXPOSE 8000 10000
+
+CMD ["sh", "-c", "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn core.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120"]
