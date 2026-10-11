@@ -3,6 +3,8 @@ from .views import (
     ApplyJobView,
     MyApplicationsView,
     JobApplicantsView,
+    AllEmployerApplicantsView,
+    TalentSearchView,
     UpdateApplicationStatusView,
     EmployerDashboardView,
     ScheduleInterviewView,
@@ -19,6 +21,8 @@ urlpatterns = [
     path('my-applications/', MyApplicationsView.as_view(), name='my-applications'),
 
     # Employer
+    path('employer/applicants/', AllEmployerApplicantsView.as_view(), name='all-employer-applicants'),
+    path('employer/talent-search/', TalentSearchView.as_view(), name='talent-search'),
     path('job/<int:job_id>/applicants/', JobApplicantsView.as_view(), name='job-applicants'),
     path('applications/<int:pk>/status/', UpdateApplicationStatusView.as_view(), name='update-application-status'),
     path('applications/<int:application_id>/skill-proof/review/', ReviewSkillProofView.as_view(), name='review-skill-proof'),

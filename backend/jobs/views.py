@@ -24,7 +24,7 @@ from .alerts import alert_matches_job, notify_matching_job_alerts
 
 class JobListView(ListAPIView):
 
-    queryset = Job.objects.filter(is_active=True).select_related('employer', 'category').order_by("-is_featured", "-created_at")
+    queryset = Job.objects.filter(is_active=True).select_related('employer', 'category').order_by("-created_at")
     serializer_class = JobSerializer
     permission_classes = [AllowAny]
 

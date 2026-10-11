@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Briefcase, Loader2, MapPin, Sparkles, Wallet } from 'lucide-react'
+import SidebarLayout from '../components/SidebarLayout'
 
 const normalizeList = (data) => {
   if (Array.isArray(data)) return data
@@ -11,6 +12,7 @@ const normalizeList = (data) => {
 
 const PostJob = () => {
   const navigate = useNavigate()
+  const [user, setUser] = useState(null)
   const [categories, setCategories] = useState([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -54,6 +56,7 @@ const PostJob = () => {
 
         localStorage.setItem('user_role', 'employer')
         localStorage.setItem('user_profile', JSON.stringify(profileRes.data))
+        setUser(profileRes.data)
         setCategories(normalizeList(categoriesRes.data))
       } catch (err) {
         console.error('Post job page load failed:', err.response?.data || err.message)
@@ -103,7 +106,7 @@ const PostJob = () => {
         experience_required: 0,
         category: '',
       })
-      setTimeout(() => navigate('/employer'), 700)
+      setTimeout(() => navigate('/employer?tab=jobs'), 700)
     } catch (err) {
       console.error('Post job failed:', err.response?.data || err.message)
       setError(err.response?.data?.detail || 'Unable to post job. Please verify required fields.')
@@ -121,7 +124,8 @@ const PostJob = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+    <SidebarLayout title="Post New Job" role="employer" profile={user}>
+      <div className="px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex items-center justify-between gap-4">
           <Link to="/employer" className="inline-flex items-center gap-2 rounded-2xl border border-blue-100 bg-white/85 px-4 py-2.5 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-300 hover:text-blue-700">
@@ -327,6 +331,7 @@ const PostJob = () => {
         </div>
       </div>
     </div>
+    </SidebarLayout>
   )
 }
 

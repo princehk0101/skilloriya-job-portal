@@ -376,3 +376,97 @@ class InterviewNotesView(APIView):
         interview.notes = notes.strip()
         interview.save(update_fields=['notes'])
         return Response({'notes': interview.notes})
+
+
+class AllEmployerApplicantsView(ListAPIView):
+    serializer_class = ApplicationSerializer
+    permission_classes = [IsAuthenticated, IsEmployer]
+
+    def get_queryset(self):
+        qs = Application.objects.filter(
+            job__employer=self.request.user
+        ).select_related('applicant', 'job').prefetch_related('status_history').order_by('-applied_at')
+        
+        job_id = self.request.query_params.get('job_id')
+        if job_id and job_id != 'all':
+            qs = qs.filter(job_id=job_id)
+            
+        stage = self.request.query_params.get('status')
+        if stage and stage != 'all':
+            qs = qs.filter(status=stage)
+            
+        search = self.request.query_params.get('q')
+        if search:
+            from django.db.models import Q
+            qs = qs.filter(
+                Q(full_name__icontains=search) |
+                Q(email__icontains=search) |
+                Q(college_name__icontains=search) |
+                Q(job__title__icontains=search)
+            )
+        return qs
+
+
+class TalentSearchView(APIView):
+    permission_classes = [IsAuthenticated, IsEmployer]
+
+    def get(self, request):
+        from django.contrib.auth import get_user_model
+        from django.db.models import Q
+        User = get_user_model()
+
+        query = request.query_params.get('q', '').strip()
+        skill = request.query_params.get('skill', '').strip()
+        location = request.query_params.get('location', '').strip()
+
+        users = User.objects.filter(role='seeker', is_active=True).order_by('-date_joined')
+
+        if query:
+            users = users.filter(
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query) |
+                Q(headline__icontains=query) |
+                Q(skills__icontains=query) |
+                Q(bio__icontains=query) |
+                Q(email__icontains=query)
+            )
+        if skill:
+            users = users.filter(skills__icontains=skill)
+        if location:
+            users = users.filter(location__icontains=location)
+
+        results = []
+        for u in users[:60]:
+            name = f"{u.first_name} {u.last_name}".strip() or u.email.split('@')[0]
+            skills_list = [s.strip() for s in (u.skills or '').split(',') if s.strip()]
+            profile_img = None
+            if u.profile_image:
+                try:
+                    profile_img = request.build_absolute_uri(u.profile_image.url)
+                except Exception:
+                    profile_img = u.profile_image.url
+            resume_url = None
+            if u.resume:
+                try:
+                    resume_url = request.build_absolute_uri(u.resume.url)
+                except Exception:
+                    resume_url = u.resume.url
+
+            results.append({
+                'id': u.id,
+                'name': name,
+                'email': u.email,
+                'headline': u.headline or 'Candidate / Software Professional',
+                'location': u.location or 'India',
+                'experience_years': u.experience_years or 0,
+                'education': u.education or 'B.Tech / Graduate',
+                'skills': skills_list,
+                'profile_image': profile_img,
+                'resume_url': resume_url,
+                'linkedin_url': u.linkedin_url or '',
+                'github_url': u.github_url or '',
+                'date_joined': u.date_joined,
+            })
+
+        return Response(results)
+

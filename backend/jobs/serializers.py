@@ -58,16 +58,30 @@ class JobSerializer(serializers.ModelSerializer):
         return obj.get_job_type_display()
 
     def get_employer_name(self, obj):
+        if hasattr(obj.employer, 'company') and obj.employer.company and obj.employer.company.name:
+            return obj.employer.company.name
+        if getattr(obj.employer, 'company_name', None):
+            return obj.employer.company_name
         full_name = f"{obj.employer.first_name} {obj.employer.last_name}".strip()
         return full_name or obj.employer.email
 
     def get_employer_image_url(self, obj):
-        if not obj.employer.profile_image:
-            return None
         request = self.context.get("request")
-        if request:
-            return request.build_absolute_uri(obj.employer.profile_image.url)
-        return obj.employer.profile_image.url
+        if hasattr(obj.employer, 'company') and obj.employer.company and obj.employer.company.logo:
+            try:
+                if request:
+                    return request.build_absolute_uri(obj.employer.company.logo.url)
+                return obj.employer.company.logo.url
+            except Exception:
+                pass
+        if obj.employer.profile_image:
+            try:
+                if request:
+                    return request.build_absolute_uri(obj.employer.profile_image.url)
+                return obj.employer.profile_image.url
+            except Exception:
+                pass
+        return None
 
     def get_is_saved(self, obj):
         request = self.context.get("request")
