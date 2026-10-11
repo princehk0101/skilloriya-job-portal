@@ -56,17 +56,21 @@ class UploadPDFView(APIView):
         if not pdf:
             return Response({"error": "No PDF file provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-        bucket = request.data.get('bucket', 'resumes')
-        url = upload_pdf_to_supabase(pdf, bucket=bucket)
+        folder = request.data.get('folder') or request.data.get('bucket') or 'resumes'
+        from .storage_service import upload_file_any, is_imagekit_configured, is_supabase_configured
+
+        url = upload_file_any(pdf, folder=folder)
         if url:
+            provider = "imagekit" if is_imagekit_configured() else ("supabase" if is_supabase_configured() else "cloud")
             return Response({
                 "success": True,
                 "url": url,
-                "storage": "supabase",
-                "message": "PDF uploaded successfully to Supabase Storage."
+                "storage": provider,
+                "message": f"Document uploaded successfully to {provider.capitalize()} Storage."
             })
 
         return Response({
             "success": False,
-            "error": "Supabase Storage is not configured or upload failed. Verify your SUPABASE_URL, SUPABASE_KEY, and SUPABASE_BUCKET_NAME in .env."
+            "error": "Cloud Storage is not configured or upload failed. Please configure IMAGEKIT or SUPABASE keys in .env."
         }, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+

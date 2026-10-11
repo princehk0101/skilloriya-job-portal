@@ -146,3 +146,58 @@ def upload_pdf_to_supabase(file_obj, file_name=None, bucket="resumes"):
     except Exception as e:
         logger.exception("Supabase Storage upload error: %s", e)
         return None
+
+
+def upload_pdf_to_imagekit(file_obj, file_name=None, folder="resumes"):
+    """
+    Upload a PDF, DOCX, or document file to ImageKit.
+    ImageKit supports storing all binary types including PDFs, DOCX, TXT.
+    Returns: The public CDN URL of the document, otherwise None.
+    """
+    ik = get_imagekit_client()
+    if not ik:
+        return None
+
+    try:
+        if hasattr(file_obj, 'seek'):
+            file_obj.seek(0)
+
+        if hasattr(file_obj, 'read'):
+            content = file_obj.read()
+            if hasattr(file_obj, 'seek'):
+                file_obj.seek(0)
+        else:
+            content = file_obj
+
+        original_name = getattr(file_obj, 'name', '') or file_name or f"resume_{int(time.time())}.pdf"
+        clean_name = f"{uuid.uuid4().hex[:12]}_{os.path.basename(original_name)}"
+
+        upload_res = ik.upload_file(
+            file=content,
+            file_name=clean_name,
+            options={
+                "folder": folder,
+                "use_unique_file_name": True,
+            }
+        )
+        url = getattr(upload_res, 'url', None) or (upload_res.get('url') if isinstance(upload_res, dict) else None)
+        logger.info("Successfully uploaded PDF to ImageKit: %s", url)
+        return url
+    except Exception as e:
+        logger.exception("ImageKit PDF upload error: %s", e)
+        return None
+
+
+def upload_file_any(file_obj, file_name=None, folder="resumes"):
+    """
+    Unified uploader:
+    1. First tries ImageKit (if configured).
+    2. Then tries Supabase (if configured).
+    3. Returns the resulting cloud URL, or None if no cloud storage is configured.
+    """
+    if is_imagekit_configured():
+        return upload_pdf_to_imagekit(file_obj, file_name=file_name, folder=folder)
+    if is_supabase_configured():
+        return upload_pdf_to_supabase(file_obj, file_name=file_name, bucket=folder)
+    return None
+
