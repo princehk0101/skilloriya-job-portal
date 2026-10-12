@@ -67,9 +67,32 @@ class CompanySerializer(serializers.ModelSerializer):
 
         return data
 
+    def create(self, validated_data):
+        from core.storage_service import upload_image_to_imagekit, is_imagekit_configured
+        logo_file = validated_data.get('logo')
+        if logo_file and is_imagekit_configured():
+            url = upload_image_to_imagekit(logo_file, folder="company_logos")
+            if url:
+                validated_data['logo'] = url
+        return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        from core.storage_service import upload_image_to_imagekit, is_imagekit_configured
+        if 'logo' in validated_data and validated_data['logo'] and is_imagekit_configured():
+            logo_file = validated_data.pop('logo')
+            url = upload_image_to_imagekit(logo_file, folder="company_logos")
+            if url:
+                instance.logo = url
+            else:
+                instance.logo = logo_file
+        return super().update(instance, validated_data)
+
     def get_logo_url(self, obj):
         if not obj.logo:
             return None
+        logo_str = str(obj.logo)
+        if logo_str.startswith('http://') or logo_str.startswith('https://'):
+            return logo_str
         request = self.context.get('request')
         if request:
             return request.build_absolute_uri(obj.logo.url)

@@ -186,6 +186,29 @@ class ProfileSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Only PDF, DOC, or DOCX formats are supported.")
         return value
 
+    def update(self, instance, validated_data):
+        from core.storage_service import upload_image_to_imagekit, upload_pdf_to_imagekit, is_imagekit_configured
+
+        # Upload profile image to ImageKit if provided
+        if 'profile_image' in validated_data and validated_data['profile_image'] and is_imagekit_configured():
+            img_file = validated_data.pop('profile_image')
+            url = upload_image_to_imagekit(img_file, folder="profile_images")
+            if url:
+                instance.profile_image = url
+            else:
+                instance.profile_image = img_file
+
+        # Upload resume to ImageKit if provided
+        if 'resume' in validated_data and validated_data['resume'] and is_imagekit_configured():
+            resume_file = validated_data.pop('resume')
+            url = upload_pdf_to_imagekit(resume_file, folder="resumes")
+            if url:
+                instance.resume = url
+            else:
+                instance.resume = resume_file
+
+        return super().update(instance, validated_data)
+
 
 class WorkSerializer(serializers.ModelSerializer):
     owner_email = serializers.ReadOnlyField(source='owner.email')
@@ -233,8 +256,20 @@ class ResumeVersionSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Only PDF, DOC, or DOCX files are supported.')
         return value
 
+    def create(self, validated_data):
+        from core.storage_service import upload_pdf_to_imagekit, is_imagekit_configured
+        file_obj = validated_data.get('file')
+        if file_obj and is_imagekit_configured():
+            url = upload_pdf_to_imagekit(file_obj, folder="resumes/versions")
+            if url:
+                validated_data['file'] = url
+        return super().create(validated_data)
+
     def get_file_url(self, obj):
         if not obj.file:
             return None
+        file_str = str(obj.file)
+        if file_str.startswith('http://') or file_str.startswith('https://'):
+            return file_str
         request = self.context.get('request')
         return request.build_absolute_uri(obj.file.url) if request else obj.file.url
