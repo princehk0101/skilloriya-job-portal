@@ -32,6 +32,7 @@ import {
   ListTodo,
   Zap,
   Bookmark,
+  CheckCircle2,
 } from 'lucide-react'
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -256,7 +257,6 @@ const Navbar = () => {
         { to: '/pricing', label: 'Pricing' },
       ]
     : [
-        { to: '/jobs', label: 'Find Jobs' },
         { to: '/categories', label: 'Categories' },
         { to: '/companies', label: 'Companies' },
         { to: '/assessments', label: 'Skill Tests' },
@@ -306,6 +306,68 @@ const Navbar = () => {
           </Link>
 
           <div className="hidden items-center gap-2 rounded-full border border-white/60 bg-white/72 px-2 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] md:flex">
+            {!isAdmin && !isEmployer ? (
+              <div className="group relative">
+                <Link
+                  to="/jobs"
+                  className={`inline-flex items-center gap-1 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+                    isActiveRoute('/jobs') || isActiveRoute('/applied-jobs')
+                      ? 'bg-slate-900 text-white shadow-[0_10px_20px_rgba(15,23,42,0.14)]'
+                      : 'text-slate-600 hover:bg-blue-50 hover:text-blue-700'
+                  }`}
+                >
+                  <span>Jobs</span>
+                  <ChevronDown size={14} className="transition-transform duration-200 group-hover:rotate-180" />
+                </Link>
+
+                <div className="invisible absolute top-full left-0 z-50 pt-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                  <div className="w-64 rounded-2xl border border-blue-100 bg-white p-2 shadow-[0_20px_40px_rgba(35,85,217,0.14)]">
+                    <Link
+                      to="/jobs"
+                      className="flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-blue-50 text-slate-800 hover:text-blue-700"
+                    >
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                        <Briefcase size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold">Explore All Jobs</p>
+                        <p className="text-[11px] text-slate-500">Search 1,000+ open roles</p>
+                      </div>
+                    </Link>
+
+                    <Link
+                      to="/applied-jobs"
+                      className="flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-emerald-50 text-slate-800 hover:text-emerald-700"
+                    >
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                        <CheckCircle2 size={16} />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-bold">Applied Jobs</p>
+                          <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-bold text-emerald-700">Track</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500">Real-time status tracker</p>
+                      </div>
+                    </Link>
+
+                    <Link
+                      to="/saved-jobs"
+                      className="flex items-center gap-3 rounded-xl p-2.5 transition-colors hover:bg-blue-50 text-slate-800 hover:text-blue-700"
+                    >
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                        <Bookmark size={16} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold">Saved Jobs</p>
+                        <p className="text-[11px] text-slate-500">Your bookmarked positions</p>
+                      </div>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
             {navLinks.map((item) => (
               <Link
                 key={item.to}
@@ -465,6 +527,15 @@ const Navbar = () => {
                             <div>
                               <p className="text-sm font-bold text-slate-900 group-hover/item:text-blue-700">All Jobs</p>
                               <p className="text-[11px] text-slate-500 mt-0.5">Browse developer roles</p>
+                            </div>
+                          </Link>
+                          <Link to="/applied-jobs" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
+                            <div className="flex shrink-0 h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 transition-colors group-hover/item:bg-emerald-100">
+                              <CheckCircle2 size={16} />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-slate-900 group-hover/item:text-emerald-700">My Applied Jobs</p>
+                              <p className="text-[11px] text-slate-500 mt-0.5">Track your application status</p>
                             </div>
                           </Link>
                           <Link to="/jobs?type=remote" className="group/item flex items-start gap-4 hover:bg-slate-50 p-2 rounded-xl transition-colors -ml-2">
@@ -732,6 +803,12 @@ const Navbar = () => {
                           <LayoutDashboard size={16} />
                           {isEmployer ? 'Recruiter Hub' : 'My Dashboard'}
                         </Link>
+                        {!isEmployer && (
+                          <Link to="/applied-jobs" className="inline-flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-emerald-50 hover:text-emerald-700">
+                            <Briefcase size={16} />
+                            Applied Jobs
+                          </Link>
+                        )}
                         <Link to="/ai/resume-analysis" className="inline-flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold text-slate-800 transition-colors hover:bg-blue-50 hover:text-blue-700">
                           <FileText size={16} />
                           AI Resume & ATS
@@ -800,6 +877,33 @@ const Navbar = () => {
                 </Link>
               ) : null}
 
+              {!isAdmin && !isEmployer ? (
+                <div className="space-y-1 pb-1">
+                  <Link
+                    to="/jobs"
+                    className={`block rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
+                      isActiveRoute('/jobs') ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700'
+                    }`}
+                  >
+                    Explore Jobs
+                  </Link>
+                  <Link
+                    to="/applied-jobs"
+                    className={`flex items-center justify-between rounded-2xl px-4 py-2.5 text-sm font-bold transition ${
+                      isActiveRoute('/applied-jobs')
+                        ? 'bg-emerald-600 text-white'
+                        : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <Briefcase size={16} />
+                      Applied Jobs
+                    </span>
+                    <span className="rounded-full bg-emerald-200/80 px-2 py-0.5 text-[10px] font-bold text-emerald-900">Track</span>
+                  </Link>
+                </div>
+              ) : null}
+
               {navLinks.map((item) => (
                 <Link
                   key={item.to}
@@ -828,6 +932,9 @@ const Navbar = () => {
               {isLoggedIn ? (
                 <div className="border-t border-slate-200/60 pt-2 space-y-1">
                   <Link to={dashboardPath} className="block rounded-2xl px-4 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50">Dashboard</Link>
+                  {!isEmployer && (
+                    <Link to="/applied-jobs" className="block rounded-2xl px-4 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-50">Applied Jobs</Link>
+                  )}
                   <Link to="/profile" className="block rounded-2xl px-4 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50">Profile</Link>
                   <Link to="/saved-jobs" className="block rounded-2xl px-4 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50">Saved Jobs</Link>
                   <button onClick={handleLogout} className="block w-full rounded-2xl px-4 py-2.5 text-left text-sm font-bold text-red-600 hover:bg-red-50">Logout</button>

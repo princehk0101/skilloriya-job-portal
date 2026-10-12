@@ -17,8 +17,12 @@ class ApplicationSerializer(serializers.ModelSerializer):
     applicant_name = serializers.SerializerMethodField()
     applicant_profile_image_url = serializers.SerializerMethodField()
     job_title = serializers.ReadOnlyField(source='job.title')
+    job_location = serializers.ReadOnlyField(source='job.location')
+    job_type = serializers.ReadOnlyField(source='job.job_type')
+    job_salary = serializers.ReadOnlyField(source='job.salary')
     employer_id = serializers.ReadOnlyField(source='job.employer_id')
     employer_name = serializers.SerializerMethodField()
+    employer_image_url = serializers.SerializerMethodField()
     company_name = serializers.SerializerMethodField()
     resume_url = serializers.SerializerMethodField()
     status_history = ApplicationStatusEventSerializer(many=True, read_only=True)
@@ -34,8 +38,12 @@ class ApplicationSerializer(serializers.ModelSerializer):
             'applicant_profile_image_url',
             'job',
             'job_title',
+            'job_location',
+            'job_type',
+            'job_salary',
             'employer_id',
             'employer_name',
+            'employer_image_url',
             'company_name',
             'full_name',
             'college_name',
@@ -125,6 +133,23 @@ class ApplicationSerializer(serializers.ModelSerializer):
             emp = obj.job.employer
             return f"{emp.first_name} {emp.last_name}".strip() or emp.email
         return "Recruiter"
+
+    def get_employer_image_url(self, obj):
+        if obj.job and obj.job.employer:
+            emp = obj.job.employer
+            if getattr(emp, 'profile_image', None):
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(emp.profile_image.url)
+                return emp.profile_image.url
+            from companies.models import Company
+            comp_obj = Company.objects.filter(owner_email=emp.email).first()
+            if comp_obj and getattr(comp_obj, 'logo', None):
+                request = self.context.get('request')
+                if request:
+                    return request.build_absolute_uri(comp_obj.logo.url)
+                return comp_obj.logo.url
+        return None
 
     def get_company_name(self, obj):
         if obj.job and obj.job.employer:

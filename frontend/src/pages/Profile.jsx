@@ -25,6 +25,7 @@ import {
   Zap,
 } from "lucide-react"
 import { resolveMediaUrl } from "../utils/media"
+import { fetchMyApplications, getApplicationStatusClass, getApplicationStatusLabel } from "../utils/applications"
 
 const defaultForm = {
   first_name: "",
@@ -57,6 +58,7 @@ const Profile = () => {
   const [isSaving, setIsSaving] = useState(false)
   const [isParsingAI, setIsParsingAI] = useState(false)
   const [badges, setBadges] = useState([])
+  const [appliedJobs, setAppliedJobs] = useState([])
   const [error, setError] = useState("")
   const [successMsg, setSuccessMsg] = useState("")
 
@@ -101,15 +103,19 @@ const Profile = () => {
 
         if (data.role !== 'employer') {
           try {
-            const [badgesRes, recRes] = await Promise.allSettled([
+            const [badgesRes, recRes, appsRes] = await Promise.allSettled([
               axios.get("/api/skills/my-badges/", { headers: { Authorization: `Bearer ${token}` } }),
               axios.get("/api/ai/recommended-jobs/", { headers: { Authorization: `Bearer ${token}` } }),
+              fetchMyApplications(),
             ])
             if (badgesRes.status === 'fulfilled') {
               setBadges(badgesRes.value.data?.badges || [])
             }
             if (recRes.status === 'fulfilled') {
               setTopSuggestions(recRes.value.data || [])
+            }
+            if (appsRes.status === 'fulfilled') {
+              setAppliedJobs(appsRes.value || [])
             }
           } catch (bErr) {
             // Non-blocking
@@ -833,6 +839,107 @@ const Profile = () => {
                           </div>
                         )
                       })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Section: My Applied Jobs */}
+                <div className="mt-6 pt-5 border-t border-slate-100">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                          <Briefcase size={16} className="text-blue-600" />
+                          My Applied Jobs
+                        </h4>
+                        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
+                          {appliedJobs.length} {appliedJobs.length === 1 ? 'Job' : 'Jobs'} Applied
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-0.5">
+                        Track your live application status, employer review progress, and interview updates.
+                      </p>
+                    </div>
+                    <Link
+                      to="/applied-jobs"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline shrink-0"
+                    >
+                      View All Applied Jobs Tracker →
+                    </Link>
+                  </div>
+
+                  {appliedJobs.length === 0 ? (
+                    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-5 text-center">
+                      <Briefcase size={28} className="mx-auto text-slate-400 mb-2" />
+                      <p className="text-xs font-bold text-slate-800">You haven't applied to any jobs yet</p>
+                      <p className="text-[11px] text-slate-500 mt-1 max-w-md mx-auto">
+                        Explore open positions and apply with your optimized profile and verified skill badges.
+                      </p>
+                      <Link
+                        to="/jobs"
+                        className="inline-flex items-center gap-1.5 mt-3 rounded-xl bg-blue-600 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-blue-700 shadow-sm"
+                      >
+                        Explore Open Jobs →
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {appliedJobs.slice(0, 4).map((app) => (
+                          <div
+                            key={app.id}
+                            className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm hover:border-blue-300 transition-all"
+                          >
+                            <div>
+                              <div className="flex items-start justify-between gap-2">
+                                <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${getApplicationStatusClass(app.status)}`}>
+                                  <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
+                                  {getApplicationStatusLabel(app.status)}
+                                </span>
+                                <span className="text-[10px] text-slate-400">
+                                  {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : 'Recent'}
+                                </span>
+                              </div>
+
+                              <h5 className="font-bold text-sm text-slate-900 mt-2 line-clamp-1">
+                                {app.job_title || 'Software Engineer'}
+                              </h5>
+                              <p className="text-xs text-slate-500 mt-0.5 line-clamp-1">
+                                {app.employer_name || app.company_name || 'Hiring Company'} • {app.job_location || 'Remote'}
+                              </p>
+
+                              {app.job_salary && (
+                                <p className="text-[11px] font-semibold text-emerald-700 mt-1">
+                                  ₹{Number(app.job_salary).toLocaleString('en-IN')} / year
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                              <span className="text-[10px] text-slate-500">
+                                Application ID: #{app.id}
+                              </span>
+                              <Link
+                                to="/applied-jobs"
+                                className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline"
+                              >
+                                View Status →
+                              </Link>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      {appliedJobs.length > 4 && (
+                        <div className="text-center pt-1">
+                          <Link
+                            to="/applied-jobs"
+                            className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline"
+                          >
+                            + {appliedJobs.length - 4} more applied jobs. Open full tracker →
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

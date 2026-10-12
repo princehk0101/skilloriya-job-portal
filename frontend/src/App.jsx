@@ -19,6 +19,7 @@ import VerifyResetOTP from './pages/VerifyResetOTP';
 import VerifyLoginOTP from './pages/VerifyLoginOTP';
 import JobDescription from './pages/JobDescription';
 import Jobs from './pages/Jobs';
+import AppliedJobs from './pages/AppliedJobs';
 import Companies from './pages/Companies';
 import Assesstment from './pages/Assesstment';
 import Profile from './pages/Profile';
@@ -46,6 +47,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/categories" element={<Categories />} />
             <Route path="/jobs" element={<Jobs />} />
+            <Route path="/applied-jobs" element={<AppliedJobs />} />
+            <Route path="/my-applications" element={<AppliedJobs />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/admin/login" element={<AdminLogin />} />
