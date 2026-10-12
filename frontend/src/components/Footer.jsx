@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Briefcase, ArrowRight, Compass, Sparkles, Building2 } from 'lucide-react'
+import logoImg from '../assets/logo.jpeg'
 
 const Footer = () => {
   const location = useLocation()
@@ -59,11 +60,13 @@ const Footer = () => {
         <div className="my-14 grid w-full grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-6">
             <Link to="/" className="group flex items-center gap-3 text-slate-900">
-              <div className="rounded-2xl bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] p-2 shadow-[0_12px_28px_rgba(35,85,217,0.28)] transition-all group-hover:-translate-y-0.5">
-                <Briefcase size={24} className="text-white" />
-              </div>
+              <img
+                src={logoImg}
+                alt="Skilloriya Logo"
+                className="h-11 w-11 rounded-2xl object-cover shadow-sm ring-1 ring-slate-900/10 transition-transform group-hover:scale-105"
+              />
               <div>
-                <span className="block text-xl font-bold tracking-tight">Skilloria</span>
+                <span className="block text-xl font-bold tracking-tight text-slate-900">Skilloriya</span>
               </div>
             </Link>
             <p className="text-sm leading-7 text-slate-600">

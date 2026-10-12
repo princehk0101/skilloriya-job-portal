@@ -36,6 +36,7 @@ import {
 import axios from 'axios'
 import { motion, AnimatePresence } from 'framer-motion'
 import { resolveMediaUrl } from '../utils/media'
+import logoImg from '../assets/logo.jpeg'
 
 const formatTimeAgo = (dateString) => {
   if (!dateString) return 'Just now'
@@ -294,11 +295,13 @@ const Navbar = () => {
       <div className="mx-auto flex w-[98%] max-w-[1600px] items-center justify-between px-2 sm:px-4">
         <div className={`glass-panel flex w-full items-center justify-between rounded-2xl px-4 py-2 transition-all duration-300 ${isScrolled || !isHome ? 'shadow-[0_10px_40px_rgba(16,32,58,0.1)]' : 'bg-white/75'}`}>
           <Link to="/" className="group flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-[0.85rem] bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] text-white shadow-[0_10px_20px_rgba(35,85,217,0.2)] transition-all duration-300 group-hover:-translate-y-0.5">
-              <Briefcase size={20} strokeWidth={2.4} />
-            </div>
+            <img
+              src={logoImg}
+              alt="Skilloriya Logo"
+              className="h-10 w-10 rounded-xl object-cover shadow-sm ring-1 ring-slate-900/10 transition-transform duration-300 group-hover:scale-105"
+            />
             <div>
-              <span className="block text-xl font-bold tracking-tight text-slate-900 transition-colors group-hover:text-blue-700">Skilloria</span>
+              <span className="block text-xl font-bold tracking-tight text-slate-900 transition-colors group-hover:text-blue-700">Skilloriya</span>
             </div>
           </Link>
 
@@ -783,10 +786,10 @@ const Navbar = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mt-3 overflow-hidden px-4 pb-4 md:hidden"
+            transition={{ duration: 0.25 }}
+            className="mt-3 overflow-hidden px-3 pb-4 md:hidden"
           >
-            <div className="glass-panel space-y-3 rounded-[1.75rem] p-4">
+            <div className="glass-panel max-h-[82vh] space-y-2 overflow-y-auto rounded-[1.75rem] p-4 shadow-xl">
               {isEmployer && !isAdmin ? (
                 <Link
                   to="/post-job"
@@ -801,25 +804,39 @@ const Navbar = () => {
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`block rounded-2xl px-4 py-3 text-sm font-semibold transition ${
+                  className={`block rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
                     isActiveRoute(item.to) ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-blue-50 hover:text-blue-700'
                   }`}
                 >
                   {item.label}
                 </Link>
               ))}
+
+              <div className="border-t border-slate-200/60 pt-2 space-y-1">
+                <Link to="/resources" className="block rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700">
+                  Prep Resources
+                </Link>
+                <Link to="/ai-copilot" className="inline-flex w-full items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-800 hover:bg-emerald-100">
+                  <Bot size={16} />
+                  AI Copilot
+                </Link>
+                <Link to="/ai/resume-analysis" className="block rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-700">
+                  AI Resume & ATS
+                </Link>
+              </div>
+
               {isLoggedIn ? (
-                <>
-                  <Link to={dashboardPath} className="block rounded-2xl px-4 py-3 text-sm font-bold text-blue-700 hover:bg-blue-50">Dashboard</Link>
-                  <Link to="/profile" className="block rounded-2xl px-4 py-3 text-sm font-bold text-blue-700 hover:bg-blue-50">Profile</Link>
-                  <Link to="/settings" className="block rounded-2xl px-4 py-3 text-sm font-bold text-blue-700 hover:bg-blue-50">Settings</Link>
-                  <button onClick={handleLogout} className="block rounded-2xl px-4 py-3 text-left text-sm font-bold text-red-600 hover:bg-red-50">Logout</button>
-                </>
+                <div className="border-t border-slate-200/60 pt-2 space-y-1">
+                  <Link to={dashboardPath} className="block rounded-2xl px-4 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50">Dashboard</Link>
+                  <Link to="/profile" className="block rounded-2xl px-4 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50">Profile</Link>
+                  <Link to="/saved-jobs" className="block rounded-2xl px-4 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50">Saved Jobs</Link>
+                  <button onClick={handleLogout} className="block w-full rounded-2xl px-4 py-2.5 text-left text-sm font-bold text-red-600 hover:bg-red-50">Logout</button>
+                </div>
               ) : (
-                <>
-                  <Link to="/login" className="block rounded-2xl px-4 py-3 text-sm font-bold text-blue-700 hover:bg-blue-50">Login</Link>
-                  <Link to="/signup" className="block rounded-2xl bg-slate-900 px-4 py-3 text-center text-sm font-bold text-white">Create Account</Link>
-                </>
+                <div className="border-t border-slate-200/60 pt-2 space-y-2">
+                  <Link to="/login" className="block rounded-2xl px-4 py-2.5 text-center text-sm font-bold text-blue-700 border border-blue-200 bg-white hover:bg-blue-50">Login</Link>
+                  <Link to="/signup" className="block rounded-2xl bg-slate-900 px-4 py-2.5 text-center text-sm font-bold text-white shadow hover:bg-blue-700">Create Account</Link>
+                </div>
               )}
             </div>
           </motion.div>

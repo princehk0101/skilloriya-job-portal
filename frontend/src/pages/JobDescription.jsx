@@ -172,12 +172,12 @@ const JobDescription = () => {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-[2.5rem] border border-blue-100 bg-white/95 shadow-[0_20px_55px_rgba(35,85,217,0.1)] backdrop-blur">
+        <div className="overflow-hidden rounded-2xl sm:rounded-[2.5rem] border border-blue-100 bg-white/95 shadow-[0_20px_55px_rgba(35,85,217,0.1)] backdrop-blur">
           {/* Hero Banner */}
-          <div className="bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-8 py-10 text-white">
+          <div className="bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-4 py-6 sm:px-8 sm:py-10 text-white">
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-              <div className="flex gap-5">
-                <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white/10 p-2.5 backdrop-blur shadow-md">
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
+                <div className="flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white/10 p-2 sm:p-2.5 backdrop-blur shadow-md">
                   <img
                     src={resolveMediaUrl(job.employer_image_url) || 'https://via.placeholder.com/80'}
                     alt={job.employer_name || job.employer_email}
@@ -200,11 +200,11 @@ const JobDescription = () => {
                     ) : null}
                   </div>
 
-                  <h1 className="display-font mt-3 text-3xl font-extrabold leading-tight sm:text-4xl text-white">
+                  <h1 className="display-font mt-2 sm:mt-3 text-2xl font-extrabold leading-tight sm:text-4xl text-white">
                     {job.title}
                   </h1>
 
-                  <div className="mt-3 flex flex-wrap gap-4 text-xs text-blue-100">
+                  <div className="mt-3 flex flex-wrap gap-2.5 sm:gap-4 text-xs text-blue-100">
                     <span className="inline-flex items-center gap-1.5 font-bold text-white">
                       <Building2 size={15} />
                       {job.employer_name || job.employer_email}
@@ -217,11 +217,11 @@ const JobDescription = () => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-col gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur sm:flex-row lg:flex-col">
+              <div className="flex flex-col gap-3 rounded-2xl border border-white/15 bg-white/10 p-3.5 sm:p-4 backdrop-blur sm:flex-row lg:flex-col">
                 <button
                   onClick={openApplyPage}
                   disabled={Boolean(currentApplication) || viewerRole === 'employer'}
-                  className={`rounded-2xl px-8 py-3 text-sm font-bold transition shadow-md ${
+                  className={`rounded-2xl px-6 sm:px-8 py-3 text-sm font-bold transition shadow-md ${
                     currentApplication || viewerRole === 'employer'
                       ? 'cursor-not-allowed bg-white/20 text-white'
                       : 'bg-white text-blue-800 hover:bg-blue-50'
@@ -232,7 +232,7 @@ const JobDescription = () => {
 
                 <button
                   onClick={() => setIsChatOpen(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-6 py-2.5 text-xs font-bold text-white transition hover:bg-white/20"
+                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-5 sm:px-6 py-2.5 text-xs font-bold text-white transition hover:bg-white/20"
                 >
                   <MessageSquare size={14} />
                   Message Recruiter
@@ -242,7 +242,7 @@ const JobDescription = () => {
           </div>
 
           {/* Main Details Grid */}
-          <div className="grid grid-cols-1 gap-8 p-8 lg:grid-cols-[1.35fr_0.65fr]">
+          <div className="grid grid-cols-1 gap-6 sm:gap-8 p-4 sm:p-8 lg:grid-cols-[1.35fr_0.65fr]">
             <div className="space-y-8">
               {/* Application Status Banner if applied */}
               {currentApplication ? (

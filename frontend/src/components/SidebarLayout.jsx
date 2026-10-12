@@ -21,6 +21,7 @@ import {
   FileText,
   CheckCircle2,
 } from 'lucide-react'
+import logoImg from '../assets/logo.jpeg'
 
 const SidebarLayout = ({ children, title, role, profile, pendingRecruitersCount = 0 }) => {
   const location = useLocation()
@@ -127,18 +128,20 @@ const SidebarLayout = ({ children, title, role, profile, pendingRecruitersCount 
         {/* Header */}
         <div className="flex h-20 items-center px-6 border-b border-slate-100 justify-between bg-gradient-to-r from-slate-900 to-blue-950 text-white">
           <Link to="/" className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white font-extrabold shadow-md">
-              S
-            </div>
+            <img
+              src={logoImg}
+              alt="Skilloriya"
+              className="h-10 w-10 rounded-xl object-cover shadow-md ring-1 ring-white/20"
+            />
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="text-base font-black tracking-tight text-white">Skilloria</span>
+                <span className="text-base font-black tracking-tight text-white">Skilloriya</span>
                 <span className="rounded-md bg-blue-500/30 px-1.5 py-0.5 text-[10px] font-bold text-cyan-300 uppercase">
                   {role === 'admin' ? 'Admin' : 'Recruiter'}
                 </span>
               </div>
               <p className="text-[11px] text-blue-200">
-                {role === 'admin' ? 'Control Center' : 'Naukri RMS Edition'}
+                {role === 'admin' ? 'Control Center' : 'Recruitment Portal'}
               </p>
             </div>
           </Link>

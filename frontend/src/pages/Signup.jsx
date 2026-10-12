@@ -69,12 +69,14 @@ const Signup = () => {
         return
       }
 
-      if (response.data.verification_email_sent === false) {
-        setErrorMessage(response.data.message)
-        setShowLoginLink(true)
-      } else {
-        navigate('/VerifyOTP', { state: { email: formData.email } })
-      }
+      // Account created -> Navigate to OTP verification screen
+      navigate('/VerifyOTP', {
+        state: {
+          email: formData.email,
+          role: formData.role,
+          message: response.data?.message || 'Verification code sent to your email.'
+        }
+      })
     } catch (error) {
       console.error('Signup failed:', error.response?.data || error.message)
       const message = extractErrorMessage(error)
@@ -146,43 +148,57 @@ const Signup = () => {
         </div>
       }
     >
-      <form className="space-y-5" onSubmit={handleSubmit}>
+      {/* Portal Switcher Tabs */}
+      <div className="mb-6 grid grid-cols-2 rounded-xl bg-slate-100 p-1 text-xs font-bold">
+        <button
+          type="button"
+          className="rounded-lg bg-white py-2 text-blue-700 shadow-sm"
+        >
+          Job Seeker
+        </button>
+        <Link
+          to="/employer/signup"
+          className="rounded-lg py-2 text-center text-slate-500 transition hover:text-slate-900"
+        >
+          Employer / Recruiter
+        </Link>
+      </div>
+
+      <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
         <label className="block">
-          <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+          <span className="mb-1.5 flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-700">
             <Mail className="h-4 w-4 text-blue-600" />
-            Email
+            Email Address
           </span>
           <input
             type="email"
             name="email"
-            placeholder="name@example.com"
+            placeholder="you@example.com"
             value={formData.email}
             onChange={handleChange}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400"
             required
           />
         </label>
 
         <label className="block">
-          <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-            <LockKeyhole className="h-4 w-4 text-cyan-600" />
+          <span className="mb-1.5 flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-700">
+            <LockKeyhole className="h-4 w-4 text-blue-600" />
             Password
           </span>
           <input
             type="password"
             name="password"
-            placeholder="Create a strong password"
+            placeholder="Create a strong password (min 8 chars)"
             value={formData.password}
             onChange={handleChange}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400"
             required
           />
         </label>
 
-
-
         {errorMessage ? (
-          <div className="space-y-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="space-y-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs sm:text-sm font-medium text-rose-700">
             <p>{errorMessage}</p>
             {showLoginLink ? (
               <Link to="/login" className="inline-block font-bold text-blue-700 underline">
@@ -197,9 +213,9 @@ const Signup = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? 'Creating account...' : 'Create account'}
+          {loading ? 'Sending Verification Code...' : 'Create Account & Verify OTP'}
         </button>
       </form>
 

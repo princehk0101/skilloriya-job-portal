@@ -151,65 +151,65 @@ const CompanyProfile = () => {
   }
 
   return (
-    <div className="relative min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-28 pb-16">
+    <div className="relative min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-20 sm:pt-28 pb-16">
       <div className="relative w-[98%] max-w-[1600px] mx-auto z-10 px-2 sm:px-4">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 mb-6 font-semibold transition-colors"
+          className="inline-flex items-center gap-2 text-xs sm:text-sm text-slate-500 hover:text-blue-600 mb-4 sm:mb-6 font-semibold transition-colors"
         >
           <ArrowLeft size={16} />
           Back
         </button>
 
         {/* Company Header Card */}
-        <div className="rounded-[2rem] border border-blue-100 bg-white/95 p-8 sm:p-10 shadow-[0_18px_45px_rgba(37,99,235,0.08)] mb-8 backdrop-blur">
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            <div className="shrink-0 rounded-2xl border border-blue-100 p-2.5 shadow-md bg-white">
+        <div className="rounded-2xl sm:rounded-[2rem] border border-blue-100 bg-white/95 p-4 sm:p-8 lg:p-10 shadow-[0_18px_45px_rgba(37,99,235,0.08)] mb-6 sm:mb-8 backdrop-blur">
+          <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 items-start">
+            <div className="shrink-0 rounded-2xl border border-blue-100 p-2 shadow-md bg-white">
               <img
                 src={resolveMediaUrl(company.logo_url || company.logo) || 'https://via.placeholder.com/120'}
                 alt={company.name}
-                className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover bg-white"
+                className="w-20 h-20 sm:w-28 sm:h-28 rounded-xl object-cover bg-white"
               />
             </div>
             
             <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{company.name}</h1>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{company.name}</h1>
                 {company.is_verified && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2.5 py-0.5 text-xs font-bold text-blue-700 shadow-sm">
-                    <ShieldCheck size={14} className="text-blue-600 fill-blue-100" />
+                  <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-200 px-2 py-0.5 text-xs font-bold text-blue-700 shadow-sm">
+                    <ShieldCheck size={13} className="text-blue-600 fill-blue-100" />
                     Verified Employer
                   </span>
                 )}
               </div>
               
-              <div className="flex flex-wrap items-center gap-3 text-sm text-slate-600 mt-4">
-                <span className="inline-flex items-center gap-1.5 bg-blue-50/80 px-3 py-1 rounded-xl border border-blue-100 text-blue-700 font-semibold text-xs">
-                  <MapPin size={13} className="text-blue-500" /> {company.location || 'Location not set'}
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-slate-600 mt-3 sm:mt-4">
+                <span className="inline-flex items-center gap-1 bg-blue-50/80 px-2.5 py-1 rounded-xl border border-blue-100 text-blue-700 font-semibold text-xs">
+                  <MapPin size={12} className="text-blue-500" /> {company.location || 'Location not set'}
                 </span>
                 {company.website && (
                   <a
                     href={company.website}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 bg-blue-50/80 px-3 py-1 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors text-blue-700 font-semibold text-xs"
+                    className="inline-flex items-center gap-1 bg-blue-50/80 px-2.5 py-1 rounded-xl border border-blue-100 hover:bg-blue-100 transition-colors text-blue-700 font-semibold text-xs"
                   >
-                    <Globe size={13} className="text-blue-500" /> Website <ExternalLink size={12} className="text-blue-400" />
+                    <Globe size={12} className="text-blue-500" /> Website <ExternalLink size={11} className="text-blue-400" />
                   </a>
                 )}
-                <span className="inline-flex items-center gap-1.5 bg-blue-50/80 px-3 py-1 rounded-xl border border-blue-100 text-blue-700 font-semibold text-xs">
-                  <Briefcase size={13} className="text-blue-500" /> {jobs.length} Open Roles
+                <span className="inline-flex items-center gap-1 bg-blue-50/80 px-2.5 py-1 rounded-xl border border-blue-100 text-blue-700 font-semibold text-xs">
+                  <Briefcase size={12} className="text-blue-500" /> {jobs.length} Open Roles
                 </span>
                 {avgRating && (
-                  <span className="inline-flex items-center gap-1.5 bg-amber-50 px-3 py-1 rounded-xl border border-amber-200 text-amber-800 font-bold text-xs">
-                    <Star size={13} className="text-amber-500 fill-amber-500" /> {avgRating} / 5.0 ({reviews.length} reviews)
+                  <span className="inline-flex items-center gap-1 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200 text-amber-800 font-bold text-xs">
+                    <Star size={12} className="text-amber-500 fill-amber-500" /> {avgRating} ({reviews.length})
                   </span>
                 )}
               </div>
               
-              <div className="mt-6 border-t border-slate-100 pt-5">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">About the Company</h3>
-                <p className="text-slate-600 leading-relaxed text-sm sm:text-base">
+              <div className="mt-4 sm:mt-6 border-t border-slate-100 pt-4 sm:pt-5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1 sm:mb-2">About the Company</h3>
+                <p className="text-slate-600 leading-relaxed text-xs sm:text-base">
                   {company.description || 'No description provided for this organization yet.'}
                 </p>
               </div>
@@ -218,11 +218,11 @@ const CompanyProfile = () => {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center justify-between gap-4 mb-6 border-b border-slate-200 pb-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 mb-6 border-b border-slate-200 pb-3">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setActiveTab('jobs')}
-              className={`rounded-xl px-5 py-2.5 text-sm font-bold transition-all ${
+              className={`rounded-xl px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold transition-all ${
                 activeTab === 'jobs'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-white text-slate-600 border border-slate-200 hover:bg-blue-50'
@@ -232,13 +232,13 @@ const CompanyProfile = () => {
             </button>
             <button
               onClick={() => setActiveTab('reviews')}
-              className={`rounded-xl px-5 py-2.5 text-sm font-bold transition-all ${
+              className={`rounded-xl px-4 sm:px-5 py-2 text-xs sm:text-sm font-bold transition-all ${
                 activeTab === 'reviews'
                   ? 'bg-blue-600 text-white shadow-md'
                   : 'bg-white text-slate-600 border border-slate-200 hover:bg-blue-50'
               }`}
             >
-              Reviews & Salaries ({reviews.length})
+              Reviews ({reviews.length})
             </button>
           </div>
 

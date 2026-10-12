@@ -61,31 +61,26 @@ class RegisterView(APIView):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        user.is_verified = True
+        user.is_verified = False
         user.save(update_fields=['is_verified'])
 
-        # Optional background notification / OTP record
-        try:
-            otp_code = str(random.randint(100000, 999999))
-            EmailOTP.objects.create(user=user, otp=otp_code, purpose='verification')
-            send_otp_email(user.email, otp_code)
-        except Exception:
-            logger.warning("Could not send welcome OTP email for %s", user.email)
+        # Generate and dispatch verification OTP
+        otp_code = str(random.randint(100000, 999999))
+        EmailOTP.objects.filter(user=user, purpose='verification').delete()
+        EmailOTP.objects.create(user=user, otp=otp_code, purpose='verification')
+        email_sent = send_otp_email(user.email, otp_code)
 
-        # Issue JWT tokens directly so user is immediately logged in
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            "message": "User registered successfully.",
-            "access": str(refresh.access_token),
-            "refresh": str(refresh),
-            "user": {
-                "id": user.id,
-                "email": user.email,
-                "role": user.role,
-                "company_name": getattr(user, 'company_name', '') or "",
-                "is_verified": user.is_verified,
-            }
-        }, status=status.HTTP_201_CREATED)
+        response_data = {
+            "message": "Account created successfully! Please enter the 6-digit OTP sent to your email to verify and activate your account.",
+            "requires_verification": True,
+            "verification_email_sent": email_sent,
+            "email": user.email,
+            "role": user.role,
+        }
+        if getattr(settings, 'DEBUG', False):
+            response_data["otp_debug"] = otp_code
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 # VERIFY OTP 
@@ -95,17 +90,20 @@ class VerifyOTPView(APIView):
     throttle_scope = 'auth_otp_verify'
 
     def post(self, request):
-        email = request.data.get("email")
-        otp = request.data.get("otp")
+        email = str(request.data.get("email", "")).strip().lower()
+        otp = str(request.data.get("otp", "")).strip()
+
+        if not email or not otp:
+            return Response({"error": "Email and 6-digit OTP are required."}, status=400)
 
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(email__iexact=email)
             otp_obj = EmailOTP.objects.filter(user=user, otp=otp, purpose='verification').last()
 
             if not otp_obj or otp_obj.is_expired:
                 if otp_obj:
                     otp_obj.delete()
-                return Response({"error": "Invalid OTP"}, status=400)
+                return Response({"error": "Invalid or expired OTP. Please verify or request a new code."}, status=400)
 
             user.is_verified = True
             user.save(update_fields=['is_verified'])
@@ -113,7 +111,7 @@ class VerifyOTPView(APIView):
 
             refresh = RefreshToken.for_user(user)
             return Response({
-                "message": "Email verified successfully",
+                "message": "Email verified successfully! Welcome to Skilloriya.",
                 "access": str(refresh.access_token),
                 "refresh": str(refresh),
                 "user": {
@@ -126,7 +124,7 @@ class VerifyOTPView(APIView):
             })
 
         except User.DoesNotExist:
-            return Response({"error": "User not found"}, status=400)
+            return Response({"error": "User not found with this email."}, status=400)
 
 
 class ResendVerificationOTPView(APIView):

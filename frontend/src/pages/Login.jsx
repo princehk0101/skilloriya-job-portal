@@ -58,6 +58,16 @@ const Login = () => {
 
     try {
       const response = await axios.post('/api/users/login/', { email, password })
+      if (response.data?.verification_required) {
+        navigate('/VerifyOTP', {
+          state: {
+            email: response.data.email || email,
+            role: 'seeker',
+            message: response.data.message || 'Please verify the OTP sent to your email to activate your account.'
+          }
+        })
+        return
+      }
       await saveSessionAndRole(response.data)
     } catch (error) {
       console.error('Login failed:', error.response?.data || error.message)
@@ -120,55 +130,71 @@ const Login = () => {
         </div>
       }
     >
-      <form className="space-y-5" onSubmit={handleSubmit}>
+      {/* Portal Switcher Tabs */}
+      <div className="mb-6 grid grid-cols-2 rounded-xl bg-slate-100 p-1 text-xs font-bold">
+        <button
+          type="button"
+          className="rounded-lg bg-white py-2 text-blue-700 shadow-sm"
+        >
+          Job Seeker
+        </button>
+        <Link
+          to="/employer/login"
+          className="rounded-lg py-2 text-center text-slate-500 transition hover:text-slate-900"
+        >
+          Employer / Recruiter
+        </Link>
+      </div>
+
+      <form className="space-y-4 sm:space-y-5" onSubmit={handleSubmit}>
         <label className="block">
-          <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
+          <span className="mb-1.5 flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-700">
             <Mail className="h-4 w-4 text-blue-600" />
-            Email
+            Email Address
           </span>
           <input
             type="email"
-            placeholder="you@company.com"
+            placeholder="you@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400"
             required
           />
         </label>
 
         <label className="block">
-          <span className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700">
-            <LockKeyhole className="h-4 w-4 text-cyan-600" />
-            Password
-          </span>
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-700">
+              <LockKeyhole className="h-4 w-4 text-blue-600" />
+              Password
+            </span>
+            <Link to="/forget-password" className="text-xs font-semibold text-blue-700 hover:underline">
+              Forgot?
+            </Link>
+          </div>
           <input
             type="password"
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-cyan-500 focus:ring-4 focus:ring-cyan-100"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 placeholder:text-slate-400"
             required
           />
         </label>
 
-        <div className="flex items-center justify-between text-sm">
-          <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-slate-600">
-            <ShieldCheck className="h-4 w-4 text-cyan-600" />
-            Secure session
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100/90 px-2.5 py-1 text-slate-600">
+            <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+            Encrypted session
           </span>
-          <div className="flex items-center gap-3">
-            <Link to="/login-otp" className="inline-flex items-center gap-1 font-semibold text-blue-700 transition hover:text-cyan-600">
-              <KeyRound className="h-4 w-4" />
-              Login with OTP
-            </Link>
-            <Link to="/forget-password" className="font-semibold text-slate-700 transition hover:text-blue-600">
-              Forgot password?
-            </Link>
-          </div>
+          <Link to="/login-otp" className="inline-flex items-center gap-1 font-bold text-blue-700 hover:text-blue-900">
+            <KeyRound className="h-3.5 w-3.5" />
+            Login with OTP
+          </Link>
         </div>
 
         {errorMessage ? (
-          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs sm:text-sm font-medium text-rose-700">
             {errorMessage}
           </div>
         ) : null}
@@ -176,9 +202,9 @@ const Login = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? 'Signing in...' : 'Login'}
+          {loading ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
 

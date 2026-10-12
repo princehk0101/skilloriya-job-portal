@@ -382,41 +382,39 @@ const JobCard = ({ fullPage = false }) => {
   return (
     <section className="py-20">
       <div className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
-        <div className="mb-12 flex items-end justify-between">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <h2 className="display-font text-3xl font-extrabold text-slate-900 sm:text-5xl">
-                {fullPage ? 'All Jobs' : 'Latest Jobs'}
-              </h2>
-              <p className="mt-2 text-sm text-slate-600">
-                Browse through our curated collection of tech jobs from top companies
-              </p>
-            </div>
-            {/* Toggle switch for All Jobs / New Jobs */}
-            <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 p-1">
-              <button
-                type="button"
-                onClick={() => handleToggleNewJobs('all')}
-                className={`rounded-xl px-5 py-2 text-sm font-bold transition-all ${
-                  searchParams.get('filter') !== 'new'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                All Jobs
-              </button>
-              <button
-                type="button"
-                onClick={() => handleToggleNewJobs('new')}
-                className={`flex items-center gap-1.5 rounded-xl px-5 py-2 text-sm font-semibold transition-all ${
-                  searchParams.get('filter') === 'new'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                <Sparkles size={14} className={searchParams.get('filter') === 'new' ? 'text-amber-300' : 'text-amber-500'} /> New Jobs
-              </button>
-            </div>
+        <div className="mb-8 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <h2 className="display-font text-2xl font-extrabold text-slate-900 sm:text-5xl">
+              {fullPage ? 'All Jobs' : 'Latest Jobs'}
+            </h2>
+            <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-slate-600">
+              Browse through our curated collection of tech jobs from top companies
+            </p>
+          </div>
+          {/* Toggle switch for All Jobs / New Jobs */}
+          <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 p-1 w-fit">
+            <button
+              type="button"
+              onClick={() => handleToggleNewJobs('all')}
+              className={`rounded-xl px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-bold transition-all ${
+                searchParams.get('filter') !== 'new'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              All Jobs
+            </button>
+            <button
+              type="button"
+              onClick={() => handleToggleNewJobs('new')}
+              className={`flex items-center gap-1.5 rounded-xl px-4 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-sm font-semibold transition-all ${
+                searchParams.get('filter') === 'new'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Sparkles size={14} className={searchParams.get('filter') === 'new' ? 'text-amber-300' : 'text-amber-500'} /> New Jobs
+            </button>
           </div>
         </div>
 
