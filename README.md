@@ -303,10 +303,8 @@ skilloriya-job-portal/
 ## 👥 Contributors
 
 - **Sudhanshu Yadav** — Frontend & UI Engineering
-- **Prince Kumar** — Backend Architecture, APIs & Cloud Integration
+- **Chhotelal Chauhan** — Backend Architecture, APIs & Cloud Integration
 
 ---
 
-## 📄 License
 
-This project is licensed under the MIT License.
