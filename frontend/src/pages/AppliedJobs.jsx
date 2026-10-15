@@ -187,7 +187,6 @@ const AppliedJobs = () => {
               <p className="mt-1 text-2xl font-black text-emerald-900">{stats.offers}</p>
             </div>
           </div>
-        </div>
 
         {/* Filter Controls & Search */}
         <div className="mb-6 space-y-4">

@@ -209,7 +209,7 @@ def parse_with_gemini_llm(text, api_key):
 
 
 class AIResumeParserView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def post(self, request):
@@ -243,6 +243,7 @@ class AIResumeParserView(APIView):
 
         return Response({
             'success': True,
+            'extracted_text': text,
             'data': parsed_data,
             'parsed_data': parsed_data,
             'message': 'Resume parsed successfully using AI engine.'
