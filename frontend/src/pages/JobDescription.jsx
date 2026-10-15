@@ -65,8 +65,16 @@ const JobDescription = () => {
         const jobData = response.data
         const nextAppliedJobsMap = createAppliedJobsMap(applications)
         setJob(jobData)
-        setAppliedJobsMap(nextAppliedJobsMap)
-        setIsSaved(Boolean(jobData.is_saved))
+        try {
+          const stored = JSON.parse(localStorage.getItem('skilloriya_saved_job_ids') || '[]')
+          if (stored.includes(Number(id))) {
+            setIsSaved(true)
+          } else {
+            setIsSaved(Boolean(jobData.is_saved))
+          }
+        } catch {
+          setIsSaved(Boolean(jobData.is_saved))
+        }
 
         // Fetch AI Match Score if logged in as seeker
         if (auth && localStorage.getItem('user_role') !== 'employer') {
@@ -111,16 +119,27 @@ const JobDescription = () => {
   }, [id])
 
   const handleToggleSave = async () => {
-    const auth = getAuthConfig()
-    if (!auth) {
-      navigate('/login')
-      return
-    }
+    const nextSaved = !isSaved
+    setIsSaved(nextSaved)
+
     try {
-      await axios.post(`/api/jobs/${id}/save/`, {}, auth)
-      setIsSaved((prev) => !prev)
-    } catch (err) {
-      console.error('Failed to toggle save:', err)
+      const stored = JSON.parse(localStorage.getItem('skilloriya_saved_job_ids') || '[]')
+      const storedSet = new Set(stored)
+      if (nextSaved) {
+        storedSet.add(Number(id))
+      } else {
+        storedSet.delete(Number(id))
+      }
+      localStorage.setItem('skilloriya_saved_job_ids', JSON.stringify(Array.from(storedSet)))
+    } catch {}
+
+    const auth = getAuthConfig()
+    if (auth) {
+      try {
+        await axios.post(`/api/jobs/${id}/save/`, {}, auth)
+      } catch (err) {
+        console.warn('Backend save sync warning:', err)
+      }
     }
   }
 

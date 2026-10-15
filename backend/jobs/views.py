@@ -128,14 +128,14 @@ class JobCategoryListView(ListAPIView):
 
 class SavedJobListView(ListAPIView):
     serializer_class = SavedJobSerializer
-    permission_classes = [IsAuthenticated, IsSeeker]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return SavedJob.objects.filter(user=self.request.user).select_related('job', 'job__employer')
 
 
 class SavedJobToggleView(APIView):
-    permission_classes = [IsAuthenticated, IsSeeker]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request, job_id):
         job = get_object_or_404(Job, id=job_id, is_active=True)

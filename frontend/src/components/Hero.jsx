@@ -120,7 +120,7 @@ const Hero = () => {
           initial={{ opacity: 0, scale: 0.94 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.15 }}
-          className="relative"
+          className="relative hidden md:block"
         >
           <div className="relative mx-auto max-w-xl">
             <div className="absolute -left-6 top-14 hidden w-52 rounded-[1.5rem] border border-slate-200 bg-white/92 p-4 shadow-[0_20px_45px_rgba(16,32,58,0.12)] backdrop-blur lg:block">

@@ -69,6 +69,7 @@ function App() {
             <Route path="/jobs/:id" element={<JobDescription />} />
             <Route path="/apply/:id" element={<Apply />} />
             <Route path="/companies" element={<Companies />} />
+            <Route path="/saved-jobs" element={<Jobs />} />
             <Route path="/ai-copilot" element={<AIWorkspace />} />
             <Route path="/ai/copilot" element={<AIWorkspace />} />
             <Route path="/portfolio" element={<AIWorkspace />} />
@@ -79,6 +80,15 @@ function App() {
             <Route path="/skill-gap" element={<AIWorkspace />} />
             <Route path="/ai/resume-analysis" element={<AIWorkspace />} />
             <Route path="/dsa-sheets" element={<AIWorkspace />} />
+            <Route path="/sheet/:sheetId" element={<AIWorkspace />} />
+            <Route path="/dsa-patterns" element={<AIWorkspace />} />
+            <Route path="/core-subjects" element={<AIWorkspace />} />
+            <Route path="/system-design" element={<AIWorkspace />} />
+            <Route path="/company-questions" element={<AIWorkspace />} />
+            <Route path="/faang-questions" element={<AIWorkspace />} />
+            <Route path="/aptitude" element={<AIWorkspace />} />
+            <Route path="/extension" element={<AIWorkspace />} />
+            <Route path="/resources" element={<AIWorkspace />} />
             <Route path="/task-board" element={<AIWorkspace />} />
             <Route path="/progress" element={<AIWorkspace />} />
             <Route path="/companies/:id" element={<CompanyProfile />} />

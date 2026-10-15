@@ -13,7 +13,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import axios from 'axios'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useLocation } from 'react-router-dom'
 import { resolveMediaUrl } from '../utils/media'
 import {
   createAppliedJobsMap,
@@ -42,7 +42,9 @@ const fetchAllPages = async (url) => {
 }
 
 const JobCard = ({ fullPage = false }) => {
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
+  const isSavedPage = location.pathname === '/saved-jobs' || searchParams.get('filter') === 'saved'
   const [jobs, setJobs] = useState([])
   const [categories, setCategories] = useState([])
   const [appliedJobsMap, setAppliedJobsMap] = useState({})
@@ -51,7 +53,7 @@ const JobCard = ({ fullPage = false }) => {
   const [filters, setFilters] = useState({
     q: searchParams.get('q') || '',
     location: searchParams.get('location') || '',
-    job_type: searchParams.get('job_type') || '',
+    job_type: searchParams.get('job_type') || searchParams.get('type') || '',
     experience: searchParams.get('experience') || '',
     min_salary: searchParams.get('min_salary') || '',
     max_salary: searchParams.get('max_salary') || '',
@@ -64,7 +66,7 @@ const JobCard = ({ fullPage = false }) => {
     setFilters({
       q: searchParams.get('q') || '',
       location: searchParams.get('location') || '',
-      job_type: searchParams.get('job_type') || '',
+      job_type: searchParams.get('job_type') || searchParams.get('type') || '',
       experience: searchParams.get('experience') || '',
       min_salary: searchParams.get('min_salary') || '',
       max_salary: searchParams.get('max_salary') || '',
@@ -108,6 +110,10 @@ const JobCard = ({ fullPage = false }) => {
       fetchedJobs.forEach((j) => {
         if (j.is_saved) savedIds.add(j.id)
       })
+      try {
+        const localSaved = JSON.parse(localStorage.getItem('skilloriya_saved_job_ids') || '[]')
+        localSaved.forEach((id) => savedIds.add(id))
+      } catch {}
       setSavedJobIds(savedIds)
     } catch (error) {
       console.error('Error fetching jobs:', error)
@@ -123,25 +129,40 @@ const JobCard = ({ fullPage = false }) => {
   const handleToggleSave = async (e, jobId) => {
     e.preventDefault()
     e.stopPropagation()
-    const auth = getAuthConfig()
-    if (!auth) {
-      alert('Please login to bookmark jobs.')
-      return
-    }
 
+    const isCurrentlySaved = savedJobIds.has(jobId)
+
+    // 1. Optimistic instant UI update
+    setSavedJobIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(jobId)) {
+        next.delete(jobId)
+      } else {
+        next.add(jobId)
+      }
+      return next
+    })
+
+    // 2. Persist in localStorage for instant offline & guest support
     try {
-      await axios.post(`/api/jobs/${jobId}/save/`, {}, auth)
-      setSavedJobIds((prev) => {
-        const next = new Set(prev)
-        if (next.has(jobId)) {
-          next.delete(jobId)
-        } else {
-          next.add(jobId)
-        }
-        return next
-      })
-    } catch (err) {
-      console.error('Failed to toggle save job:', err)
+      const stored = JSON.parse(localStorage.getItem('skilloriya_saved_job_ids') || '[]')
+      const storedSet = new Set(stored)
+      if (isCurrentlySaved) {
+        storedSet.delete(jobId)
+      } else {
+        storedSet.add(jobId)
+      }
+      localStorage.setItem('skilloriya_saved_job_ids', JSON.stringify(Array.from(storedSet)))
+    } catch {}
+
+    // 3. Sync with backend if user has auth token
+    const auth = getAuthConfig()
+    if (auth) {
+      try {
+        await axios.post(`/api/jobs/${jobId}/save/`, {}, auth)
+      } catch (err) {
+        console.warn('Backend bookmark sync warning:', err)
+      }
     }
   }
 
@@ -218,7 +239,7 @@ const JobCard = ({ fullPage = false }) => {
   const filteredJobs = useMemo(() => {
     const query = (searchParams.get('q') || '').trim().toLowerCase()
     const location = (searchParams.get('location') || '').trim()
-    const jobType = searchParams.get('job_type') || ''
+    const rawJobType = (searchParams.get('job_type') || searchParams.get('type') || '').trim().toLowerCase()
     const experience = searchParams.get('experience') || ''
     const filterNew = searchParams.get('filter') === 'new'
     const minSalary = Number(searchParams.get('min_salary') || 0)
@@ -231,6 +252,8 @@ const JobCard = ({ fullPage = false }) => {
         (selectedCategory === 'uncategorized'
           ? !job.category
           : String(job.category) === selectedCategory)
+
+      const matchesSaved = !isSavedPage || savedJobIds.has(job.id) || job.is_saved
 
       const searchable = `${job.title || ''} ${job.description || ''} ${job.employer_name || ''} ${job.category_name || ''} ${job.location || ''}`.toLowerCase()
       const salary = Number(job.salary || 0)
@@ -247,11 +270,18 @@ const JobCard = ({ fullPage = false }) => {
         (job.created_at &&
           new Date(job.created_at).getTime() > Date.now() - 7 * 24 * 60 * 60 * 1000)
 
+      const matchesJobType =
+        !rawJobType ||
+        (rawJobType === 'remote'
+          ? (String(job.job_type || '').toLowerCase() === 'remote' || String(job.location || '').toLowerCase().includes('remote'))
+          : String(job.job_type || '').toLowerCase() === rawJobType)
+
       return (
         categoryMatch &&
+        matchesSaved &&
         (!query || searchable.includes(query)) &&
         locationMatches(job, location) &&
-        (!jobType || job.job_type === jobType) &&
+        matchesJobType &&
         expMatch &&
         isRecent &&
         (!minSalary || salary >= minSalary) &&
@@ -263,7 +293,7 @@ const JobCard = ({ fullPage = false }) => {
     if (sort === 'salary_low') results = [...results].sort((a, b) => Number(a.salary || 0) - Number(b.salary || 0))
     if (sort === 'newest' || filterNew) results = [...results].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))
     return results
-  }, [jobs, selectedCategory, searchParams])
+  }, [jobs, selectedCategory, searchParams, isSavedPage, savedJobIds])
 
   const visibleJobs = fullPage ? filteredJobs : filteredJobs.slice(0, 9)
 
@@ -385,10 +415,12 @@ const JobCard = ({ fullPage = false }) => {
         <div className="mb-8 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
             <h2 className="display-font text-2xl font-extrabold text-slate-900 sm:text-5xl">
-              {fullPage ? 'All Jobs' : 'Latest Jobs'}
+              {isSavedPage ? 'Saved Jobs' : fullPage ? 'All Jobs' : 'Latest Jobs'}
             </h2>
             <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-slate-600">
-              Browse through our curated collection of tech jobs from top companies
+              {isSavedPage
+                ? 'Your bookmarked positions saved for easy tracking and quick application'
+                : 'Browse through our curated collection of tech jobs from top companies'}
             </p>
           </div>
           {/* Toggle switch for All Jobs / New Jobs */}
@@ -538,7 +570,15 @@ const JobCard = ({ fullPage = false }) => {
         </form>
         
         <div className="mb-6 flex items-center justify-between">
-          <p className="text-sm font-bold text-slate-700">{filteredJobs.length} <span className="font-medium text-slate-500">jobs match this filter</span></p>
+          <p className="text-sm font-bold text-slate-700">
+            {loading ? (
+              <span className="font-medium text-slate-500">Searching jobs...</span>
+            ) : (
+              <>
+                {filteredJobs.length} <span className="font-medium text-slate-500">jobs match this filter</span>
+              </>
+            )}
+          </p>
           <div className="flex gap-2">
              <button type="button" onClick={applyFilters} className="rounded-xl bg-blue-700 px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-800">Apply Filters</button>
              <button type="button" onClick={clearFilters} className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Clear</button>

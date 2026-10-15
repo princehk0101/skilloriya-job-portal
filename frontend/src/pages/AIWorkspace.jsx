@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams, useLocation, useParams } from 'react-router-dom'
 import {
   Search,
   Home,
@@ -31,7 +31,8 @@ import {
   Check,
   ChevronRight,
   Bot,
-  Compass
+  Compass,
+  Chrome
 } from 'lucide-react'
 import axios from 'axios'
 import TaskBoardView from '../components/workspace/TaskBoardView'
@@ -45,11 +46,38 @@ import CoreSubjectsView from '../components/workspace/CoreSubjectsView'
 import MockInterviewStudio from '../components/workspace/MockInterviewStudio'
 import SkillGapRoadmapView from '../components/workspace/SkillGapRoadmapView'
 import AgenticCopilotView from '../components/workspace/AgenticCopilotView'
+import ExtensionView from '../components/workspace/ExtensionView'
 
 export default function AIWorkspace() {
+  const location = useLocation()
+  const { sheetId } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
-  const initialTab = searchParams.get('tab') || 'task-board'
-  const [activeTab, setActiveTab] = useState(initialTab)
+
+  const getTabFromLocation = () => {
+    const tabParam = searchParams.get('tab')
+    if (tabParam) return tabParam
+
+    const path = location.pathname.toLowerCase()
+    if (path.includes('/resume-analysis') || path.includes('/resume')) return 'resume-analysis'
+    if (path.includes('/cover-letter')) return 'cover-letter'
+    if (path.includes('/mock-interview')) return 'mock-interview'
+    if (path.includes('/copilot')) return 'agentic-copilot'
+    if (path.includes('/portfolio')) return 'portfolio'
+    if (path.includes('/extension')) return 'extension'
+    if (path.includes('/dsa-sheets') || path.startsWith('/sheet')) return 'dsa-sheets'
+    if (path.includes('/dsa-patterns')) return 'dsa-patterns'
+    if (path.includes('/core-subjects')) return 'core-subjects'
+    if (path.includes('/system-design')) return 'system-design'
+    if (path.includes('/company-questions') || path.includes('/faang-questions')) return 'faang-questions'
+    if (path.includes('/task-board')) return 'task-board'
+    if (path.includes('/progress') || path.includes('/resources')) return 'progress'
+    if (path.includes('/skill-gap')) return 'skill-gap'
+    if (path.includes('/aptitude')) return 'aptitude'
+
+    return 'task-board'
+  }
+
+  const [activeTab, setActiveTab] = useState(getTabFromLocation)
   const [searchQuery, setSearchQuery] = useState('')
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const [feedbackText, setFeedbackText] = useState('')
@@ -97,13 +125,13 @@ export default function AIWorkspace() {
   const [analysisResult, setAnalysisResult] = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
 
-  // Sync tab with URL
+  // Sync tab with URL and Route
   useEffect(() => {
-    const tab = searchParams.get('tab')
-    if (tab && tab !== activeTab) {
-      setActiveTab(tab)
+    const currentTab = getTabFromLocation()
+    if (currentTab !== activeTab) {
+      setActiveTab(currentTab)
     }
-  }, [searchParams])
+  }, [location.pathname, searchParams])
 
   const selectTab = (tabName) => {
     setActiveTab(tabName)
@@ -601,6 +629,18 @@ ${clForm.candidate_name}`)
                   <FileCheck2 size={15} className="text-slate-500" />
                   <span>Resume Analysis</span>
                 </button>
+
+                <button
+                  onClick={() => selectTab('extension')}
+                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-2 text-xs font-semibold transition ${
+                    activeTab === 'extension'
+                      ? 'bg-[#eef8ed] text-[#1c7430] border border-[#d2edd0]'
+                      : 'text-slate-600 hover:bg-[#f2efe6]'
+                  }`}
+                >
+                  <Chrome size={15} className={activeTab === 'extension' ? 'text-[#1c7430]' : 'text-slate-500'} />
+                  <span>Chrome Extension</span>
+                </button>
               </div>
             </div>
           </div>
@@ -985,6 +1025,9 @@ ${clForm.candidate_name}`)
 
           {/* TAB: CORE SUBJECTS */}
           {activeTab === 'core-subjects' && <CoreSubjectsView />}
+
+          {/* TAB: CHROME EXTENSION */}
+          {activeTab === 'extension' && <ExtensionView />}
         </main>
       </div>
 

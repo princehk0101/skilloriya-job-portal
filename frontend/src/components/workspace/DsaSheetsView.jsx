@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
 import {
   Layers,
   Search,
@@ -236,13 +237,22 @@ export default function DsaSheetsView() {
     return 'bg-red-50 text-red-700 border-red-200'
   }
 
+  const { sheetId } = useParams()
+  const sheetNames = {
+    'striver': 'Striver A2Z Sheet (433 Problems)',
+    'love-babbar': 'Love Babbar Sheet (430 Problems)',
+    'neetcode': 'NeetCode 150 Sheet (150 Problems)',
+    'rohit-negi': 'Rohit Negi Sheet (725 Problems)',
+  }
+  const currentSheetTitle = sheetNames[sheetId] || 'Curated DSA Problem Sheets'
+
   return (
     <div className="w-full max-w-[1600px] mx-auto py-4 px-2 sm:px-4 space-y-6">
       {/* Title */}
       <div className="border-b border-[#eae6dc] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 uppercase">
-            CURATED DSA PROBLEM SHEETS
+            {currentSheetTitle}
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed mt-1">
             Industry vetted coding problem sheets covering all core patterns. Mark problems solved to track your readiness.
