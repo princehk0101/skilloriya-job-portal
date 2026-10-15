@@ -354,26 +354,25 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-24 pb-16">
       <div className="w-[98%] max-w-[1400px] mx-auto px-2 sm:px-4">
-        {/* Banner Header */}
-        <div className="mb-6 rounded-[2rem] border border-blue-100 bg-[linear-gradient(135deg,_#0f172a,_#1d4ed8,_#06b6d4)] p-6 sm:p-8 text-white shadow-[0_24px_60px_rgba(37,99,235,0.16)]">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-blue-200">
-                {isEmployer ? "Employer Account" : "Job Seeker Account"}
-              </p>
-              <h2 className="text-2xl sm:text-3xl font-extrabold mt-1">
-                {isEmployer ? "Company & Recruiter Profile" : "Candidate Profile & Resume"}
-              </h2>
-              <p className="text-blue-100 mt-2 text-sm max-w-xl">
-                {isEmployer
-                  ? "Update your organization profile so job seekers know who is hiring."
-                  : "Keep your skills, resume, and experience up-to-date for employers and fast 1-click applications."}
-              </p>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-2 text-xs font-semibold backdrop-blur border border-white/20">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        {/* Centered Header with No BG */}
+        <div className="text-center max-w-3xl mx-auto mb-10 pt-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+            <Sparkles size={14} />
+            {isEmployer ? "Employer Account" : "Job Seeker Account"}
+          </span>
+          <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+            {isEmployer ? "Company & Recruiter Profile" : "Candidate Profile & Resume"}
+          </h1>
+          <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
+            {isEmployer
+              ? "Update your organization profile so job seekers know who is hiring."
+              : "Keep your skills, resume, and experience up-to-date for employers and fast 1-click applications."}
+          </p>
+          <div className="mt-4 flex justify-center">
+            <span className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
               {formData.email}
-            </div>
+            </span>
           </div>
         </div>
 

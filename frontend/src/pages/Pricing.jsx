@@ -14,7 +14,7 @@ const Pricing = () => {
 
   const getAuthConfig = () => {
     const token = localStorage.getItem('access_token')
-    return { headers: { Authorization: `Bearer ${token}` } }
+    return token ? { headers: { Authorization: `Bearer ${token}` } } : {}
   }
 
   const fetchPlans = async () => {

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Briefcase, Search, MapPin, ArrowRight, BadgeCheck } from 'lucide-react'
+import { Briefcase, Search, MapPin, ArrowRight, BadgeCheck, Sparkles } from 'lucide-react'
 import axios from 'axios'
 import {
   createAppliedJobsMap,
@@ -157,23 +157,28 @@ const Categories = () => {
 
   return (
     <div className="min-h-screen pt-24 pb-16">
-      <section className="pb-10">
+      <section className="pb-10 pt-4">
         <div className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
-          <div className="overflow-hidden rounded-[2rem] border border-white/70 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-12 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
-            <h1 className="display-font text-4xl font-bold md:text-6xl">
-              Explore by <span className="text-amber-200">category</span>
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+              <Sparkles size={14} />
+              Browse by Industry
+            </span>
+            <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+              Explore by category
             </h1>
-            <p className="mx-auto mt-4 max-w-2xl text-lg text-blue-50/85">
+            <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
               Browse openings category-wise, scan active roles quickly, and expand any section to view more listings.
             </p>
+
             <div className="relative mx-auto mt-8 max-w-lg">
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                <Search size={20} className="text-slate-400" />
+                <Search size={18} className="text-slate-400" />
               </div>
               <input
                 type="text"
-                className="block w-full rounded-full border border-white/40 bg-white py-3 pl-11 pr-4 text-gray-900 outline-none transition-all focus:border-transparent focus:ring-2 focus:ring-blue-200"
-                placeholder="Search category..."
+                className="block w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm font-medium text-slate-900 shadow-sm outline-none transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                placeholder="Search category (e.g. Design, Development, Marketing)..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -181,7 +186,7 @@ const Categories = () => {
             {searchParams.get('category') || jobSearch || locationSearch ? (
               <button
                 onClick={clearCategoryFilter}
-                className="mt-4 inline-flex rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 transition hover:bg-blue-100"
+                className="mt-4 inline-flex rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 shadow-sm transition hover:bg-blue-100"
               >
                 Clear job filters
               </button>

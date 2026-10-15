@@ -148,28 +148,25 @@ const PostJob = () => {
     <SidebarLayout title="Post New Job Opening" role="employer" profile={user}>
       <div className="px-4 py-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
-          {/* Header Banner */}
-          <div className="mb-8 rounded-3xl border border-slate-200/80 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 p-8 text-white shadow-sm">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div>
-                <span className="rounded-full bg-blue-500/20 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-cyan-300 border border-blue-500/30">
-                  New Opening Wizard
-                </span>
-                <h1 className="mt-2 text-2xl font-black tracking-tight text-white sm:text-3xl">
-                  Publish a Job Opening
-                </h1>
-                <p className="mt-1 text-xs text-slate-300 max-w-xl">
-                  Fill in the role details, skills, compensation, and practical challenges to reach top tech talent instantly.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Link
-                  to="/employer?tab=jobs"
-                  className="rounded-xl bg-white/10 px-4 py-2 text-xs font-bold text-white hover:bg-white/20 transition"
-                >
-                  View Active Jobs ({user?.company_name || 'My Jobs'})
-                </Link>
-              </div>
+          {/* Centered Header with No BG */}
+          <div className="mb-10 text-center max-w-3xl mx-auto pt-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+              <Sparkles size={14} />
+              New Opening Wizard
+            </span>
+            <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+              Publish a Job Opening
+            </h1>
+            <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
+              Fill in the role details, skills, compensation, and practical challenges to reach top tech talent instantly.
+            </p>
+            <div className="mt-6 flex justify-center">
+              <Link
+                to="/employer?tab=jobs"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-sm hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50/50 transition-all"
+              >
+                View Active Jobs ({user?.company_name || 'My Jobs'})
+              </Link>
             </div>
           </div>
 

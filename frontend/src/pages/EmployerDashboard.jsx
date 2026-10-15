@@ -545,56 +545,41 @@ const EmployerDashboard = () => {
     <SidebarLayout title="Skilloria Recruiter Hub" role="employer" profile={user}>
       <div className="px-4 pb-16 pt-8 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          {/* Top Banner */}
-          <div className="mb-8 flex flex-col justify-between gap-4 rounded-[2.5rem] border border-blue-100 bg-gradient-to-r from-slate-950 via-blue-900 to-indigo-900 px-8 py-8 text-white shadow-xl md:flex-row md:items-center">
-            <div className="flex items-center gap-5">
-              <div className="relative">
-                <img
-                  src={resolveMediaUrl(companyForm.logo_url) || resolveMediaUrl(user?.profile_image_url) || 'https://via.placeholder.com/64'}
-                  alt="Company Logo"
-                  className="h-16 w-16 rounded-2xl border-2 border-white/20 object-cover shadow-md bg-white p-1"
-                />
-                {company?.is_verified && (
-                  <span className="absolute -bottom-1 -right-1 rounded-full bg-emerald-500 p-1 text-white shadow">
-                    <ShieldCheck size={12} />
-                  </span>
-                )}
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="rounded-full bg-blue-500/30 px-3 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-cyan-300">
-                    Naukri RMS Recruiter Suite
-                  </span>
-                  {user?.is_approved_by_admin ? (
-                    <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-300 border border-emerald-500/30">
-                      ✓ Approved Recruiter
-                    </span>
-                  ) : (
-                    <span className="rounded-full bg-amber-500/20 px-2.5 py-0.5 text-[10px] font-bold text-amber-300 border border-amber-500/30">
-                      Pending Admin Verification
-                    </span>
-                  )}
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white mt-1 tracking-tight">
-                  {company?.name || user?.company_name || 'Recruiter Command Hub'}
-                </h1>
-                <p className="text-xs text-blue-100 max-w-xl mt-0.5">
-                  Manage active listings, search candidate talent, track ATS stages, and conduct live video interviews.
-                </p>
-              </div>
+          {/* Centered Header with No BG */}
+          <div className="text-center max-w-3xl mx-auto mb-10 pt-2">
+            <div className="flex flex-wrap items-center justify-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+                <Sparkles size={14} />
+                Naukri RMS Recruiter Suite
+              </span>
+              {user?.is_approved_by_admin ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700 shadow-sm">
+                  <ShieldCheck size={13} className="text-emerald-600" />
+                  Approved Recruiter
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-bold text-amber-700 shadow-sm">
+                  Pending Verification
+                </span>
+              )}
             </div>
-
-            <div className="flex items-center gap-3">
+            <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+              {company?.name || user?.company_name || 'Recruiter Command Hub'}
+            </h1>
+            <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
+              Manage active listings, search candidate talent, track ATS stages, and conduct live video interviews.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
               <Link
                 to="/post-job"
-                className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-xs font-bold text-blue-900 shadow-md transition hover:bg-blue-50"
+                className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-blue-700"
               >
                 <Plus size={16} />
                 Post New Job
               </Link>
               <button
                 onClick={() => setTab('talent')}
-                className="inline-flex items-center gap-2 rounded-2xl bg-white/10 px-4 py-3 text-xs font-bold text-white transition hover:bg-white/20"
+                className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-5 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-slate-50"
               >
                 <Search size={15} />
                 Search Resumes

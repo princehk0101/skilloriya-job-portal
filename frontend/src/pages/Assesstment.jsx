@@ -158,41 +158,37 @@ const Assesstment = () => {
   return (
     <div className="min-h-screen pb-20 pt-24 bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)]">
       <div className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
-        {/* Banner */}
-        <section className="overflow-hidden rounded-[2.5rem] border border-white/70 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-12 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-10">
-          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-            <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 py-1 text-xs font-bold text-cyan-200">
-                <Sparkles size={14} />
-                Skilloria Assessment & Certification Engine
-              </span>
-              <h1 className="display-font mt-4 text-3xl font-extrabold leading-tight sm:text-5xl">
-                Prove your skills with industry-standard tests.
-              </h1>
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-blue-100">
-                Pass skill assessments to earn verified badges on your profile. Verified candidates are 3x more likely to be shortlisted by recruiters.
-              </p>
-            </div>
+        {/* Centered Header with No BG */}
+        <div className="text-center max-w-3xl mx-auto mb-12 pt-4">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+            <Sparkles size={14} />
+            Skilloriya Assessment & Certification
+          </span>
+          <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+            Prove your skills with industry-standard tests
+          </h1>
+          <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
+            Pass skill assessments to earn verified badges on your profile. Verified candidates are 3x more likely to be shortlisted by recruiters.
+          </p>
 
-            <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-[1.75rem] border border-white/15 bg-white/10 p-5 backdrop-blur text-center">
-                <Award size={24} className="mx-auto text-amber-300" />
-                <p className="mt-3 text-2xl font-black">{assessments.length}</p>
-                <p className="text-xs text-blue-100">Skill Tracks</p>
-              </div>
-              <div className="rounded-[1.75rem] border border-white/15 bg-white/10 p-5 backdrop-blur text-center">
-                <Clock size={24} className="mx-auto text-cyan-300" />
-                <p className="mt-3 text-2xl font-black">20-30</p>
-                <p className="text-xs text-blue-100">Minutes Each</p>
-              </div>
-              <div className="rounded-[1.75rem] border border-white/15 bg-white/10 p-5 backdrop-blur text-center">
-                <CheckCircle2 size={24} className="mx-auto text-emerald-300" />
-                <p className="mt-3 text-2xl font-black">{myBadges.length}</p>
-                <p className="text-xs text-blue-100">Badges Earned</p>
-              </div>
+          <div className="mt-8 grid grid-cols-3 gap-3 sm:gap-6 max-w-lg mx-auto">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-center">
+              <Award size={22} className="mx-auto text-amber-500" />
+              <p className="mt-2 text-xl sm:text-2xl font-black text-slate-900">{assessments.length}</p>
+              <p className="text-[11px] font-semibold text-slate-500">Skill Tracks</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-center">
+              <Clock size={22} className="mx-auto text-blue-600" />
+              <p className="mt-2 text-xl sm:text-2xl font-black text-slate-900">20-30</p>
+              <p className="text-[11px] font-semibold text-slate-500">Minutes Each</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm text-center">
+              <CheckCircle2 size={22} className="mx-auto text-emerald-600" />
+              <p className="mt-2 text-xl sm:text-2xl font-black text-slate-900">{myBadges.length}</p>
+              <p className="text-[11px] font-semibold text-slate-500">Badges Earned</p>
             </div>
           </div>
-        </section>
+        </div>
 
         {/* My Earned Badges Section */}
         {myBadges.length > 0 ? (

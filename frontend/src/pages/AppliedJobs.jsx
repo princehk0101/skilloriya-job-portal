@@ -146,29 +146,27 @@ const AppliedJobs = () => {
       <div className="relative z-10 mx-auto w-[98%] max-w-[1400px] px-3 sm:px-6">
         
         {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200/80 px-3 py-1 text-xs font-bold text-blue-700 shadow-sm">
-                <Briefcase size={13} />
-                Candidate Portal
-              </span>
-              <h1 className="display-font mt-2 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900">
-                Applied Jobs
-              </h1>
-              <p className="mt-1.5 text-xs sm:text-sm font-medium text-slate-600">
-                Track your active job applications, interview updates, and candidate status in real-time.
-              </p>
-            </div>
-
+        <div className="text-center max-w-3xl mx-auto mb-10 pt-4">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+            <Briefcase size={14} />
+            Candidate Application Tracker
+          </span>
+          <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+            My Applied Jobs
+          </h1>
+          <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
+            Track your active job applications, interview updates, and candidate status in real-time.
+          </p>
+          <div className="mt-6 flex justify-center">
             <Link
               to="/jobs"
-              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 w-fit"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-6 py-3 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-blue-700"
             >
               Browse More Jobs
               <ArrowRight size={15} />
             </Link>
           </div>
+        </div>
 
           {/* Quick Metrics Cards */}
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">

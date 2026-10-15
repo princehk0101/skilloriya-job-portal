@@ -412,19 +412,22 @@ const JobCard = ({ fullPage = false }) => {
   return (
     <section className="py-20">
       <div className="mx-auto w-[98%] max-w-[1600px] px-2 sm:px-4">
-        <div className="mb-8 sm:mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <h2 className="display-font text-2xl font-extrabold text-slate-900 sm:text-5xl">
-              {isSavedPage ? 'Saved Jobs' : fullPage ? 'All Jobs' : 'Latest Jobs'}
-            </h2>
-            <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-slate-600">
-              {isSavedPage
-                ? 'Your bookmarked positions saved for easy tracking and quick application'
-                : 'Browse through our curated collection of tech jobs from top companies'}
-            </p>
-          </div>
+        <div className="text-center max-w-3xl mx-auto mb-10 pt-4">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+            <Sparkles size={14} />
+            {isSavedPage ? 'Your Bookmarked Jobs' : 'Verified Tech Roles'}
+          </span>
+          <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+            {isSavedPage ? 'Saved Jobs' : fullPage ? 'Explore Tech Jobs' : 'Latest Job Openings'}
+          </h1>
+          <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
+            {isSavedPage
+              ? 'Your bookmarked positions saved for easy tracking and quick application.'
+              : 'Browse through our curated collection of tech jobs from top companies.'}
+          </p>
+
           {/* Toggle switch for All Jobs / New Jobs */}
-          <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 p-1 w-fit">
+          <div className="mt-6 mx-auto flex items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 p-1 w-fit">
             <button
               type="button"
               onClick={() => handleToggleNewJobs('all')}

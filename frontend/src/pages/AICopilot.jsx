@@ -7,22 +7,24 @@ const AICopilot = () => {
     <div className="min-h-screen pt-24 pb-20 bg-slate-50/50">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
-          <div>
-            <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-600 mb-2">
-              <Sparkles size={14} /> AI Workspace
-            </div>
-            <h1 className="display-font text-4xl font-extrabold text-slate-900 sm:text-5xl">
-              AI Copilot Dashboard
-            </h1>
-            <p className="mt-4 text-slate-600 max-w-xl">
-              Track your AI-powered career growth. Monitor job matches, cover letters, and interview performance in one place.
-            </p>
+        {/* Centered Header with No BG */}
+        <div className="text-center max-w-3xl mx-auto mb-12 pt-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+            <Sparkles size={14} />
+            AI Workspace & Career Copilot
+          </span>
+          <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+            AI Copilot Dashboard
+          </h1>
+          <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
+            Track your AI-powered career growth. Monitor job matches, tailored cover letters, and interview performance in one place.
+          </p>
+          <div className="mt-6 flex justify-center">
+            <button className="flex items-center gap-2 rounded-2xl bg-emerald-600 px-6 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700">
+              <Sparkles size={15} />
+              Analyse New Job
+            </button>
           </div>
-          <button className="flex items-center gap-2 rounded-xl bg-emerald-100 px-6 py-3 text-sm font-bold text-emerald-700 transition hover:bg-emerald-200">
-            Analyse New Job
-          </button>
         </div>
 
         {/* Action Cards */}

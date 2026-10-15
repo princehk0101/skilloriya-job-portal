@@ -241,37 +241,28 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] pt-24 pb-20">
       <div className="w-[98%] max-w-[1600px] mx-auto px-2 sm:px-4">
-        {/* Banner */}
-        <div className="mb-8 flex flex-col justify-between gap-4 rounded-[2.5rem] border border-blue-100 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-8 py-8 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] md:flex-row md:items-center">
-          <div className="flex items-center gap-4">
-            <img
-              src={resolveMediaUrl(user?.profile_image_url) || 'https://via.placeholder.com/64'}
-              alt="Profile"
-              className="h-16 w-16 rounded-2xl border border-white/20 object-cover shadow-md"
-            />
-            <div>
-              <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-cyan-200">
-                Candidate Dashboard
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-                Welcome back, {user?.first_name || user?.email?.split('@')[0]}!
-              </h1>
-              <p className="text-xs text-blue-100">
-                Track your active applications, saved jobs, AI matches, and interview schedules.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
+        {/* Centered Header with No BG */}
+        <div className="text-center max-w-3xl mx-auto mb-10 pt-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+            <Sparkles size={14} />
+            Candidate Command Center
+          </span>
+          <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+            Welcome back, {user?.first_name || user?.email?.split('@')[0]}!
+          </h1>
+          <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
+            Track your active applications, saved jobs, AI matches, and interview schedules.
+          </p>
+          <div className="mt-6 flex items-center justify-center gap-3">
             <Link
               to="/profile"
-              className="inline-flex items-center gap-1.5 rounded-2xl bg-white px-5 py-3 text-xs font-bold text-blue-800 shadow-md transition hover:bg-blue-50"
+              className="inline-flex items-center gap-1.5 rounded-2xl bg-slate-900 px-5 py-2.5 text-xs sm:text-sm font-bold text-white shadow-sm transition hover:bg-blue-700"
             >
               Edit Profile
             </Link>
             <button
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 rounded-2xl bg-white/10 px-4 py-3 text-xs font-bold text-white transition hover:bg-white/20"
+              className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-xs sm:text-sm font-bold text-slate-700 shadow-sm transition hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200"
             >
               <LogOut size={15} />
               Logout

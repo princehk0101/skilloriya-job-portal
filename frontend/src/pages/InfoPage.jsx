@@ -113,13 +113,18 @@ const InfoPage = ({ pageKey }) => {
           Back to Home
         </Link>
 
-        <section className="mt-6 rounded-[2rem] border border-white/60 bg-[linear-gradient(135deg,_#10203a,_#2355d9,_#0ea5b7)] px-6 py-8 text-white shadow-[0_24px_60px_rgba(35,85,217,0.16)] sm:px-8">
-          <div className="text-sm font-semibold text-blue-100">
+        <div className="mt-8 text-center max-w-3xl mx-auto mb-10">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+            <Icon size={14} />
             {content.eyebrow}
-          </div>
-          <h1 className="display-font mt-5 text-4xl font-bold leading-tight sm:text-5xl">{content.title}</h1>
-          <p className="mt-4 max-w-3xl text-sm leading-7 text-blue-100">{content.description}</p>
-        </section>
+          </span>
+          <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+            {content.title}
+          </h1>
+          <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
+            {content.description}
+          </p>
+        </div>
 
         <section className="mt-8 grid gap-6 md:grid-cols-2">
           {content.sections.map((section) => (

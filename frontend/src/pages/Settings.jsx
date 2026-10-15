@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
-import { Bell, Loader2, Save, Shield } from 'lucide-react'
+import { Bell, Loader2, Save, Shield, Sparkles } from 'lucide-react'
 
 const Settings = () => {
   const [jobEmailAlerts, setJobEmailAlerts] = useState(true)
@@ -48,9 +48,18 @@ const Settings = () => {
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#eff6ff,_#f8fbff)] px-4 pb-12 pt-24 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-4xl space-y-6">
-        <div className="rounded-[2rem] border border-blue-100 bg-[linear-gradient(135deg,_#0f172a,_#1d4ed8,_#06b6d4)] p-8 text-white shadow-[0_24px_60px_rgba(37,99,235,0.16)]">
-          <h1 className="text-3xl font-extrabold">Email preferences</h1>
-          <p className="mt-2 text-blue-100">Choose whether Skilloriya should email you about new roles that fit your interests.</p>
+        {/* Centered Header with No BG */}
+        <div className="text-center max-w-2xl mx-auto mb-8 pt-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+            <Sparkles size={14} />
+            Account Preferences
+          </span>
+          <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+            Email preferences
+          </h1>
+          <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
+            Choose whether Skilloriya should email you about new roles that fit your interests.
+          </p>
         </div>
 
         <div className="rounded-3xl border border-blue-100 bg-white/90 p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)]">

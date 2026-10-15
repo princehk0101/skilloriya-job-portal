@@ -186,10 +186,25 @@ const Apply = () => {
           Back
         </button>
 
+        {/* Centered Header with No BG */}
+        <div className="text-center max-w-3xl mx-auto mb-10 pt-2">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-xs font-bold text-blue-700 shadow-sm">
+            <Sparkles size={14} />
+            Job Application Portal
+          </span>
+          <h1 className="display-font mt-4 text-4xl font-extrabold text-slate-900 sm:text-5xl lg:text-6xl tracking-tight">
+            Apply for {job?.title || 'this Position'}
+          </h1>
+          <p className="mt-4 text-base text-slate-600 sm:text-lg max-w-2xl mx-auto">
+            {job?.company_name || job?.employer_name ? `At ${job.company_name || job.employer_name} • ` : ''}
+            Review your profile details, attach your resume, and submit your application.
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1.2fr_0.8fr]">
           <div className="rounded-[2rem] border border-blue-100 bg-white/92 p-6 shadow-[0_18px_45px_rgba(37,99,235,0.08)] backdrop-blur sm:p-8">
             <div className="mb-6">
-              <h1 className="text-3xl font-black text-slate-900">Submit your application for this job.</h1>
+              <h2 className="text-xl font-bold text-slate-900">Application Details</h2>
             </div>
 
             {existingApplication ? (
